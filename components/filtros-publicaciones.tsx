@@ -36,7 +36,11 @@ export function FiltrosPublicaciones({
   hasActiveFilters,
 }: FiltrosPublicacionesProps) {
   return (
-    <div className="rounded-xl border border-primary bg-primary p-4 shadow-sm">
+    <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+      <h2 className="text-lg font-semibold text-foreground shrink-0">
+        Mascotas que esperan ser encontradas por sus dueños:
+      </h2>
+      <div className="rounded-xl border border-primary bg-primary p-4 shadow-sm flex-1">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Input
@@ -101,6 +105,7 @@ export function FiltrosPublicaciones({
             </Button>
           )}
         </div>
+      </div>
       </div>
     </div>
   )

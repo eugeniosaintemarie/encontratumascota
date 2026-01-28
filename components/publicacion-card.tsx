@@ -42,14 +42,14 @@ export function PublicacionCard({
   return (
     <Card 
       id={`publicacion-${publicacion.id}`}
-      className="group flex flex-col overflow-hidden transition-all hover:shadow-lg p-0"
+      className="group flex flex-col overflow-hidden transition-all hover:shadow-lg p-0 gap-0"
     >
-      <div className="relative aspect-square overflow-hidden">
+      <div className="relative aspect-square overflow-hidden bg-muted">
         <Image
           src={mascota.imagenUrl || "/placeholder.svg"}
           alt={`${especieLabels[mascota.especie]} encontrado`}
           fill
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
+          className="object-cover object-top transition-transform duration-300 group-hover:scale-105"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
         <div className="absolute left-3 top-3 flex flex-col gap-1.5">
@@ -87,7 +87,7 @@ export function PublicacionCard({
 
         <div className="mt-auto">
           {isAuthenticated ? (
-            <div className="space-y-2 rounded-lg bg-secondary/50 p-3">
+            <div className="space-y-0.5 rounded-lg bg-secondary/50 p-3">
               <p className="text-sm font-medium text-foreground">
                 {publicacion.contactoNombre}
               </p>
