@@ -1,0 +1,297 @@
+"use client"
+
+import React, { useState } from "react"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { AlertCircle, CheckCircle2, Lock, PawPrint, Home } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { publicacionesMock } from "@/lib/mock-data"
+import { ADMIN_USER } from "@/lib/auth"
+import type { Usuario } from "@/lib/types"
+
+interface PerfilModalProps {
+  isOpen: boolean
+  onClose: () => void
+  currentUser: Usuario | null
+  onLogout: () => void
+  onPasswordChange?: () => void
+}
+
+export function PerfilModal({
+  isOpen,
+  onClose,
+  currentUser,
+  onLogout,
+  onPasswordChange,
+}: PerfilModalProps) {
+  const [activeTab, setActiveTab] = useState("publicaciones")
+  
+  // Estado para cerrar publicacion
+  const [selectedPublicacion, setSelectedPublicacion] = useState<string>("")
+  const [closeReason, setCloseReason] = useState<"ubicada" | "transitada" | "">("")
+  const [closeSuccess, setCloseSuccess] = useState(false)
+  
+  // Estado para cambio de contrasena
+  const [currentPassword, setCurrentPassword] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmNewPassword, setConfirmNewPassword] = useState("")
+  const [passwordError, setPasswordError] = useState<string | null>(null)
+  const [passwordSuccess, setPasswordSuccess] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+
+  // Obtener publicaciones del usuario actual
+  const userPublicaciones = publicacionesMock.filter(
+    (pub) => pub.usuarioId === currentUser?.id && pub.activa
+  )
+
+  const handleClosePublicacion = async () => {
+    if (!selectedPublicacion || !closeReason) return
+    
+    setIsLoading(true)
+    // Simular cierre de publicacion
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    
+    // En una implementacion real, aqui se actualizaria la base de datos
+    console.log(`Cerrando publicacion ${selectedPublicacion} como ${closeReason}`)
+    
+    setIsLoading(false)
+    setCloseSuccess(true)
+    setSelectedPublicacion("")
+    setCloseReason("")
+    
+    setTimeout(() => setCloseSuccess(false), 3000)
+  }
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setPasswordError(null)
+    setPasswordSuccess(false)
+
+    // Validar contrasena actual
+    if (currentPassword !== ADMIN_USER.password) {
+      setPasswordError("La contrasena actual es incorrecta")
+      return
+    }
+
+    // Validar nueva contrasena
+    if (newPassword.length < 5) {
+      setPasswordError("La nueva contrasena debe tener al menos 5 caracteres")
+      return
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      setPasswordError("Las contrasenas no coinciden")
+      return
+    }
+
+    setIsLoading(true)
+    // Simular cambio de contrasena
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    
+    // En una implementacion real, aqui se actualizaria la contrasena
+    console.log("Contrasena cambiada exitosamente")
+    
+    setIsLoading(false)
+    setPasswordSuccess(true)
+    setCurrentPassword("")
+    setNewPassword("")
+    setConfirmNewPassword("")
+    onPasswordChange?.()
+    
+    setTimeout(() => setPasswordSuccess(false), 3000)
+  }
+
+  const handleClose = () => {
+    setSelectedPublicacion("")
+    setCloseReason("")
+    setCloseSuccess(false)
+    setCurrentPassword("")
+    setNewPassword("")
+    setConfirmNewPassword("")
+    setPasswordError(null)
+    setPasswordSuccess(false)
+    onClose()
+  }
+
+  const handleLogout = () => {
+    handleClose()
+    onLogout()
+  }
+
+  if (!currentUser) return null
+
+  return (
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="bg-background sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+              <PawPrint className="h-4 w-4 text-primary" />
+            </div>
+            Mi Perfil
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="mb-4 p-3 rounded-lg bg-muted/50">
+          <p className="text-sm font-medium text-foreground">{currentUser.nombreUsuario}</p>
+          <p className="text-xs text-muted-foreground">{currentUser.email}</p>
+        </div>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="publicaciones">Mis Publicaciones</TabsTrigger>
+            <TabsTrigger value="cuenta">Mi Cuenta</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="publicaciones" className="space-y-4 mt-4">
+            {closeSuccess && (
+              <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <AlertDescription className="text-green-600">
+                  Publicacion cerrada exitosamente
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {userPublicaciones.length > 0 ? (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Seleccionar publicacion</Label>
+                  <Select value={selectedPublicacion} onValueChange={setSelectedPublicacion}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Elegir publicacion..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {userPublicaciones.map((pub) => (
+                        <SelectItem key={pub.id} value={pub.id}>
+                          {pub.mascota.especie} - {pub.ubicacion} ({pub.fechaEncuentro.toLocaleDateString()})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {selectedPublicacion && (
+                  <div className="space-y-2">
+                    <Label>Motivo de cierre</Label>
+                    <Select value={closeReason} onValueChange={(v) => setCloseReason(v as "ubicada" | "transitada")}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar motivo..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ubicada">
+                          <div className="flex items-center gap-2">
+                            <Home className="h-4 w-4" />
+                            Mascota ubicada con su familia
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="transitada" disabled>
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <PawPrint className="h-4 w-4" />
+                            Mascota en transito (proximamente)
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                <Button
+                  onClick={handleClosePublicacion}
+                  disabled={!selectedPublicacion || !closeReason || isLoading}
+                  className="w-full"
+                >
+                  {isLoading ? "Cerrando..." : "Cerrar Publicacion"}
+                </Button>
+              </div>
+            ) : (
+              <div className="text-center py-6 text-muted-foreground">
+                <PawPrint className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No tenes publicaciones activas</p>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="cuenta" className="space-y-4 mt-4">
+            {passwordError && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{passwordError}</AlertDescription>
+              </Alert>
+            )}
+
+            {passwordSuccess && (
+              <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <AlertDescription className="text-green-600">
+                  Contrasena cambiada exitosamente
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <form onSubmit={handleChangePassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="current-password">Contrasena actual</Label>
+                <Input
+                  id="current-password"
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-password">Nueva contrasena</Label>
+                <Input
+                  id="new-password"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                />
+                <p className="text-xs text-muted-foreground">
+                  Minimo 5 caracteres
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-new-password">Confirmar nueva contrasena</Label>
+                <Input
+                  id="confirm-new-password"
+                  type="password"
+                  value={confirmNewPassword}
+                  onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <Button type="submit" disabled={isLoading} className="w-full">
+                <Lock className="mr-2 h-4 w-4" />
+                {isLoading ? "Cambiando..." : "Cambiar Contrasena"}
+              </Button>
+            </form>
+          </TabsContent>
+        </Tabs>
+
+        <div className="mt-4 pt-4 border-t border-border">
+          <Button variant="outline" onClick={handleLogout} className="w-full">
+            Cerrar Sesion
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}

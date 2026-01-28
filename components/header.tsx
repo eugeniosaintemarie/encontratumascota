@@ -1,0 +1,143 @@
+"use client"
+
+import { useState } from "react"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { ThemeToggle } from "@/components/theme-toggle"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { PawPrint, Plus, LogIn, Menu, Moon, Sun, User, LogOut } from "lucide-react"
+import { useTheme } from "next-themes"
+
+interface HeaderProps {
+  onPublicarClick: () => void
+  onAccederClick: () => void
+  isAuthenticated?: boolean
+  onPerfilClick?: () => void
+  onLogout?: () => void
+}
+
+export function Header({ 
+  onPublicarClick, 
+  onAccederClick,
+  isAuthenticated = false,
+  onPerfilClick,
+  onLogout,
+}: HeaderProps) {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const { theme, setTheme, resolvedTheme } = useTheme()
+  const isDark = resolvedTheme === "dark"
+
+  return (
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
+            <PawPrint className="h-5 w-5 text-primary-foreground" />
+          </div>
+          <span className="text-lg font-semibold text-foreground">
+            Encontra Tu Mascota
+          </span>
+        </Link>
+
+        {/* Desktop navigation */}
+        <nav className="hidden sm:flex items-center gap-2">
+          <Button variant="ghost" size="sm" onClick={onPublicarClick}>
+            <Plus className="mr-1.5 h-4 w-4" />
+            Publicar
+          </Button>
+          {isAuthenticated ? (
+            <Button variant="outline" size="sm" onClick={onPerfilClick}>
+              <User className="mr-1.5 h-4 w-4" />
+              Mi Perfil
+            </Button>
+          ) : (
+            <Button variant="outline" size="sm" onClick={onAccederClick}>
+              <LogIn className="mr-1.5 h-4 w-4" />
+              Acceder
+            </Button>
+          )}
+          <ThemeToggle />
+        </nav>
+
+        {/* Mobile hamburger menu */}
+        <div className="sm:hidden">
+          <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-9 w-9">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem
+                onClick={() => {
+                  setMenuOpen(false)
+                  onPublicarClick()
+                }}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Publicar
+              </DropdownMenuItem>
+              {isAuthenticated ? (
+                <>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setMenuOpen(false)
+                      onPerfilClick?.()
+                    }}
+                  >
+                    <User className="mr-2 h-4 w-4" />
+                    Mi Perfil
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setMenuOpen(false)
+                      onLogout?.()
+                    }}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Cerrar Sesion
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <DropdownMenuItem
+                  onClick={() => {
+                    setMenuOpen(false)
+                    onAccederClick()
+                  }}
+                >
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Acceder
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => {
+                  setTheme(isDark ? "light" : "dark")
+                }}
+              >
+                {isDark ? (
+                  <>
+                    <Sun className="mr-2 h-4 w-4" />
+                    Tema claro
+                  </>
+                ) : (
+                  <>
+                    <Moon className="mr-2 h-4 w-4" />
+                    Tema oscuro
+                  </>
+                )}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+    </header>
+  )
+}
