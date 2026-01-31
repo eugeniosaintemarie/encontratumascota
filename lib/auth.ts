@@ -3,7 +3,7 @@ import type { Usuario } from "./types"
 // Usuario admin hardcodeado para pruebas
 export const ADMIN_USER: Usuario & { password: string } = {
   id: "admin",
-  nombreUsuario: "admin",
+  nombreUsuario: "Eugenio",
   email: "e.saintemarie@outlook.com",
   password: "LaFerrariRojaDeUge1000",
   fechaRegistro: new Date("2026-01-01"),

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { PawPrint, Plus, LogIn, Menu, Moon, Sun, User, LogOut } from "lucide-react"
+import { PawPrint, Plus, LogIn, Menu, Moon, Sun, User, LogOut, ArrowLeft } from "lucide-react"
 import { useTheme } from "next-themes"
 
 interface HeaderProps {
@@ -20,6 +20,7 @@ interface HeaderProps {
   isAuthenticated?: boolean
   onPerfilClick?: () => void
   onLogout?: () => void
+  showBackButton?: boolean
 }
 
 export function Header({ 
@@ -28,10 +29,15 @@ export function Header({
   isAuthenticated = false,
   onPerfilClick,
   onLogout,
+  showBackButton = false,
 }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false)
-  const { theme, setTheme, resolvedTheme } = useTheme()
+  const { setTheme, resolvedTheme } = useTheme()
   const isDark = resolvedTheme === "dark"
+
+  const handleThemeToggle = useCallback(() => {
+    setTheme(isDark ? "light" : "dark")
+  }, [isDark, setTheme])
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
@@ -47,17 +53,25 @@ export function Header({
 
         {/* Desktop navigation */}
         <nav className="hidden sm:flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={onPublicarClick}>
+          {showBackButton && (
+            <Link href="/">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="mr-1.5 h-4 w-4" />
+                Volver al inicio
+              </Button>
+            </Link>
+          )}
+          <Button variant="outline" size="sm" onClick={onPublicarClick}>
             <Plus className="mr-1.5 h-4 w-4" />
             Publicar
           </Button>
           {isAuthenticated ? (
-            <Button variant="outline" size="sm" onClick={onPerfilClick}>
+            <Button variant="ghost" size="sm" onClick={onPerfilClick}>
               <User className="mr-1.5 h-4 w-4" />
-              Mi Perfil
+              Mi perfil
             </Button>
           ) : (
-            <Button variant="outline" size="sm" onClick={onAccederClick}>
+            <Button variant="ghost" size="sm" onClick={onAccederClick}>
               <LogIn className="mr-1.5 h-4 w-4" />
               Acceder
             </Button>
@@ -75,6 +89,17 @@ export function Header({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
+              {showBackButton && (
+                <>
+                  <DropdownMenuItem asChild>
+                    <Link href="/">
+                      <ArrowLeft className="mr-2 h-4 w-4" />
+                      Volver al inicio
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                </>
+              )}
               <DropdownMenuItem
                 onClick={() => {
                   setMenuOpen(false)
@@ -93,7 +118,7 @@ export function Header({
                     }}
                   >
                     <User className="mr-2 h-4 w-4" />
-                    Mi Perfil
+                    Mi perfil
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => {
@@ -102,7 +127,7 @@ export function Header({
                     }}
                   >
                     <LogOut className="mr-2 h-4 w-4" />
-                    Cerrar Sesion
+                    Cerrar sesion
                   </DropdownMenuItem>
                 </>
               ) : (
@@ -117,11 +142,7 @@ export function Header({
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => {
-                  setTheme(isDark ? "light" : "dark")
-                }}
-              >
+              <DropdownMenuItem onClick={handleThemeToggle}>
                 {isDark ? (
                   <>
                     <Sun className="mr-2 h-4 w-4" />

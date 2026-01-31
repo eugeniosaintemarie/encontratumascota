@@ -48,7 +48,8 @@ export function FiltrosPublicaciones({
             value={ubicacion}
             onChange={(e) => onUbicacionChange(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && onSearch()}
-            className="bg-white text-foreground"
+            className="bg-white/10 border-white/30 placeholder:text-white/70"
+            style={{ color: 'white' }}
           />
         </div>
 
@@ -57,7 +58,7 @@ export function FiltrosPublicaciones({
             value={especie}
             onValueChange={(v) => onEspecieChange(v as Especie | "todos")}
           >
-            <SelectTrigger className="w-[140px] bg-white text-foreground">
+            <SelectTrigger className="w-[140px] bg-white/10 !text-white border-white/30 [&_svg]:!text-white/70">
               <SelectValue placeholder="Tipo" />
             </SelectTrigger>
             <SelectContent>
@@ -72,7 +73,7 @@ export function FiltrosPublicaciones({
             value={sexo}
             onValueChange={(v) => onSexoChange(v as Sexo | "todos")}
           >
-            <SelectTrigger className="w-[140px] bg-white text-foreground">
+            <SelectTrigger className="w-[140px] bg-white/10 !text-white border-white/30 [&_svg]:!text-white/70">
               <SelectValue placeholder="Genero" />
             </SelectTrigger>
             <SelectContent>
@@ -87,9 +88,9 @@ export function FiltrosPublicaciones({
             variant="outline"
             size="icon"
             onClick={onSearch}
-            className="shrink-0 bg-white hover:bg-gray-100 border-white"
+            className="shrink-0 bg-white/10 hover:bg-white/20 !border-white/30"
           >
-            <Search className="h-4 w-4 text-primary" />
+            <Search className="h-4 w-4 text-white" />
             <span className="sr-only">Buscar</span>
           </Button>
 

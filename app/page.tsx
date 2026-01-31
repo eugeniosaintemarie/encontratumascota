@@ -1,13 +1,13 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { Header } from "@/components/header"
 import { ListadoPublicaciones } from "@/components/listado-publicaciones"
 import { AuthModal } from "@/components/auth-modal"
 import { PublicarModal } from "@/components/publicar-modal"
 import { PerfilModal } from "@/components/perfil-modal"
-import { getCurrentUser, setCurrentUser, logout } from "@/lib/auth"
+import { getCurrentUser, logout } from "@/lib/auth"
 import type { Usuario } from "@/lib/types"
 
 export default function HomePage() {
@@ -17,8 +17,7 @@ export default function HomePage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [currentUser, setCurrentUserState] = useState<Usuario | null>(null)
   const [authInitialView, setAuthInitialView] = useState<"login" | "register">("login")
-  const [pendingPublicacionId, setPendingPublicacionId] = useState<number | null>(null)
-  const cardRefs = useRef<Map<number, HTMLElement>>(new Map())
+  const [pendingPublicacionId, setPendingPublicacionId] = useState<string | null>(null)
 
   // Verificar si hay sesion guardada al cargar
   useEffect(() => {
@@ -29,27 +28,27 @@ export default function HomePage() {
     }
   }, [])
 
-  const handlePublicarClick = () => {
+  const handlePublicarClick = useCallback(() => {
     setIsPublicarModalOpen(true)
-  }
+  }, [])
 
-  const handleAccederClick = () => {
+  const handleAccederClick = useCallback(() => {
     setAuthInitialView("login")
     setPendingPublicacionId(null)
     setIsAuthModalOpen(true)
-  }
+  }, [])
 
-  const handlePerfilClick = () => {
+  const handlePerfilClick = useCallback(() => {
     setIsPerfilModalOpen(true)
-  }
+  }, [])
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     logout()
     setCurrentUserState(null)
     setIsAuthenticated(false)
-  }
+  }, [])
 
-  const handleAuthSuccess = () => {
+  const handleAuthSuccess = useCallback(() => {
     const user = getCurrentUser()
     setCurrentUserState(user)
     setIsAuthenticated(true)
@@ -69,18 +68,18 @@ export default function HomePage() {
         setPendingPublicacionId(null)
       }, 100)
     }
-  }
+  }, [pendingPublicacionId])
 
-  const handleRequireAuthFromCard = (publicacionId: number) => {
+  const handleRequireAuthFromCard = useCallback((publicacionId: string) => {
     setPendingPublicacionId(publicacionId)
     setAuthInitialView("login")
     setIsAuthModalOpen(true)
-  }
+  }, [])
 
-  const handleRequireAuth = () => {
+  const handleRequireAuth = useCallback(() => {
     setAuthInitialView("login")
     setIsAuthModalOpen(true)
-  }
+  }, [])
 
   return (
     <div className="min-h-screen bg-background">
@@ -91,20 +90,20 @@ export default function HomePage() {
         onPerfilClick={handlePerfilClick}
         onLogout={handleLogout}
       />
-      <main className="mx-auto max-w-7xl px-4 py-8">
+      <main className="mx-auto max-w-7xl px-4 pt-4 pb-8">
         <ListadoPublicaciones 
           isAuthenticated={isAuthenticated} 
           onRequireAuth={handleRequireAuthFromCard}
         />
       </main>
-      <footer className="border-t border-border bg-card">
+      <footer className="border-t border-border">
         <div className="bg-primary/10 py-4">
           <div className="mx-auto max-w-7xl px-4 flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12">
-            <p className="text-sm text-muted-foreground flex items-center gap-2">
+            <p className="text-sm text-foreground flex items-center gap-2">
               <span className="text-2xl font-bold text-primary leading-none">127</span>
               <span>mascotas reunidas con sus familias</span>
             </p>
-            <p className="text-sm text-muted-foreground text-center sm:text-left">
+            <p className="text-sm text-foreground text-center sm:text-left">
               No encontras tu mascota?{" "}
               <Link href="/transitadas" className="text-primary hover:underline font-medium">
                 Fijate si le dieron transito ubicandola con otra familia
@@ -112,8 +111,8 @@ export default function HomePage() {
             </p>
           </div>
         </div>
-        <div className="py-6">
-          <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground">
+        <div className="py-6 bg-background">
+          <div className="mx-auto max-w-7xl px-4 text-center text-sm text-foreground/60">
             <p>
               Encontra Tu Mascota - Plataforma colaborativa para reunir mascotas
               perdidas con sus familias
