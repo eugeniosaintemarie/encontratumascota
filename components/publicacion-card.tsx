@@ -88,7 +88,7 @@ export function PublicacionCard({
 
         <div className="mt-auto">
           {isAuthenticated ? (
-            <div className="space-y-0.5 rounded-lg bg-secondary/50 p-3">
+            <div className="space-y-0.5 rounded-lg bg-secondary/50 p-3 overflow-hidden">
               <p className="text-sm font-medium text-foreground">
                 {publicacion.contactoNombre}
               </p>
@@ -100,7 +100,8 @@ export function PublicacionCard({
               </a>
               <a 
                 href={`mailto:${publicacion.contactoEmail}`}
-                className="block text-sm text-muted-foreground hover:text-primary hover:underline"
+                className="block text-sm text-muted-foreground hover:text-primary hover:underline truncate"
+                title={publicacion.contactoEmail}
               >
                 {publicacion.contactoEmail}
               </a>
