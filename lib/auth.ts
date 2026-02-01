@@ -4,7 +4,7 @@ import type { Usuario } from "./types"
 export const ADMIN_USER: Usuario & { password: string } = {
   id: "admin",
   nombreUsuario: "Eugenio",
-  email: "e.saintemarie@outlook.com",
+  email: "eugenio@encontratumascota.com.ar",
   password: "LaFerrariRojaDeUge1000",
   fechaRegistro: new Date("2026-01-01"),
 }

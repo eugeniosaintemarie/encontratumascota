@@ -116,7 +116,8 @@ export default function TransitadasPage() {
                 <PublicacionCard
                   key={publicacion.id}
                   publicacion={publicacion}
-                  isAuthenticated={true}
+                  isAuthenticated={isAuthenticated}
+                  onLoginRequired={() => setIsAuthModalOpen(true)}
                 />
               ))}
             </div>
