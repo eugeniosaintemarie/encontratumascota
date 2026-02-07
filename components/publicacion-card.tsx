@@ -5,7 +5,7 @@ import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MapPin, Lock, Share2, Check, Loader2 } from "lucide-react"
+import { MapPin, Lock, Share2, Check, Loader2, AlertTriangle } from "lucide-react"
 import type { Publicacion } from "@/lib/types"
 import { razasLabels, especieLabels, generoLabels } from "@/lib/mock-data"
 import { toast } from "sonner"
@@ -94,6 +94,12 @@ export function PublicacionCard({
           className="object-cover object-top transition-transform duration-300 group-hover:scale-105"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
+        {/* Icono de Tránsito Urgente */}
+        {publicacion.transitoUrgente && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[5]">
+            <AlertTriangle className="h-24 w-24 text-orange-500/20 drop-shadow-sm" strokeWidth={1.5} />
+          </div>
+        )}
         {/* Botón de compartir */}
         <div className="absolute right-3 top-3 z-10">
           <Button
@@ -134,7 +140,13 @@ export function PublicacionCard({
             {razasLabels[mascota.raza]}
           </Badge>
         </div>
-        <div className="absolute left-3 bottom-3">
+        <div className="absolute left-3 bottom-3 flex flex-col gap-1.5">
+          {publicacion.transitoUrgente && (
+            <Badge variant="secondary" className="bg-orange-500 text-white backdrop-blur-sm text-xs flex items-center gap-1 border-0 w-fit">
+              <AlertTriangle className="h-3 w-3" />
+              Tránsito Urgente
+            </Badge>
+          )}
           <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm text-xs flex items-center gap-1 border-0">
             <MapPin className="h-3 w-3" />
             {publicacion.ubicacion}

@@ -7,6 +7,7 @@ import { AuthModal } from "@/components/auth-modal"
 import { PublicarModal } from "@/components/publicar-modal"
 import { PerfilModal } from "@/components/perfil-modal"
 import { PawPrint } from "lucide-react"
+import { Footer } from "@/components/footer"
 import { usePublicaciones } from "@/lib/publicaciones-context"
 import type { Especie, Sexo, Usuario } from "@/lib/types"
 
@@ -135,16 +136,7 @@ export default function TransitadasPage() {
         </div>
       </main>
 
-      <footer className="border-t border-border">
-        <div className="py-6 bg-background">
-          <div className="mx-auto max-w-7xl px-4 text-center text-sm text-foreground/60">
-            <p>
-              Encontra Tu Mascota - Plataforma colaborativa para reunir mascotas
-              perdidas con sus familias
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       <AuthModal
         isOpen={isAuthModalOpen}

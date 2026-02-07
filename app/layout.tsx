@@ -1,21 +1,35 @@
 import React from "react"
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
 import { PublicacionesProvider } from '@/lib/publicaciones-context'
+import { ServiceWorkerRegistration } from '@/components/sw-registration'
 import './globals.css'
 
 const _inter = Inter({ subsets: ["latin"] });
+
+export const viewport: Viewport = {
+  themeColor: '#16a34a',
+}
 
 export const metadata: Metadata = {
   title: 'Encontra Tu Mascota',
   description: 'Plataforma colaborativa para reunir mascotas perdidas con sus familias',
   generator: 'v0.app',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Encontra Tu Mascota',
+  },
   icons: {
     icon: '/favicon.svg',
-    apple: '/favicon.svg',
+    apple: '/apple-icon.png',
+  },
+  other: {
+    'mobile-web-app-capable': 'yes',
   },
 }
 
@@ -38,6 +52,7 @@ export default function RootLayout({
             {children}
           </PublicacionesProvider>
           <Toaster />
+          <ServiceWorkerRegistration />
         </ThemeProvider>
         <Analytics />
       </body>

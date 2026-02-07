@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import Link from "next/link"
 import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
 import { ListadoPublicaciones } from "@/components/listado-publicaciones"
 import { AuthModal } from "@/components/auth-modal"
 import { PublicarModal } from "@/components/publicar-modal"
@@ -96,30 +96,7 @@ export default function HomePage() {
           onRequireAuth={handleRequireAuthFromCard}
         />
       </main>
-      <footer className="border-t border-border">
-        <div className="bg-primary/10 py-4">
-          <div className="mx-auto max-w-7xl px-4 flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12">
-            <p className="text-sm text-foreground flex items-center gap-2">
-              <span className="text-2xl font-bold text-primary leading-none">127</span>
-              <span>mascotas reunidas con sus familias</span>
-            </p>
-            <p className="text-sm text-foreground text-center sm:text-left">
-              No encontras tu mascota?{" "}
-              <Link href="/transitadas" className="text-primary hover:underline font-medium">
-                Fijate si le dieron transito ubicandola con otra familia
-              </Link>
-            </p>
-          </div>
-        </div>
-        <div className="py-6 bg-background">
-          <div className="mx-auto max-w-7xl px-4 text-center text-sm text-foreground/60">
-            <p>
-              Encontra Tu Mascota - Plataforma colaborativa para reunir mascotas
-              perdidas con sus familias
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       <AuthModal
         isOpen={isAuthModalOpen}

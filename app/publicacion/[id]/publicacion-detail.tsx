@@ -7,6 +7,7 @@ import { PublicacionCard } from "@/components/publicacion-card"
 import { AuthModal } from "@/components/auth-modal"
 import { PublicarModal } from "@/components/publicar-modal"
 import { PerfilModal } from "@/components/perfil-modal"
+import { Footer } from "@/components/footer"
 import { getCurrentUser, logout } from "@/lib/auth"
 import type { Publicacion, Usuario } from "@/lib/types"
 import { ArrowLeft } from "lucide-react"
@@ -68,6 +69,8 @@ export function PublicacionDetail({ publicacion }: PublicacionDetailProps) {
           onRequireAuth={() => setIsAuthModalOpen(true)}
         />
       </main>
+
+      <Footer />
 
       <AuthModal
         isOpen={isAuthModalOpen}

@@ -9,16 +9,18 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
-import { Search, X } from "lucide-react"
+import { Search, X, AlertTriangle } from "lucide-react"
 import type { Especie, Sexo } from "@/lib/types"
 
 interface FiltrosPublicacionesProps {
   especie: Especie | "todos"
   sexo: Sexo | "todos"
   ubicacion: string
+  transitoUrgente: boolean
   onEspecieChange: (value: Especie | "todos") => void
   onSexoChange: (value: Sexo | "todos") => void
   onUbicacionChange: (value: string) => void
+  onTransitoUrgenteChange: (value: boolean) => void
   onClearFilters: () => void
   onSearch: () => void
   hasActiveFilters: boolean
@@ -28,9 +30,11 @@ export function FiltrosPublicaciones({
   especie,
   sexo,
   ubicacion,
+  transitoUrgente,
   onEspecieChange,
   onSexoChange,
   onUbicacionChange,
+  onTransitoUrgenteChange,
   onClearFilters,
   onSearch,
   hasActiveFilters,
@@ -83,6 +87,21 @@ export function FiltrosPublicaciones({
               <SelectItem value="desconocido">Desconocido</SelectItem>
             </SelectContent>
           </Select>
+
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => onTransitoUrgenteChange(!transitoUrgente)}
+            className={`shrink-0 ${
+              transitoUrgente
+                ? "bg-orange-500 hover:bg-orange-600 !border-orange-500"
+                : "bg-white/10 hover:bg-white/20 !border-white/30"
+            }`}
+            title="Filtrar tránsito urgente"
+          >
+            <AlertTriangle className={`h-4 w-4 ${transitoUrgente ? 'text-white' : 'text-white'}`} />
+            <span className="sr-only">Tránsito Urgente</span>
+          </Button>
 
           <Button
             variant="outline"

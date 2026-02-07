@@ -19,6 +19,7 @@ export function ListadoPublicaciones({
   const [especie, setEspecie] = useState<Especie | "todos">("todos")
   const [sexo, setSexo] = useState<Sexo | "todos">("todos")
   const [ubicacion, setUbicacion] = useState("")
+  const [transitoUrgente, setTransitoUrgente] = useState(false)
 
   const { publicaciones } = usePublicaciones()
 
@@ -31,19 +32,22 @@ export function ListadoPublicaciones({
         !pub.ubicacion.toLowerCase().includes(ubicacion.toLowerCase())
       )
         return false
+      // Filtrar por tránsito urgente
+      if (transitoUrgente && !pub.transitoUrgente) return false
       // Excluir las que están en tránsito (van a otra página)
       if (pub.enTransito) return false
       return pub.activa
     })
-  }, [especie, sexo, ubicacion])
+  }, [especie, sexo, ubicacion, transitoUrgente, publicaciones])
 
   const hasActiveFilters =
-    especie !== "todos" || sexo !== "todos" || ubicacion !== ""
+    especie !== "todos" || sexo !== "todos" || ubicacion !== "" || transitoUrgente
 
   const clearFilters = () => {
     setEspecie("todos")
     setSexo("todos")
     setUbicacion("")
+    setTransitoUrgente(false)
   }
 
   const handleSearch = () => {
@@ -56,9 +60,11 @@ export function ListadoPublicaciones({
         especie={especie}
         sexo={sexo}
         ubicacion={ubicacion}
+        transitoUrgente={transitoUrgente}
         onEspecieChange={setEspecie}
         onSexoChange={setSexo}
         onUbicacionChange={setUbicacion}
+        onTransitoUrgenteChange={setTransitoUrgente}
         onClearFilters={clearFilters}
         onSearch={handleSearch}
         hasActiveFilters={hasActiveFilters}

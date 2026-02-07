@@ -47,6 +47,7 @@ export interface Publicacion {
   usuarioId: string
   activa: boolean
   enTransito?: boolean
+  transitoUrgente?: boolean
 }
 
 export interface Usuario {

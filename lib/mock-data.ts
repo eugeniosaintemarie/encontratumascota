@@ -25,6 +25,7 @@ export const publicacionesMock: Publicacion[] = [
     contactoEmail: "eugenio@encontratumascota.com.ar",
     usuarioId: ADMIN_USER_ID,
     activa: true,
+    transitoUrgente: true,
   },
   {
     id: "2",
@@ -113,6 +114,7 @@ export const publicacionesMock: Publicacion[] = [
     contactoEmail: "eugenio@encontratumascota.com.ar",
     usuarioId: ADMIN_USER_ID,
     activa: true,
+    transitoUrgente: true,
   },
   {
     id: "6",
@@ -180,6 +182,7 @@ export const publicacionesMock: Publicacion[] = [
     usuarioId: ADMIN_USER_ID,
     activa: false,
     enTransito: true,
+    transitoUrgente: true,
   },
   {
     id: "9",

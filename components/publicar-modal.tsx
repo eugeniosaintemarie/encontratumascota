@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Checkbox } from "@/components/ui/checkbox"
 
 import type { Especie, Sexo, Raza } from "@/lib/types"
 
@@ -49,6 +50,7 @@ export function PublicarModal({
   const [contactoTelefono, setContactoTelefono] = useState("")
   const [contactoEmail, setContactoEmail] = useState("")
   const [imagenUrl, setImagenUrl] = useState("")
+  const [transitoUrgente, setTransitoUrgente] = useState(false)
 
   const razasPorEspecie: Record<Especie, { value: Raza; label: string }[]> = {
     perro: [
@@ -95,6 +97,7 @@ export function PublicarModal({
     setContactoTelefono("")
     setContactoEmail("")
     setImagenUrl("")
+    setTransitoUrgente(false)
   }
 
   const handleClose = () => {
@@ -251,6 +254,20 @@ export function PublicarModal({
               onChange={(e) => setImagenUrl(e.target.value)}
               placeholder="https://ejemplo.com/imagen.jpg"
             />
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="transito-urgente"
+              checked={transitoUrgente}
+              onCheckedChange={(checked) => setTransitoUrgente(checked === true)}
+            />
+            <Label htmlFor="transito-urgente" className="text-sm font-medium leading-none cursor-pointer">
+              Tránsito Urgente
+              <span className="block text-xs font-normal text-muted-foreground mt-0.5">
+                Marca esta opción si no podés tener a la mascota por mucho tiempo
+              </span>
+            </Label>
           </div>
 
           <div className="border-t border-border pt-4">
