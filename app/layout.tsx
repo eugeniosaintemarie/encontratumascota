@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { ThemeProvider } from '@/components/theme-provider'
+import { Toaster } from '@/components/ui/sonner'
 import { PublicacionesProvider } from '@/lib/publicaciones-context'
 import './globals.css'
 
@@ -36,6 +37,7 @@ export default function RootLayout({
           <PublicacionesProvider>
             {children}
           </PublicacionesProvider>
+          <Toaster />
         </ThemeProvider>
         <Analytics />
       </body>
