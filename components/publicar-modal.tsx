@@ -263,7 +263,7 @@ export function PublicarModal({
               onCheckedChange={(checked) => setTransitoUrgente(checked === true)}
             />
             <Label htmlFor="transito-urgente" className="text-sm font-medium leading-none cursor-pointer">
-              Tránsito Urgente
+              Tránsito urgente
               <span className="block text-xs font-normal text-muted-foreground mt-0.5">
                 Marca esta opción si no podés tener a la mascota por mucho tiempo
               </span>

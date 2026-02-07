@@ -100,7 +100,7 @@ export function FiltrosPublicaciones({
             title="Filtrar tránsito urgente"
           >
             <AlertTriangle className={`h-4 w-4 ${transitoUrgente ? 'text-white' : 'text-white'}`} />
-            <span className="sr-only">Tránsito Urgente</span>
+            <span className="sr-only">Tránsito urgente</span>
           </Button>
 
           <Button

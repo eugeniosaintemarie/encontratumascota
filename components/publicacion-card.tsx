@@ -94,7 +94,7 @@ export function PublicacionCard({
           className="object-cover object-top transition-transform duration-300 group-hover:scale-105"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
-        {/* Icono de Tránsito Urgente */}
+        {/* Icono de Tránsito urgente */}
         {publicacion.transitoUrgente && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[5]">
             <AlertTriangle className="h-24 w-24 text-orange-500/20 drop-shadow-sm" strokeWidth={1.5} />
@@ -144,7 +144,7 @@ export function PublicacionCard({
           {publicacion.transitoUrgente && (
             <Badge variant="secondary" className="bg-orange-500 text-white backdrop-blur-sm text-xs flex items-center gap-1 border-0 w-fit">
               <AlertTriangle className="h-3 w-3" />
-              Tránsito Urgente
+              Tránsito urgente
             </Badge>
           )}
           <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm text-xs flex items-center gap-1 border-0">
