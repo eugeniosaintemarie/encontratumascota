@@ -1,7 +1,6 @@
 "use client"
 
-import React from "react"
-
+import type React from "react"
 import { useState } from "react"
 import {
   Dialog,
@@ -110,28 +109,18 @@ export function PublicarModal({
         <DialogContent className="bg-background sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
-              Autenticacion requerida
+              Inicia sesion para cargar una mascota encontrada
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <p className="text-muted-foreground">
-              Inicia sesion para cargar una mascota encontrada
-            </p>
-            <div className="flex gap-3">
-              <Button
-                className="flex-1"
-                onClick={() => {
-                  handleClose()
-                  onRequireAuth()
-                }}
-              >
-                Iniciar Sesion
-              </Button>
-              <Button variant="outline" onClick={handleClose}>
-                Cancelar
-              </Button>
-            </div>
-          </div>
+          <Button
+            className="w-full"
+            onClick={() => {
+              handleClose()
+              onRequireAuth()
+            }}
+          >
+            Iniciar sesion
+          </Button>
         </DialogContent>
       </Dialog>
     )

@@ -1,11 +1,11 @@
 import type { Usuario } from "./types"
 
-// Usuario admin hardcodeado para pruebas
+// Usuario admin - credenciales desde variables de entorno
 export const ADMIN_USER: Usuario & { password: string } = {
   id: "admin",
-  nombreUsuario: "admin",
-  email: "e.saintemarie@outlook.com",
-  password: "LaFerrariRojaDeUge1000",
+  nombreUsuario: process.env.NEXT_PUBLIC_ADMIN_NAME || "Admin",
+  email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || "",
+  password: process.env.ADMIN_PASSWORD || "",
   fechaRegistro: new Date("2026-01-01"),
 }
 

@@ -20,7 +20,8 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, CheckCircle2, Lock, PawPrint, Home } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { publicacionesMock } from "@/lib/mock-data"
+import { usePublicaciones } from "@/lib/publicaciones-context"
+import { especieLabels, generoLabels, razasLabels } from "@/lib/mock-data"
 import { ADMIN_USER } from "@/lib/auth"
 import type { Usuario } from "@/lib/types"
 
@@ -54,8 +55,10 @@ export function PerfilModal({
   const [passwordSuccess, setPasswordSuccess] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
+  const { publicaciones, cerrarPublicacion } = usePublicaciones()
+
   // Obtener publicaciones del usuario actual
-  const userPublicaciones = publicacionesMock.filter(
+  const userPublicaciones = publicaciones.filter(
     (pub) => pub.usuarioId === currentUser?.id && pub.activa
   )
 
@@ -63,11 +66,12 @@ export function PerfilModal({
     if (!selectedPublicacion || !closeReason) return
     
     setIsLoading(true)
-    // Simular cierre de publicacion
+    // Simular delay de red
     await new Promise((resolve) => setTimeout(resolve, 500))
     
-    // En una implementacion real, aqui se actualizaria la base de datos
-    console.log(`Cerrando publicacion ${selectedPublicacion} como ${closeReason}`)
+    // Mapear motivo al formato del context
+    const motivo = closeReason === "transitada" ? "en_transito" : "encontrado_dueno"
+    cerrarPublicacion(selectedPublicacion, motivo)
     
     setIsLoading(false)
     setCloseSuccess(true)
@@ -143,19 +147,24 @@ export function PerfilModal({
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
               <PawPrint className="h-4 w-4 text-primary" />
             </div>
-            Mi Perfil
+            Mi perfil
           </DialogTitle>
         </DialogHeader>
 
-        <div className="mb-4 p-3 rounded-lg bg-muted/50">
-          <p className="text-sm font-medium text-foreground">{currentUser.nombreUsuario}</p>
-          <p className="text-xs text-muted-foreground">{currentUser.email}</p>
+        <div className="mb-4 p-3 rounded-lg bg-muted/50 flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-foreground">{currentUser.nombreUsuario}</p>
+            <p className="text-xs text-muted-foreground">{currentUser.email}</p>
+          </div>
+          <Button variant="outline" size="sm" onClick={handleLogout}>
+            Cerrar sesion
+          </Button>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="publicaciones">Mis Publicaciones</TabsTrigger>
-            <TabsTrigger value="cuenta">Mi Cuenta</TabsTrigger>
+            <TabsTrigger value="publicaciones">Mis publicaciones</TabsTrigger>
+            <TabsTrigger value="cuenta">Mi cuenta</TabsTrigger>
           </TabsList>
 
           <TabsContent value="publicaciones" className="space-y-4 mt-4">
@@ -170,29 +179,24 @@ export function PerfilModal({
 
             {userPublicaciones.length > 0 ? (
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Seleccionar publicacion</Label>
-                  <Select value={selectedPublicacion} onValueChange={setSelectedPublicacion}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Elegir publicacion..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {userPublicaciones.map((pub) => (
-                        <SelectItem key={pub.id} value={pub.id}>
-                          {pub.mascota.especie} - {pub.ubicacion} ({pub.fechaEncuentro.toLocaleDateString()})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <Select value={selectedPublicacion} onValueChange={setSelectedPublicacion}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Elegir publicacion..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {userPublicaciones.map((pub) => (
+                      <SelectItem key={pub.id} value={pub.id}>
+                        {especieLabels[pub.mascota.especie]} - {generoLabels[pub.mascota.sexo]} - {razasLabels[pub.mascota.raza]} / {pub.ubicacion} ({pub.fechaEncuentro.toLocaleDateString()})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
                 {selectedPublicacion && (
-                  <div className="space-y-2">
-                    <Label>Motivo de cierre</Label>
-                    <Select value={closeReason} onValueChange={(v) => setCloseReason(v as "ubicada" | "transitada")}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar motivo..." />
-                      </SelectTrigger>
+                  <Select value={closeReason} onValueChange={(v) => setCloseReason(v as "ubicada" | "transitada")}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Seleccionar motivo de cierre..." />
+                    </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="ubicada">
                           <div className="flex items-center gap-2">
@@ -200,15 +204,14 @@ export function PerfilModal({
                             Mascota ubicada con su familia
                           </div>
                         </SelectItem>
-                        <SelectItem value="transitada" disabled>
-                          <div className="flex items-center gap-2 text-muted-foreground">
+                        <SelectItem value="transitada">
+                          <div className="flex items-center gap-2">
                             <PawPrint className="h-4 w-4" />
-                            Mascota en transito (proximamente)
+                            Mascota en tránsito
                           </div>
                         </SelectItem>
                       </SelectContent>
                     </Select>
-                  </div>
                 )}
 
                 <Button
@@ -216,7 +219,7 @@ export function PerfilModal({
                   disabled={!selectedPublicacion || !closeReason || isLoading}
                   className="w-full"
                 >
-                  {isLoading ? "Cerrando..." : "Cerrar Publicacion"}
+                  {isLoading ? "Cerrando..." : "Cerrar publicacion"}
                 </Button>
               </div>
             ) : (
@@ -265,11 +268,11 @@ export function PerfilModal({
                   required
                 />
                 <p className="text-xs text-muted-foreground">
-                  Minimo 5 caracteres
+                  Mínimo 6 caracteres, incluyendo una mayúscula y un número
                 </p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirm-new-password">Confirmar nueva contrasena</Label>
+                <Label htmlFor="confirm-new-password">Confirmar nueva contraseña</Label>
                 <Input
                   id="confirm-new-password"
                   type="password"
@@ -280,17 +283,11 @@ export function PerfilModal({
               </div>
               <Button type="submit" disabled={isLoading} className="w-full">
                 <Lock className="mr-2 h-4 w-4" />
-                {isLoading ? "Cambiando..." : "Cambiar Contrasena"}
+                {isLoading ? "Cambiando..." : "Cambiar contraseña"}
               </Button>
             </form>
           </TabsContent>
         </Tabs>
-
-        <div className="mt-4 pt-4 border-t border-border">
-          <Button variant="outline" onClick={handleLogout} className="w-full">
-            Cerrar Sesion
-          </Button>
-        </div>
       </DialogContent>
     </Dialog>
   )

@@ -13,7 +13,7 @@ import { toast } from "sonner"
 interface PublicacionCardProps {
   publicacion: Publicacion
   isAuthenticated?: boolean
-  onRequireAuth?: (publicacionId: number) => void
+  onRequireAuth?: (publicacionId: string) => void
 }
 
 function formatDate(date: Date): string {
@@ -121,49 +121,61 @@ export function PublicacionCard({
 
         <div className="absolute left-3 top-3 flex flex-col gap-1.5">
           <div className="flex flex-wrap gap-1.5">
-            <Badge variant="secondary" className="bg-card/90 backdrop-blur-sm">
+            <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm border-0">
               {especieLabels[mascota.especie]}
             </Badge>
             <Badge
               variant="outline"
-              className="border-card/50 bg-card/90 backdrop-blur-sm"
+              className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm border-0"
             >
               {generoLabels[mascota.sexo]}
             </Badge>
           </div>
-          <Badge variant="secondary" className="bg-card/90 backdrop-blur-sm font-medium w-fit">
+          <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0">
             {razasLabels[mascota.raza]}
           </Badge>
         </div>
+        <div className="absolute left-3 bottom-3">
+          <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm text-xs flex items-center gap-1 border-0">
+            <MapPin className="h-3 w-3" />
+            {publicacion.ubicacion}
+          </Badge>
+        </div>
         <div className="absolute right-3 bottom-3">
-          <Badge variant="secondary" className="bg-card/90 backdrop-blur-sm text-xs">
+          <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm text-xs border-0">
             {formatDate(publicacion.fechaEncuentro)}
           </Badge>
         </div>
       </div>
 
       <CardContent className="flex flex-1 flex-col px-[10px] py-[10px]">
-        <p className="text-sm text-muted-foreground line-clamp-3 mb-[10px]">
+        <p className="text-sm text-foreground/80 line-clamp-3 mb-[10px]">
           {descripcionFormateada}
         </p>
 
-        <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-[10px]">
-          <MapPin className="h-4 w-4 shrink-0 text-primary" />
-          <span>{publicacion.ubicacion}</span>
-        </div>
-
         <div className="mt-auto">
           {isAuthenticated ? (
-            <div className="space-y-0.5 rounded-lg bg-secondary/50 p-3">
+            <div className="space-y-0.5 rounded-lg bg-secondary/50 p-3 overflow-hidden">
               <p className="text-sm font-medium text-foreground">
                 {publicacion.contactoNombre}
               </p>
-              <p className="text-sm text-muted-foreground">{publicacion.contactoTelefono}</p>
-              <p className="text-sm text-muted-foreground">{publicacion.contactoEmail}</p>
+              <a 
+                href={`tel:${publicacion.contactoTelefono.replace(/\s/g, '')}`}
+                className="block text-sm text-muted-foreground hover:text-primary hover:underline"
+              >
+                {publicacion.contactoTelefono}
+              </a>
+              <a 
+                href={`mailto:${publicacion.contactoEmail}`}
+                className="block text-sm text-muted-foreground hover:text-primary hover:underline truncate"
+                title={publicacion.contactoEmail}
+              >
+                {publicacion.contactoEmail}
+              </a>
             </div>
           ) : (
             <div className="rounded-lg border border-dashed border-border bg-muted/30 p-3">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2 text-sm text-foreground/70">
                 <Lock className="h-4 w-4 shrink-0" />
                 <span>
                   <button 

@@ -4,12 +4,12 @@ import { useState, useMemo } from "react"
 import { PublicacionCard } from "@/components/publicacion-card"
 import { FiltrosPublicaciones } from "@/components/filtros-publicaciones"
 import { PawPrint } from "lucide-react"
-import { publicacionesMock } from "@/lib/mock-data"
+import { usePublicaciones } from "@/lib/publicaciones-context"
 import type { Especie, Sexo } from "@/lib/types"
 
 interface ListadoPublicacionesProps {
   isAuthenticated?: boolean
-  onRequireAuth?: (publicacionId: number) => void
+  onRequireAuth?: (publicacionId: string) => void
 }
 
 export function ListadoPublicaciones({
@@ -20,8 +20,10 @@ export function ListadoPublicaciones({
   const [sexo, setSexo] = useState<Sexo | "todos">("todos")
   const [ubicacion, setUbicacion] = useState("")
 
+  const { publicaciones } = usePublicaciones()
+
   const publicacionesFiltradas = useMemo(() => {
-    return publicacionesMock.filter((pub) => {
+    return publicaciones.filter((pub) => {
       if (especie !== "todos" && pub.mascota.especie !== especie) return false
       if (sexo !== "todos" && pub.mascota.sexo !== sexo) return false
       if (
@@ -29,6 +31,8 @@ export function ListadoPublicaciones({
         !pub.ubicacion.toLowerCase().includes(ubicacion.toLowerCase())
       )
         return false
+      // Excluir las que están en tránsito (van a otra página)
+      if (pub.enTransito) return false
       return pub.activa
     })
   }, [especie, sexo, ubicacion])
@@ -47,7 +51,7 @@ export function ListadoPublicaciones({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <FiltrosPublicaciones
         especie={especie}
         sexo={sexo}

@@ -1,6 +1,5 @@
 "use client"
 
-import React from "react"
 import { useState } from "react"
 import {
   Dialog,
@@ -125,39 +124,25 @@ export function AuthModal({
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            <div className="space-y-2">
-              <Label htmlFor="login-email">Email</Label>
-              <Input
-                id="login-email"
-                type="email"
-                value={loginEmail}
-                onChange={(e) => setLoginEmail(e.target.value)}
-                placeholder="tu@email.com"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="login-password">Contrasena</Label>
-              <Input
-                id="login-password"
-                type="password"
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-                required
-              />
-            </div>
-            <div className="flex gap-3">
-              <Button type="submit" className="flex-1" disabled={isLoading}>
-                {isLoading ? "Ingresando..." : "Ingresar"}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleClose}
-              >
-                Cancelar
-              </Button>
-            </div>
+            <Input
+              id="login-email"
+              type="email"
+              value={loginEmail}
+              onChange={(e) => setLoginEmail(e.target.value)}
+              placeholder="Email"
+              required
+            />
+            <Input
+              id="login-password"
+              type="password"
+              value={loginPassword}
+              onChange={(e) => setLoginPassword(e.target.value)}
+              placeholder="Contraseña"
+              required
+            />
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Ingresando..." : "Ingresar"}
+            </Button>
             <p className="text-center text-sm text-muted-foreground">
               No tenes cuenta?{" "}
               <button
@@ -171,63 +156,46 @@ export function AuthModal({
           </form>
         ) : (
           <form onSubmit={handleRegister} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="register-nombre">Nombre completo</Label>
-              <Input
-                id="register-nombre"
-                type="text"
-                value={registerNombre}
-                onChange={(e) => setRegisterNombre(e.target.value)}
-                placeholder="Tu nombre completo"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="register-email">Email</Label>
-              <Input
-                id="register-email"
-                type="email"
-                value={registerEmail}
-                onChange={(e) => setRegisterEmail(e.target.value)}
-                placeholder="tu@email.com"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="register-password">Contrasena</Label>
+            <Input
+              id="register-nombre"
+              type="text"
+              value={registerNombre}
+              onChange={(e) => setRegisterNombre(e.target.value)}
+              placeholder="Nombre completo"
+              required
+            />
+            <Input
+              id="register-email"
+              type="email"
+              value={registerEmail}
+              onChange={(e) => setRegisterEmail(e.target.value)}
+              placeholder="Email"
+              required
+            />
+            <div className="space-y-1">
               <Input
                 id="register-password"
                 type="password"
                 value={registerPassword}
                 onChange={(e) => setRegisterPassword(e.target.value)}
+                placeholder="Contraseña"
                 required
               />
               <p className="text-xs text-muted-foreground">
-                Minimo 5 caracteres, debe incluir minuscula y numero
+                Mínimo 6 caracteres, incluyendo una mayúscula y un número
               </p>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="register-confirm">Confirmar contrasena</Label>
-              <Input
-                id="register-confirm"
-                type="password"
-                value={registerConfirmPassword}
-                onChange={(e) => setRegisterConfirmPassword(e.target.value)}
-                required
-              />
-            </div>
-            <div className="flex gap-3">
-              <Button type="submit" className="flex-1" disabled={isLoading}>
-                {isLoading ? "Registrando..." : "Registrarse"}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleClose}
-              >
-                Cancelar
-              </Button>
-            </div>
+            <Input
+              id="register-confirm"
+              type="password"
+              value={registerConfirmPassword}
+              onChange={(e) => setRegisterConfirmPassword(e.target.value)}
+              placeholder="Confirmar contraseña"
+              required
+            />
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Registrando..." : "Registrarse"}
+            </Button>
             <p className="text-center text-sm text-muted-foreground">
               Ya tenes cuenta?{" "}
               <button
