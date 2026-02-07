@@ -5,7 +5,7 @@ export const ADMIN_USER: Usuario & { password: string } = {
   id: "admin",
   nombreUsuario: process.env.NEXT_PUBLIC_ADMIN_NAME || "Admin",
   email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || "",
-  password: process.env.ADMIN_PASSWORD || "",
+  password: process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "",
   fechaRegistro: new Date("2026-01-01"),
 }
 
