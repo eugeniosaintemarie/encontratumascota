@@ -94,12 +94,7 @@ export function PublicacionCard({
           className="object-cover object-top transition-transform duration-300 group-hover:scale-105"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
-        {/* Icono de Tránsito urgente */}
-        {publicacion.transitoUrgente && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[5]">
-            <AlertTriangle className="h-24 w-24 text-orange-500/20 drop-shadow-sm" strokeWidth={1.5} />
-          </div>
-        )}
+
         {/* Botón de compartir */}
         <div className="absolute right-3 top-3 z-10">
           <Button
