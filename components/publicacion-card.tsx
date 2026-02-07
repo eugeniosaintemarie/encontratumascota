@@ -1,11 +1,14 @@
 "use client"
 
+import { useState } from "react"
 import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { MapPin, Lock } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { MapPin, Lock, Share2, Check, Loader2 } from "lucide-react"
 import type { Publicacion } from "@/lib/types"
 import { razasLabels, especieLabels, generoLabels } from "@/lib/mock-data"
+import { toast } from "sonner"
 
 interface PublicacionCardProps {
   publicacion: Publicacion
@@ -27,9 +30,49 @@ export function PublicacionCard({
 }: PublicacionCardProps) {
   const { mascota } = publicacion
   
+  const [isSharing, setIsSharing] = useState(false)
+  const [isCopied, setIsCopied] = useState(false)
+
   const handleLoginClick = () => {
     if (onRequireAuth) {
       onRequireAuth(publicacion.id)
+    }
+  }
+
+  const handleShare = async () => {
+    if (isSharing) return
+    setIsSharing(true)
+
+    const url = `${window.location.origin}/publicacion/${publicacion.id}`
+    const title = `${especieLabels[mascota.especie]} encontrado en ${publicacion.ubicacion}`
+    const text = mascota.descripcion
+
+    try {
+      // Intentar Web Share API (mobile nativo)
+      if (navigator.share) {
+        await navigator.share({ url, title, text })
+        setIsSharing(false)
+        return
+      }
+
+      // Fallback: copiar al portapapeles
+      await navigator.clipboard.writeText(url)
+      setIsCopied(true)
+      toast.success("¡Enlace copiado!", {
+        description: "El enlace a la publicación está en tu portapapeles.",
+      })
+      setTimeout(() => setIsCopied(false), 2000)
+    } catch (err) {
+      // Si el usuario canceló el share nativo, no mostrar error
+      if ((err as Error).name === "AbortError") {
+        setIsSharing(false)
+        return
+      }
+      toast.error("No se pudo compartir", {
+        description: "Intentá copiar el enlace manualmente.",
+      })
+    } finally {
+      setIsSharing(false)
     }
   }
 
@@ -52,6 +95,30 @@ export function PublicacionCard({
           className="object-cover object-top transition-transform duration-300 group-hover:scale-105"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
+        {/* Botón de compartir */}
+        <div className="absolute right-3 top-3 z-10">
+          <Button
+            size="icon"
+            variant="secondary"
+            className="h-9 w-9 rounded-full bg-card/90 backdrop-blur-sm shadow-sm border-0 hover:bg-card transition-all"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              handleShare()
+            }}
+            disabled={isSharing}
+            title="Compartir publicación"
+          >
+            {isSharing ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : isCopied ? (
+              <Check className="h-4 w-4 text-green-600" />
+            ) : (
+              <Share2 className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+
         <div className="absolute left-3 top-3 flex flex-col gap-1.5">
           <div className="flex flex-wrap gap-1.5">
             <Badge variant="secondary" className="bg-card/90 backdrop-blur-sm">
