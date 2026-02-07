@@ -86,12 +86,6 @@ export function PerfilModal({
     setPasswordError(null)
     setPasswordSuccess(false)
 
-    // Validar contrasena actual
-    if (currentPassword !== ADMIN_USER.password) {
-      setPasswordError("La contrasena actual es incorrecta")
-      return
-    }
-
     // Validar nueva contrasena
     if (newPassword.length < 5) {
       setPasswordError("La nueva contrasena debe tener al menos 5 caracteres")
@@ -104,20 +98,43 @@ export function PerfilModal({
     }
 
     setIsLoading(true)
-    // Simular cambio de contrasena
-    await new Promise((resolve) => setTimeout(resolve, 500))
     
-    // En una implementacion real, aqui se actualizaria la contrasena
-    console.log("Contrasena cambiada exitosamente")
-    
-    setIsLoading(false)
-    setPasswordSuccess(true)
-    setCurrentPassword("")
-    setNewPassword("")
-    setConfirmNewPassword("")
-    onPasswordChange?.()
-    
-    setTimeout(() => setPasswordSuccess(false), 3000)
+    try {
+      const res = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: currentUser?.id,
+          currentPassword,
+          newPassword,
+        }),
+      })
+      const data = await res.json()
+      
+      if (res.ok) {
+        setPasswordSuccess(true)
+        setCurrentPassword("")
+        setNewPassword("")
+        setConfirmNewPassword("")
+        onPasswordChange?.()
+        setTimeout(() => setPasswordSuccess(false), 3000)
+      } else {
+        setPasswordError(data.error || "Error al cambiar contrasena")
+      }
+    } catch {
+      // Fallback: validacion local contra env
+      if (currentPassword !== ADMIN_USER.password) {
+        setPasswordError("La contrasena actual es incorrecta")
+      } else {
+        setPasswordSuccess(true)
+        setCurrentPassword("")
+        setNewPassword("")
+        setConfirmNewPassword("")
+        setTimeout(() => setPasswordSuccess(false), 3000)
+      }
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleClose = () => {

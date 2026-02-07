@@ -1,7 +1,7 @@
 import type { Usuario } from "./types"
 
-// Usuario admin - credenciales desde variables de entorno
-export const ADMIN_USER: Usuario & { password: string } = {
+// ─── Admin user from env vars (fallback when no DB) ────────
+export const ADMIN_USER: { id: string; nombreUsuario: string; email: string; password: string; fechaRegistro: Date } = {
   id: "admin",
   nombreUsuario: process.env.NEXT_PUBLIC_ADMIN_NAME || "Admin",
   email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || "",
@@ -9,24 +9,28 @@ export const ADMIN_USER: Usuario & { password: string } = {
   fechaRegistro: new Date("2026-01-01"),
 }
 
-// Funcion para validar credenciales
+// Funcion para validar credenciales (local, sin DB)
 export function validateCredentials(email: string, password: string): Usuario | null {
   if (email === ADMIN_USER.email && password === ADMIN_USER.password) {
-    // Retornar usuario sin la password
     const { password: _, ...user } = ADMIN_USER
     return user
   }
   return null
 }
 
-// Funcion para obtener usuario actual (simulado)
+// Funcion para obtener usuario actual desde localStorage
 export function getCurrentUser(): Usuario | null {
   if (typeof window === "undefined") return null
   
   const stored = localStorage.getItem("currentUser")
   if (stored) {
     try {
-      return JSON.parse(stored)
+      const parsed = JSON.parse(stored)
+      // Reconstituir fechas
+      if (parsed.fechaRegistro) {
+        parsed.fechaRegistro = new Date(parsed.fechaRegistro)
+      }
+      return parsed
     } catch {
       return null
     }

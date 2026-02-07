@@ -22,6 +22,9 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 
 import type { Especie, Sexo, Raza } from "@/lib/types"
+import { usePublicaciones } from "@/lib/publicaciones-context"
+import { getCurrentUser } from "@/lib/auth"
+import { toast } from "sonner"
 
 interface PublicarModalProps {
   isOpen: boolean
@@ -37,6 +40,7 @@ export function PublicarModal({
   onRequireAuth,
 }: PublicarModalProps) {
   const [isLoading, setIsLoading] = useState(false)
+  const { agregarPublicacion } = usePublicaciones()
   
   // Form state
   const [especie, setEspecie] = useState<Especie | "">("")
@@ -77,12 +81,39 @@ export function PublicarModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    // Simular envio
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    setIsLoading(false)
-    resetForm()
-    onClose()
-    alert("Publicacion creada exitosamente!")
+    
+    try {
+      const currentUser = getCurrentUser()
+      
+      await agregarPublicacion({
+        mascota: {
+          id: "",
+          especie: especie as Especie,
+          raza: raza as Raza,
+          sexo: sexo as Sexo,
+          color,
+          descripcion,
+          imagenUrl: imagenUrl || "/placeholder.svg",
+        },
+        ubicacion,
+        fechaEncuentro: new Date(fechaEncuentro),
+        contactoNombre,
+        contactoTelefono,
+        contactoEmail,
+        usuarioId: currentUser?.id || "admin",
+        activa: true,
+        transitoUrgente,
+      })
+      
+      resetForm()
+      onClose()
+      toast.success("Publicacion creada exitosamente!")
+    } catch (error) {
+      console.error("Error creando publicacion:", error)
+      toast.error("Error al crear la publicacion")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const resetForm = () => {

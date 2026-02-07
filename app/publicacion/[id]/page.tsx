@@ -7,9 +7,25 @@ type Props = {
   params: Promise<{ id: string }>
 }
 
+// Helper para obtener una publicacion por ID (DB o mock)
+async function fetchPublicacion(id: string) {
+  // Intentar desde la DB
+  if (process.env.DATABASE_URL) {
+    try {
+      const { getPublicacionById } = await import("@/lib/actions/publicaciones")
+      const pub = await getPublicacionById(id)
+      if (pub) return pub
+    } catch (e) {
+      console.error("Error fetching from DB:", e)
+    }
+  }
+  // Fallback a mock
+  return publicacionesMock.find((p) => p.id === id) || null
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
-  const publicacion = publicacionesMock.find((p) => p.id === id)
+  const publicacion = await fetchPublicacion(id)
 
   if (!publicacion) {
     return {
@@ -50,7 +66,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PublicacionPage({ params }: Props) {
   const { id } = await params
-  const publicacion = publicacionesMock.find((p) => p.id === id)
+  const publicacion = await fetchPublicacion(id)
 
   if (!publicacion) {
     return (
