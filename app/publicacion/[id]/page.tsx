@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { publicacionesMock, especieLabels } from "@/lib/mock-data"
+import { publicacionesMock, especieLabels, generoLabels, razasLabels } from "@/lib/mock-data"
 import { PublicacionDetail } from "./publicacion-detail"
 import Link from "next/link"
 
@@ -18,7 +18,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const { mascota } = publicacion
-  const title = `${especieLabels[mascota.especie]} encontrado en ${publicacion.ubicacion}`
+  const ubicacionSinComa = publicacion.ubicacion.replace(",", "")
+  const title = `${especieLabels[mascota.especie]} ${generoLabels[mascota.sexo]} ${razasLabels[mascota.raza]} encontrado en ${ubicacionSinComa}`
   const description = mascota.descripcion
 
   return {

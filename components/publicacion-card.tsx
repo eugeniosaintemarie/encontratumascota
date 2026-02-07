@@ -45,12 +45,11 @@ export function PublicacionCard({
 
     const url = `${window.location.origin}/publicacion/${publicacion.id}`
     const title = `${especieLabels[mascota.especie]} encontrado en ${publicacion.ubicacion}`
-    const text = mascota.descripcion
 
     try {
       // Intentar Web Share API (mobile nativo)
       if (navigator.share) {
-        await navigator.share({ url, title, text })
+        await navigator.share({ url, title })
         setIsSharing(false)
         return
       }
