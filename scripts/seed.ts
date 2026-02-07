@@ -294,7 +294,7 @@ async function seed() {
   ]
 
   for (const pub of publicacionesData) {
-    await db.insert(schema.publicaciones).values(pub)
+    await db.insert(schema.publicaciones).values({ ...pub, esPrueba: true })
   }
 
   console.log(`✅ ${publicacionesData.length} publicaciones creadas`)
