@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Header } from "@/components/header"
 import { PublicacionCard } from "@/components/publicacion-card"
@@ -8,8 +8,9 @@ import { AuthModal } from "@/components/auth-modal"
 import { PublicarModal } from "@/components/publicar-modal"
 import { PerfilModal } from "@/components/perfil-modal"
 import { Footer } from "@/components/footer"
-import { getCurrentUser, logout } from "@/lib/auth"
-import type { Publicacion, Usuario } from "@/lib/types"
+import { authClient } from "@/lib/auth/client"
+import { mapNeonUser } from "@/lib/auth"
+import type { Publicacion } from "@/lib/types"
 import { ArrowLeft } from "lucide-react"
 
 interface PublicacionDetailProps {
@@ -21,27 +22,16 @@ export function PublicacionDetail({ publicacion }: PublicacionDetailProps) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [isPublicarModalOpen, setIsPublicarModalOpen] = useState(false)
   const [isPerfilModalOpen, setIsPerfilModalOpen] = useState(false)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [currentUser, setCurrentUserState] = useState<Usuario | null>(null)
 
-  useEffect(() => {
-    const user = getCurrentUser()
-    if (user) {
-      setCurrentUserState(user)
-      setIsAuthenticated(true)
-    }
-  }, [])
+  const { data: session } = authClient.useSession()
+  const isAuthenticated = !!session?.user
+  const currentUser = session?.user ? mapNeonUser(session.user) : null
 
-  const handleLogout = useCallback(() => {
-    logout()
-    setCurrentUserState(null)
-    setIsAuthenticated(false)
+  const handleLogout = useCallback(async () => {
+    await authClient.signOut()
   }, [])
 
   const handleAuthSuccess = useCallback(() => {
-    const user = getCurrentUser()
-    setCurrentUserState(user)
-    setIsAuthenticated(true)
     setIsAuthModalOpen(false)
   }, [])
 

@@ -9,19 +9,23 @@ import { PerfilModal } from "@/components/perfil-modal"
 import { PawPrint } from "lucide-react"
 import { Footer } from "@/components/footer"
 import { usePublicaciones } from "@/lib/publicaciones-context"
-import type { Especie, Sexo, Usuario } from "@/lib/types"
+import { authClient } from "@/lib/auth/client"
+import { mapNeonUser } from "@/lib/auth"
+import type { Especie, Sexo } from "@/lib/types"
 
 export default function TransitadasPage() {
   const [especie, setEspecie] = useState<Especie | "todos">("todos")
   const [sexo, setSexo] = useState<Sexo | "todos">("todos")
   const [ubicacion, setUbicacion] = useState("")
 
-  // Auth state
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [currentUser, setCurrentUser] = useState<Usuario | null>(null)
+  // Auth state via Neon Auth
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [isPublicarModalOpen, setIsPublicarModalOpen] = useState(false)
   const [isPerfilModalOpen, setIsPerfilModalOpen] = useState(false)
+
+  const { data: session } = authClient.useSession()
+  const isAuthenticated = !!session?.user
+  const currentUser = session?.user ? mapNeonUser(session.user) : null
 
   const { publicaciones } = usePublicaciones()
 
@@ -46,15 +50,8 @@ export default function TransitadasPage() {
     }
   }, [isAuthenticated])
 
-  const handleLoginSuccess = useCallback((user: Usuario) => {
-    setIsAuthenticated(true)
-    setCurrentUser(user)
-    setIsAuthModalOpen(false)
-  }, [])
-
-  const handleLogout = useCallback(() => {
-    setIsAuthenticated(false)
-    setCurrentUser(null)
+  const handleLogout = useCallback(async () => {
+    await authClient.signOut()
   }, [])
 
   return (
@@ -118,7 +115,7 @@ export default function TransitadasPage() {
                   key={publicacion.id}
                   publicacion={publicacion}
                   isAuthenticated={isAuthenticated}
-                  onLoginRequired={() => setIsAuthModalOpen(true)}
+                  onRequireAuth={() => setIsAuthModalOpen(true)}
                 />
               ))}
             </div>
@@ -141,13 +138,14 @@ export default function TransitadasPage() {
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
-        onLoginSuccess={handleLoginSuccess}
+        onAuthSuccess={() => setIsAuthModalOpen(false)}
       />
 
       <PublicarModal
         isOpen={isPublicarModalOpen}
         onClose={() => setIsPublicarModalOpen(false)}
-        currentUser={currentUser}
+        isAuthenticated={isAuthenticated}
+        onRequireAuth={() => setIsAuthModalOpen(true)}
       />
 
       <PerfilModal

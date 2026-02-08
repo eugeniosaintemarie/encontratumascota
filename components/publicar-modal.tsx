@@ -23,7 +23,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 
 import type { Especie, Sexo, Raza } from "@/lib/types"
 import { usePublicaciones } from "@/lib/publicaciones-context"
-import { getCurrentUser } from "@/lib/auth"
+import { authClient } from "@/lib/auth/client"
 import { toast } from "sonner"
 
 interface PublicarModalProps {
@@ -41,6 +41,7 @@ export function PublicarModal({
 }: PublicarModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { agregarPublicacion } = usePublicaciones()
+  const { data: session } = authClient.useSession()
   
   // Form state
   const [especie, setEspecie] = useState<Especie | "">("")
@@ -83,8 +84,6 @@ export function PublicarModal({
     setIsLoading(true)
     
     try {
-      const currentUser = getCurrentUser()
-      
       await agregarPublicacion({
         mascota: {
           id: "",
@@ -100,7 +99,7 @@ export function PublicarModal({
         contactoNombre,
         contactoTelefono,
         contactoEmail,
-        usuarioId: currentUser?.id || "admin",
+        usuarioId: session?.user?.id || "",
         activa: true,
         transitoUrgente,
       })

@@ -22,7 +22,7 @@ import { AlertCircle, CheckCircle2, Lock, PawPrint, Home } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { usePublicaciones } from "@/lib/publicaciones-context"
 import { especieLabels, generoLabels, razasLabels } from "@/lib/labels"
-import { ADMIN_USER } from "@/lib/auth"
+import { authClient } from "@/lib/auth/client"
 import type { Usuario } from "@/lib/types"
 
 interface PerfilModalProps {
@@ -100,38 +100,23 @@ export function PerfilModal({
     setIsLoading(true)
     
     try {
-      const res = await fetch("/api/auth/change-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: currentUser?.id,
-          currentPassword,
-          newPassword,
-        }),
+      const result = await authClient.changePassword({
+        currentPassword,
+        newPassword,
       })
-      const data = await res.json()
       
-      if (res.ok) {
+      if (result.error) {
+        setPasswordError(result.error.message || "Error al cambiar contrasena")
+      } else {
         setPasswordSuccess(true)
         setCurrentPassword("")
         setNewPassword("")
         setConfirmNewPassword("")
         onPasswordChange?.()
         setTimeout(() => setPasswordSuccess(false), 3000)
-      } else {
-        setPasswordError(data.error || "Error al cambiar contrasena")
       }
     } catch {
-      // Fallback: validacion local contra env
-      if (currentPassword !== ADMIN_USER.password) {
-        setPasswordError("La contrasena actual es incorrecta")
-      } else {
-        setPasswordSuccess(true)
-        setCurrentPassword("")
-        setNewPassword("")
-        setConfirmNewPassword("")
-        setTimeout(() => setPasswordSuccess(false), 3000)
-      }
+      setPasswordError("Error de conexion. Intenta de nuevo.")
     } finally {
       setIsLoading(false)
     }

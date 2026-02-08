@@ -1,28 +1,39 @@
 import { NextResponse } from "next/server"
 
 // POST /api/auth/register
+// Verifica reCAPTCHA v3 antes de permitir el registro.
+// El registro real se hace via authClient.signUp.email() en el cliente,
+// que pasa por el catch-all handler de Neon Auth.
 export async function POST(request: Request) {
   try {
-    const { registrarUsuario } = await import("@/lib/actions/auth")
-    const { nombre, email, password } = await request.json()
+    const { recaptchaToken } = await request.json()
 
-    if (!nombre || !email || !password) {
-      return NextResponse.json({ error: "Faltan campos requeridos" }, { status: 400 })
+    if (!recaptchaToken) {
+      return NextResponse.json({ error: "Token CAPTCHA requerido" }, { status: 400 })
     }
 
-    if (password.length < 6) {
-      return NextResponse.json({ error: "La contraseña debe tener al menos 6 caracteres" }, { status: 400 })
+    // Verificar reCAPTCHA con Google
+    const secretKey = process.env.RECAPTCHA_SECRET_KEY
+    if (!secretKey) {
+      console.error("RECAPTCHA_SECRET_KEY no configurada")
+      // En desarrollo sin key, permitir el registro
+      return NextResponse.json({ verified: true })
     }
 
-    const result = await registrarUsuario({ nombre, email, password })
+    const verifyRes = await fetch("https://www.google.com/recaptcha/api/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `secret=${secretKey}&response=${recaptchaToken}`,
+    })
+    const verifyData = await verifyRes.json()
 
-    if (result.error) {
-      return NextResponse.json({ error: result.error }, { status: 409 })
+    if (!verifyData.success || (verifyData.score != null && verifyData.score < 0.5)) {
+      return NextResponse.json({ error: "Verificacion CAPTCHA fallida. Intenta de nuevo." }, { status: 403 })
     }
 
-    return NextResponse.json({ user: result.user }, { status: 201 })
+    return NextResponse.json({ verified: true })
   } catch (error) {
-    console.error("Error en registro:", error)
+    console.error("Error verificando CAPTCHA:", error)
     return NextResponse.json({ error: "Error interno" }, { status: 500 })
   }
 }

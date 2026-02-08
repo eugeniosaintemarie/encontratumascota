@@ -31,8 +31,8 @@ export const publicaciones = pgTable("publicaciones", {
   contactoTelefono: text("contacto_telefono").notNull(),
   contactoEmail: text("contacto_email").notNull(),
 
-  // Relacion con usuario
-  usuarioId: uuid("usuario_id").references(() => usuarios.id).notNull(),
+  // Relacion con usuario (Neon Auth usa IDs de texto)
+  usuarioId: text("usuario_id").notNull(),
 
   // Estado
   activa: boolean("activa").default(true).notNull(),

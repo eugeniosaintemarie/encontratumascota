@@ -1,32 +1,25 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useCallback } from "react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { ListadoPublicaciones } from "@/components/listado-publicaciones"
 import { AuthModal } from "@/components/auth-modal"
 import { PublicarModal } from "@/components/publicar-modal"
 import { PerfilModal } from "@/components/perfil-modal"
-import { getCurrentUser, logout } from "@/lib/auth"
-import type { Usuario } from "@/lib/types"
+import { authClient } from "@/lib/auth/client"
+import { mapNeonUser } from "@/lib/auth"
 
 export default function HomePage() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [isPublicarModalOpen, setIsPublicarModalOpen] = useState(false)
   const [isPerfilModalOpen, setIsPerfilModalOpen] = useState(false)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [currentUser, setCurrentUserState] = useState<Usuario | null>(null)
   const [authInitialView, setAuthInitialView] = useState<"login" | "register">("login")
   const [pendingPublicacionId, setPendingPublicacionId] = useState<string | null>(null)
 
-  // Verificar si hay sesion guardada al cargar
-  useEffect(() => {
-    const user = getCurrentUser()
-    if (user) {
-      setCurrentUserState(user)
-      setIsAuthenticated(true)
-    }
-  }, [])
+  const { data: session } = authClient.useSession()
+  const isAuthenticated = !!session?.user
+  const currentUser = session?.user ? mapNeonUser(session.user) : null
 
   const handlePublicarClick = useCallback(() => {
     setIsPublicarModalOpen(true)
@@ -42,16 +35,11 @@ export default function HomePage() {
     setIsPerfilModalOpen(true)
   }, [])
 
-  const handleLogout = useCallback(() => {
-    logout()
-    setCurrentUserState(null)
-    setIsAuthenticated(false)
+  const handleLogout = useCallback(async () => {
+    await authClient.signOut()
   }, [])
 
   const handleAuthSuccess = useCallback(() => {
-    const user = getCurrentUser()
-    setCurrentUserState(user)
-    setIsAuthenticated(true)
     setIsAuthModalOpen(false)
     
     // Si hay una publicacion pendiente, hacer scroll hacia ella

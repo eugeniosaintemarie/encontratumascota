@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { especieLabels, generoLabels, razasLabels } from "@/lib/labels"
 import { PublicacionDetail } from "./publicacion-detail"
 import Link from "next/link"
+import type { Especie, Sexo, Raza } from "@/lib/types"
 
 type Props = {
   params: Promise<{ id: string }>
@@ -29,7 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const { mascota } = publicacion
   const ubicacionSinComa = publicacion.ubicacion.replace(",", "")
-  const title = `${especieLabels[mascota.especie]} ${generoLabels[mascota.sexo]} ${razasLabels[mascota.raza]} encontrado en ${ubicacionSinComa}`
+  const title = `${especieLabels[mascota.especie as Especie]} ${generoLabels[mascota.sexo as Sexo]} ${razasLabels[mascota.raza as Raza]} encontrado en ${ubicacionSinComa}`
   const description = mascota.descripcion
 
   return {

@@ -9,10 +9,10 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { validateCredentials, setCurrentUser } from "@/lib/auth"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
+import { authClient } from "@/lib/auth/client"
+import { useRecaptcha } from "@/hooks/use-recaptcha"
 
 
 type AuthView = "login" | "register"
@@ -22,13 +22,6 @@ interface AuthModalProps {
   onClose: () => void
   initialView?: AuthView
   onAuthSuccess?: () => void
-}
-
-// Funcion para autogenerar nombre de usuario a partir del email
-function generateUsername(email: string): string {
-  const baseUsername = email.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "")
-  const randomSuffix = Math.floor(Math.random() * 1000)
-  return `${baseUsername}${randomSuffix}`
 }
 
 export function AuthModal({
@@ -51,47 +44,36 @@ export function AuthModal({
   const [registerPassword, setRegisterPassword] = useState("")
   const [registerConfirmPassword, setRegisterConfirmPassword] = useState("")
 
+  const { execute: executeRecaptcha } = useRecaptcha()
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
     setIsLoading(true)
-    
+
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: loginEmail, password: loginPassword }),
+      const result = await authClient.signIn.email({
+        email: loginEmail,
+        password: loginPassword,
       })
-      const data = await res.json()
-      
-      if (res.ok && data.user) {
-        setCurrentUser(data.user)
-        setIsLoading(false)
+
+      if (result.error) {
+        setError(result.error.message || "Email o contrasena incorrectos")
+      } else {
         onAuthSuccess?.()
         onClose()
-      } else {
-        setError(data.error || "Email o contrasena incorrectos")
-        setIsLoading(false)
       }
     } catch {
-      // Fallback a validacion local
-      const user = validateCredentials(loginEmail, loginPassword)
-      if (user) {
-        setCurrentUser(user)
-        setIsLoading(false)
-        onAuthSuccess?.()
-        onClose()
-      } else {
-        setError("Email o contrasena incorrectos")
-        setIsLoading(false)
-      }
+      setError("Error de conexion. Intenta de nuevo.")
+    } finally {
+      setIsLoading(false)
     }
   }
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
-    
+
     if (registerPassword !== registerConfirmPassword) {
       setError("Las contrasenas no coinciden")
       return
@@ -101,32 +83,43 @@ export function AuthModal({
       setError("La contrasena debe tener al menos 6 caracteres")
       return
     }
-    
+
     setIsLoading(true)
-    
+
     try {
-      const res = await fetch("/api/auth/register", {
+      // Obtener token reCAPTCHA
+      const recaptchaToken = await executeRecaptcha("register")
+
+      // Verificar CAPTCHA en el servidor
+      const captchaRes = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nombre: registerNombre,
-          email: registerEmail,
-          password: registerPassword,
-        }),
+        body: JSON.stringify({ recaptchaToken }),
       })
-      const data = await res.json()
-      
-      if (res.ok && data.user) {
-        setCurrentUser(data.user)
+
+      if (!captchaRes.ok) {
+        const captchaData = await captchaRes.json()
+        setError(captchaData.error || "Verificacion de seguridad fallida")
         setIsLoading(false)
+        return
+      }
+
+      // Registrar via Neon Auth (pasa por el catch-all handler)
+      const result = await authClient.signUp.email({
+        email: registerEmail,
+        name: registerNombre,
+        password: registerPassword,
+      })
+
+      if (result.error) {
+        setError(result.error.message || "Error al registrarse")
+      } else {
         onAuthSuccess?.()
         onClose()
-      } else {
-        setError(data.error || "Error al registrarse")
-        setIsLoading(false)
       }
     } catch {
       setError("Error de conexion. Intenta de nuevo.")
+    } finally {
       setIsLoading(false)
     }
   }
@@ -257,3 +250,4 @@ export function AuthModal({
     </Dialog>
   )
 }
+

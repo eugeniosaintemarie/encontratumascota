@@ -14,50 +14,15 @@ if (!process.env.DATABASE_URL) {
 const sql = neon(process.env.DATABASE_URL)
 const db = drizzle(sql, { schema })
 
-async function hashPassword(password: string): Promise<string> {
-  const encoder = new TextEncoder()
-  const data = encoder.encode(password + (process.env.PASSWORD_SALT || "encontratumascota-salt"))
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("")
-}
-
 async function seed() {
   console.log("🌱 Iniciando seed...")
 
-  // 1. Crear usuario admin
-  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@encontratumascota.com.ar"
-  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "admin123"
+  // Con Neon Auth, los usuarios se gestionan en el schema neon_auth.
+  // Para el seed, usamos un ID de usuario placeholder.
+  const adminId = process.env.SEED_ADMIN_USER_ID || "seed-admin"
   const adminName = process.env.NEXT_PUBLIC_ADMIN_NAME || "Eugenio"
 
-  const passwordHash = await hashPassword(adminPassword)
-
-  const [adminUser] = await db
-    .insert(schema.usuarios)
-    .values({
-      nombreUsuario: adminName,
-      email: adminEmail.toLowerCase(),
-      passwordHash,
-      fechaRegistro: new Date("2026-01-01"),
-    })
-    .onConflictDoNothing({ target: schema.usuarios.email })
-    .returning()
-
-  if (!adminUser) {
-    console.log("⚠️  Usuario admin ya existe, obteniendo ID...")
-    const existing = await db.query.usuarios.findFirst({
-      where: (u, { eq }) => eq(u.email, adminEmail.toLowerCase()),
-    })
-    if (!existing) {
-      console.error("❌ No se pudo obtener el usuario admin")
-      process.exit(1)
-    }
-    var adminId = existing.id
-  } else {
-    var adminId = adminUser.id
-  }
-
-  console.log(`✅ Usuario admin: ${adminId}`)
+  console.log(`✅ Usando usuario ID: ${adminId}`)
 
   // 2. Insertar publicaciones mock
   const publicacionesData = [
