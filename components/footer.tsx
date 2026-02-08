@@ -26,7 +26,7 @@ export function Footer() {
           <p className="text-sm text-foreground text-center sm:text-left">
             No encontras tu mascota?{" "}
             <Link href="/transitadas" className="text-[#FF8A65] hover:underline font-medium">
-              Fijate si le dieron transito ubicandola con otra familia
+              Fijate si le dieron tránsito ubicandola con otra familia
             </Link>
           </p>
         </div>

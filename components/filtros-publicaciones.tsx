@@ -94,7 +94,7 @@ export function FiltrosPublicaciones({
             onClick={() => onTransitoUrgenteChange(!transitoUrgente)}
             className={`shrink-0 ${
               transitoUrgente
-                ? "bg-[#F44336] hover:bg-[#D32F2F] !border-[#F44336]"
+                ? "bg-[#B71C1C] hover:bg-[#D32F2F] !border-[#B71C1C]"
                 : "bg-white/10 hover:bg-white/20 !border-white/30"
             }`}
             title="Filtrar tránsito urgente"
