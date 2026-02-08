@@ -51,7 +51,12 @@ export default function TransitadasPage() {
   }, [isAuthenticated])
 
   const handleLogout = useCallback(async () => {
-    await authClient.signOut()
+    try {
+      await authClient.signOut()
+    } catch (e) {
+      console.error("Error al cerrar sesion:", e)
+    }
+    window.location.reload()
   }, [])
 
   return (

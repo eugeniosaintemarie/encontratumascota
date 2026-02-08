@@ -29,7 +29,7 @@ interface PerfilModalProps {
   isOpen: boolean
   onClose: () => void
   currentUser: Usuario | null
-  onLogout: () => void
+  onLogout: () => void | Promise<void>
   onPasswordChange?: () => void
 }
 
@@ -134,9 +134,9 @@ export function PerfilModal({
     onClose()
   }
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     handleClose()
-    onLogout()
+    await onLogout()
   }
 
   if (!currentUser) return null

@@ -28,7 +28,12 @@ export function PublicacionDetail({ publicacion }: PublicacionDetailProps) {
   const currentUser = session?.user ? mapNeonUser(session.user) : null
 
   const handleLogout = useCallback(async () => {
-    await authClient.signOut()
+    try {
+      await authClient.signOut()
+    } catch (e) {
+      console.error("Error al cerrar sesion:", e)
+    }
+    window.location.reload()
   }, [])
 
   const handleAuthSuccess = useCallback(() => {

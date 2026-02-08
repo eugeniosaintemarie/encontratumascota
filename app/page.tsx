@@ -36,7 +36,12 @@ export default function HomePage() {
   }, [])
 
   const handleLogout = useCallback(async () => {
-    await authClient.signOut()
+    try {
+      await authClient.signOut()
+    } catch (e) {
+      console.error("Error al cerrar sesion:", e)
+    }
+    window.location.reload()
   }, [])
 
   const handleAuthSuccess = useCallback(() => {
