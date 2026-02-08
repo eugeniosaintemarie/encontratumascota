@@ -11,7 +11,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { PawPrint, Plus, LogIn, Menu, Moon, Sun, User, LogOut, ArrowLeft } from "lucide-react"
+import { Plus, LogIn, Menu, Moon, Sun, User, LogOut, ArrowLeft } from "lucide-react"
+import Image from "next/image"
 import { useTheme } from "next-themes"
 
 interface HeaderProps {
@@ -43,9 +44,7 @@ export function Header({
     <header className="sticky top-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <PawPrint className="h-5 w-5 text-primary-foreground" />
-          </div>
+          <Image src="/logo.png" alt="Encontra Tu Mascota" width={36} height={36} className="h-9 w-9 rounded-lg" />
           <span className="text-lg font-semibold text-foreground">
             Encontra Tu Mascota
           </span>

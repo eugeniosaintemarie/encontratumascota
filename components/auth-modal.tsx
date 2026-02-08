@@ -214,15 +214,6 @@ export function AuthModal({
               </svg>
               Continuar con Google
             </Button>
-            <div className="flex items-center justify-center gap-1.5 -mt-2">
-              <ShieldCheck className="h-3 w-3 text-muted-foreground" />
-              <p className="text-[10px] text-muted-foreground">
-                Autenticación segura con{" "}
-                <a href="https://neon.tech/docs/auth/overview" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">Neon Auth</a>
-                {" "}y{" "}
-                <a href="https://vercel.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">Vercel</a>
-              </p>
-            </div>
 
             <p className="text-center text-sm text-muted-foreground">
               No tenes cuenta?{" "}
@@ -308,15 +299,6 @@ export function AuthModal({
               </svg>
               Registrarse con Google
             </Button>
-            <div className="flex items-center justify-center gap-1.5 -mt-2">
-              <ShieldCheck className="h-3 w-3 text-muted-foreground" />
-              <p className="text-[10px] text-muted-foreground">
-                Autenticación segura con{" "}
-                <a href="https://neon.tech/docs/auth/overview" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">Neon Auth</a>
-                {" "}y{" "}
-                <a href="https://vercel.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">Vercel</a>
-              </p>
-            </div>
 
             <p className="text-center text-sm text-muted-foreground">
               Ya tenes cuenta?{" "}

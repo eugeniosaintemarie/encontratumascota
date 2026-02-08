@@ -2,6 +2,7 @@ import React from "react"
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import Script from 'next/script'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
 import { PublicacionesProvider } from '@/lib/publicaciones-context'
@@ -11,13 +12,13 @@ import './globals.css'
 const _inter = Inter({ subsets: ["latin"] });
 
 export const viewport: Viewport = {
-  themeColor: '#16a34a',
+  themeColor: '#FF5722',
 }
 
 export const metadata: Metadata = {
   title: 'Encontra Tu Mascota',
   description: 'Plataforma colaborativa para reunir mascotas perdidas con sus familias',
-  generator: 'v0.app',
+  generator: '',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -25,7 +26,7 @@ export const metadata: Metadata = {
     title: 'Encontra Tu Mascota',
   },
   icons: {
-    icon: '/favicon.svg',
+    icon: '/favicon.png',
     apple: '/apple-icon.png',
   },
   other: {
@@ -40,6 +41,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" suppressHydrationWarning>
+      <head>
+        <Script async src="https://www.googletagmanager.com/gtag/js?id=G-LNQ47VG50M" strategy="afterInteractive" />
+        <Script id="gtag-init" strategy="afterInteractive">
+          {`window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-LNQ47VG50M');`}
+        </Script>
+      </head>
       <body className={`font-sans antialiased`}>
         <ThemeProvider
           attribute="class"

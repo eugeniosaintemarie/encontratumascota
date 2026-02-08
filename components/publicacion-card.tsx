@@ -137,7 +137,7 @@ export function PublicacionCard({
         </div>
         <div className="absolute left-3 bottom-3 flex flex-col gap-1.5">
           {publicacion.transitoUrgente && (
-            <Badge variant="secondary" className="bg-orange-500 text-white backdrop-blur-sm text-xs flex items-center gap-1 border-0 w-fit">
+            <Badge variant="secondary" className="text-white backdrop-blur-sm text-xs flex items-center gap-1 border-0 w-fit" style={{ backgroundColor: "#F44336" }}>
               <AlertTriangle className="h-3 w-3" />
               Tránsito urgente
             </Badge>
