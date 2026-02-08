@@ -2,17 +2,9 @@ import { NextResponse } from "next/server"
 
 type RouteParams = { params: Promise<{ id: string }> }
 
-function hasDB() {
-  return !!process.env.DATABASE_URL
-}
-
 // GET /api/publicaciones/[id]
 export async function GET(_request: Request, { params }: RouteParams) {
   const { id } = await params
-  
-  if (!hasDB()) {
-    return NextResponse.json({ publicacion: null, mode: "mock" })
-  }
 
   try {
     const { getPublicacionById } = await import("@/lib/actions/publicaciones")
@@ -22,7 +14,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
       return NextResponse.json({ error: "Publicacion no encontrada" }, { status: 404 })
     }
 
-    return NextResponse.json({ publicacion, mode: "db" })
+    return NextResponse.json({ publicacion })
   } catch (error) {
     console.error("Error fetching publicacion:", error)
     return NextResponse.json({ error: "Error interno" }, { status: 500 })
@@ -32,10 +24,6 @@ export async function GET(_request: Request, { params }: RouteParams) {
 // PATCH /api/publicaciones/[id] - Actualizar publicacion
 export async function PATCH(request: Request, { params }: RouteParams) {
   const { id } = await params
-  
-  if (!hasDB()) {
-    return NextResponse.json({ error: "Base de datos no configurada" }, { status: 503 })
-  }
 
   try {
     const { actualizarPublicacionDB } = await import("@/lib/actions/publicaciones")

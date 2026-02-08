@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { publicacionesMock, especieLabels, generoLabels, razasLabels } from "@/lib/mock-data"
+import { especieLabels, generoLabels, razasLabels } from "@/lib/labels"
 import { PublicacionDetail } from "./publicacion-detail"
 import Link from "next/link"
 
@@ -7,20 +7,14 @@ type Props = {
   params: Promise<{ id: string }>
 }
 
-// Helper para obtener una publicacion por ID (DB o mock)
 async function fetchPublicacion(id: string) {
-  // Intentar desde la DB
-  if (process.env.DATABASE_URL) {
-    try {
-      const { getPublicacionById } = await import("@/lib/actions/publicaciones")
-      const pub = await getPublicacionById(id)
-      if (pub) return pub
-    } catch (e) {
-      console.error("Error fetching from DB:", e)
-    }
+  try {
+    const { getPublicacionById } = await import("@/lib/actions/publicaciones")
+    return await getPublicacionById(id)
+  } catch (e) {
+    console.error("Error fetching from DB:", e)
+    return null
   }
-  // Fallback a mock
-  return publicacionesMock.find((p) => p.id === id) || null
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

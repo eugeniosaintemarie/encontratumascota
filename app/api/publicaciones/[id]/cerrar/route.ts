@@ -2,17 +2,9 @@ import { NextResponse } from "next/server"
 
 type RouteParams = { params: Promise<{ id: string }> }
 
-function hasDB() {
-  return !!process.env.DATABASE_URL
-}
-
 // POST /api/publicaciones/[id]/cerrar
 export async function POST(request: Request, { params }: RouteParams) {
   const { id } = await params
-  
-  if (!hasDB()) {
-    return NextResponse.json({ error: "Base de datos no configurada" }, { status: 503 })
-  }
 
   try {
     const { cerrarPublicacionDB } = await import("@/lib/actions/publicaciones")

@@ -1,7 +1,6 @@
 "use client"
 
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react"
-import { publicacionesMock } from "./mock-data"
 import type { Publicacion } from "./types"
 
 interface PublicacionesContextType {
@@ -16,9 +15,8 @@ interface PublicacionesContextType {
 const PublicacionesContext = createContext<PublicacionesContextType | null>(null)
 
 export function PublicacionesProvider({ children }: { children: ReactNode }) {
-  const [publicaciones, setPublicaciones] = useState<Publicacion[]>(publicacionesMock)
+  const [publicaciones, setPublicaciones] = useState<Publicacion[]>([])
   const [loading, setLoading] = useState(true)
-  const [usingDB, setUsingDB] = useState(false)
 
   // Intentar cargar desde la API (DB) al montar
   const fetchPublicaciones = useCallback(async () => {
@@ -26,20 +24,17 @@ export function PublicacionesProvider({ children }: { children: ReactNode }) {
       const res = await fetch("/api/publicaciones")
       if (res.ok) {
         const data = await res.json()
-        if (data.publicaciones && data.publicaciones.length >= 0) {
-          // Reconstituir fechas
+        if (data.publicaciones) {
           const pubs = data.publicaciones.map((p: any) => ({
             ...p,
             fechaPublicacion: new Date(p.fechaPublicacion),
             fechaEncuentro: new Date(p.fechaEncuentro),
           }))
           setPublicaciones(pubs)
-          setUsingDB(true)
         }
       }
-    } catch {
-      // Si falla, quedarse con mock data
-      console.log("DB no disponible, usando datos mock")
+    } catch (e) {
+      console.error("Error cargando publicaciones:", e)
     } finally {
       setLoading(false)
     }
@@ -50,99 +45,63 @@ export function PublicacionesProvider({ children }: { children: ReactNode }) {
   }, [fetchPublicaciones])
 
   const cerrarPublicacion = useCallback(async (id: string, motivo: "encontrado_dueno" | "adoptado" | "en_transito" | "otro") => {
-    if (usingDB) {
-      try {
-        const res = await fetch(`/api/publicaciones/${id}/cerrar`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ motivo }),
-        })
-        if (res.ok) {
-          await fetchPublicaciones()
-          return
-        }
-      } catch {
-        console.error("Error cerrando publicacion en DB")
-      }
-    }
-    
-    // Fallback: actualizar local
-    setPublicaciones(prev => 
-      prev.map(pub => {
-        if (pub.id === id) {
-          return {
-            ...pub,
-            activa: false,
-            enTransito: motivo === "en_transito",
-          }
-        }
-        return pub
+    try {
+      const res = await fetch(`/api/publicaciones/${id}/cerrar`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ motivo }),
       })
-    )
-  }, [usingDB, fetchPublicaciones])
+      if (res.ok) {
+        await fetchPublicaciones()
+      }
+    } catch {
+      console.error("Error cerrando publicacion")
+    }
+  }, [fetchPublicaciones])
 
   const agregarPublicacion = useCallback(async (publicacion: Omit<Publicacion, "id" | "fechaPublicacion">) => {
-    if (usingDB) {
-      try {
-        const res = await fetch("/api/publicaciones", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            especie: publicacion.mascota.especie,
-            raza: publicacion.mascota.raza,
-            sexo: publicacion.mascota.sexo,
-            color: publicacion.mascota.color,
-            descripcion: publicacion.mascota.descripcion,
-            imagenUrl: publicacion.mascota.imagenUrl,
-            ubicacion: publicacion.ubicacion,
-            fechaEncuentro: publicacion.fechaEncuentro,
-            contactoNombre: publicacion.contactoNombre,
-            contactoTelefono: publicacion.contactoTelefono,
-            contactoEmail: publicacion.contactoEmail,
-            usuarioId: publicacion.usuarioId,
-            transitoUrgente: publicacion.transitoUrgente ?? false,
-          }),
-        })
-        if (res.ok) {
-          await fetchPublicaciones()
-          return
-        }
-      } catch {
-        console.error("Error creando publicacion en DB")
+    try {
+      const res = await fetch("/api/publicaciones", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          especie: publicacion.mascota.especie,
+          raza: publicacion.mascota.raza,
+          sexo: publicacion.mascota.sexo,
+          color: publicacion.mascota.color,
+          descripcion: publicacion.mascota.descripcion,
+          imagenUrl: publicacion.mascota.imagenUrl,
+          ubicacion: publicacion.ubicacion,
+          fechaEncuentro: publicacion.fechaEncuentro,
+          contactoNombre: publicacion.contactoNombre,
+          contactoTelefono: publicacion.contactoTelefono,
+          contactoEmail: publicacion.contactoEmail,
+          usuarioId: publicacion.usuarioId,
+          transitoUrgente: publicacion.transitoUrgente ?? false,
+        }),
+      })
+      if (res.ok) {
+        await fetchPublicaciones()
       }
+    } catch {
+      console.error("Error creando publicacion")
     }
-    
-    // Fallback: agregar local
-    const nuevaPublicacion: Publicacion = {
-      ...publicacion,
-      id: `new-${Date.now()}`,
-      fechaPublicacion: new Date(),
-    }
-    setPublicaciones(prev => [nuevaPublicacion, ...prev])
-  }, [usingDB, fetchPublicaciones])
+  }, [fetchPublicaciones])
 
   const actualizarPublicacion = useCallback(async (id: string, datos: Partial<Publicacion>) => {
-    if (usingDB) {
-      try {
-        const res = await fetch(`/api/publicaciones/${id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(datos),
-        })
-        if (res.ok) {
-          await fetchPublicaciones()
-          return
-        }
-      } catch {
-        console.error("Error actualizando publicacion en DB")
+    try {
+      const res = await fetch(`/api/publicaciones/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(datos),
+      })
+      if (res.ok) {
+        await fetchPublicaciones()
       }
+    } catch {
+      console.error("Error actualizando publicacion")
     }
-    
-    // Fallback: actualizar local
-    setPublicaciones(prev =>
-      prev.map(pub => (pub.id === id ? { ...pub, ...datos } : pub))
-    )
-  }, [usingDB, fetchPublicaciones])
+  }, [fetchPublicaciones])
 
   return (
     <PublicacionesContext.Provider

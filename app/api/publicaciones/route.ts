@@ -1,16 +1,7 @@
 import { NextResponse } from "next/server"
 
-// Verificar si DATABASE_URL esta configurada
-function hasDB() {
-  return !!process.env.DATABASE_URL
-}
-
 // GET /api/publicaciones - Listar publicaciones
 export async function GET(request: Request) {
-  if (!hasDB()) {
-    return NextResponse.json({ publicaciones: null, mode: "mock" })
-  }
-
   try {
     const { getPublicaciones } = await import("@/lib/actions/publicaciones")
     
@@ -29,19 +20,15 @@ export async function GET(request: Request) {
       soloEnTransito: soloEnTransito || undefined,
     })
 
-    return NextResponse.json({ publicaciones, mode: "db" })
+    return NextResponse.json({ publicaciones })
   } catch (error) {
     console.error("Error fetching publicaciones:", error)
-    return NextResponse.json({ publicaciones: null, mode: "error" }, { status: 500 })
+    return NextResponse.json({ publicaciones: null }, { status: 500 })
   }
 }
 
 // POST /api/publicaciones - Crear publicacion
 export async function POST(request: Request) {
-  if (!hasDB()) {
-    return NextResponse.json({ error: "Base de datos no configurada" }, { status: 503 })
-  }
-
   try {
     const { crearPublicacion } = await import("@/lib/actions/publicaciones")
     const body = await request.json()

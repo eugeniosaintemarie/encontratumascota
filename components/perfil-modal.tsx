@@ -21,7 +21,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, CheckCircle2, Lock, PawPrint, Home } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { usePublicaciones } from "@/lib/publicaciones-context"
-import { especieLabels, generoLabels, razasLabels } from "@/lib/mock-data"
+import { especieLabels, generoLabels, razasLabels } from "@/lib/labels"
 import { ADMIN_USER } from "@/lib/auth"
 import type { Usuario } from "@/lib/types"
 

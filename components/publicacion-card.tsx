@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { MapPin, Lock, Share2, Check, Loader2, AlertTriangle } from "lucide-react"
 import type { Publicacion } from "@/lib/types"
-import { razasLabels, especieLabels, generoLabels } from "@/lib/mock-data"
+import { razasLabels, especieLabels, generoLabels } from "@/lib/labels"
 import { toast } from "sonner"
 
 interface PublicacionCardProps {

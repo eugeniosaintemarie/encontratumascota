@@ -15,19 +15,9 @@ interface FiltrosPublicaciones {
   soloEnTransito?: boolean
 }
 
-// ─── Helper: ocultar datos de prueba si env dice "off" ─────
-function ocultarPruebas() {
-  return process.env.SHOW_TEST_DATA !== "on"
-}
-
 // ─── SELECT: Obtener publicaciones ──────────────────────────
 export async function getPublicaciones(filtros?: FiltrosPublicaciones) {
   const conditions = []
-
-  // Filtrar publicaciones de prueba cuando SHOW_TEST_DATA != "on"
-  if (ocultarPruebas()) {
-    conditions.push(eq(publicaciones.esPrueba, false))
-  }
 
   if (filtros?.soloActivas !== false) {
     // Por defecto solo activas
@@ -174,10 +164,6 @@ export async function contarMascotasReunidas() {
     eq(publicaciones.activa, false),
     eq(publicaciones.enTransito, false),
   ]
-
-  if (ocultarPruebas()) {
-    conditions.push(eq(publicaciones.esPrueba, false))
-  }
 
   const rows = await db
     .select()

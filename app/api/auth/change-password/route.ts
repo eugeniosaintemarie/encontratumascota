@@ -1,15 +1,7 @@
 import { NextResponse } from "next/server"
 
-function hasDB() {
-  return !!process.env.DATABASE_URL
-}
-
 // POST /api/auth/change-password
 export async function POST(request: Request) {
-  if (!hasDB()) {
-    return NextResponse.json({ error: "Cambio de contraseña no disponible sin base de datos" }, { status: 503 })
-  }
-
   try {
     const { cambiarPassword } = await import("@/lib/actions/auth")
     const { userId, currentPassword, newPassword } = await request.json()

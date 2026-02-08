@@ -1,15 +1,7 @@
 import { NextResponse } from "next/server"
 
-function hasDB() {
-  return !!process.env.DATABASE_URL
-}
-
 // POST /api/auth/register
 export async function POST(request: Request) {
-  if (!hasDB()) {
-    return NextResponse.json({ error: "Registro no disponible sin base de datos" }, { status: 503 })
-  }
-
   try {
     const { registrarUsuario } = await import("@/lib/actions/auth")
     const { nombre, email, password } = await request.json()
