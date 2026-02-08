@@ -214,8 +214,7 @@ export function AuthModal({
               </svg>
               Continuar con Google
             </Button>
-
-            <div className="flex items-center justify-center gap-1.5 pt-1">
+            <div className="flex items-center justify-center gap-1.5 -mt-2">
               <ShieldCheck className="h-3 w-3 text-muted-foreground" />
               <p className="text-[10px] text-muted-foreground">
                 Autenticación segura con Neon Auth y Vercel
@@ -306,8 +305,7 @@ export function AuthModal({
               </svg>
               Registrarse con Google
             </Button>
-
-            <div className="flex items-center justify-center gap-1.5 pt-1">
+            <div className="flex items-center justify-center gap-1.5 -mt-2">
               <ShieldCheck className="h-3 w-3 text-muted-foreground" />
               <p className="text-[10px] text-muted-foreground">
                 Autenticación segura con Neon Auth y Vercel
