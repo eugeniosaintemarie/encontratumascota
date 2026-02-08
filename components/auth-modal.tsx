@@ -217,7 +217,10 @@ export function AuthModal({
             <div className="flex items-center justify-center gap-1.5 -mt-2">
               <ShieldCheck className="h-3 w-3 text-muted-foreground" />
               <p className="text-[10px] text-muted-foreground">
-                Autenticación segura con Neon Auth y Vercel
+                Autenticación segura con{" "}
+                <a href="https://neon.tech/docs/auth/overview" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">Neon Auth</a>
+                {" "}y{" "}
+                <a href="https://vercel.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">Vercel</a>
               </p>
             </div>
 
@@ -308,7 +311,10 @@ export function AuthModal({
             <div className="flex items-center justify-center gap-1.5 -mt-2">
               <ShieldCheck className="h-3 w-3 text-muted-foreground" />
               <p className="text-[10px] text-muted-foreground">
-                Autenticación segura con Neon Auth y Vercel
+                Autenticación segura con{" "}
+                <a href="https://neon.tech/docs/auth/overview" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">Neon Auth</a>
+                {" "}y{" "}
+                <a href="https://vercel.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">Vercel</a>
               </p>
             </div>
 
