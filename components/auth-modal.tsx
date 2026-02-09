@@ -93,8 +93,18 @@ export function AuthModal({
       return
     }
 
-    if (registerPassword.length < 6) {
-      setError("La contrasena debe tener al menos 6 caracteres")
+    if (registerPassword.length < 8) {
+      setError("La contrasena debe tener al menos 8 caracteres")
+      return
+    }
+
+    if (!/[A-Z]/.test(registerPassword)) {
+      setError("La contrasena debe incluir al menos una mayuscula")
+      return
+    }
+
+    if (!/[0-9]/.test(registerPassword)) {
+      setError("La contrasena debe incluir al menos un numero")
       return
     }
 
@@ -260,7 +270,7 @@ export function AuthModal({
                 required
               />
               <p className="text-xs text-muted-foreground">
-                Mínimo 6 caracteres, incluyendo una mayúscula y un número
+                Mínimo 8 caracteres, incluyendo una mayúscula y un número
               </p>
             </div>
             <Input

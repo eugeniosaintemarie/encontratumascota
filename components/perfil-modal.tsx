@@ -87,8 +87,18 @@ export function PerfilModal({
     setPasswordSuccess(false)
 
     // Validar nueva contrasena
-    if (newPassword.length < 5) {
-      setPasswordError("La nueva contrasena debe tener al menos 5 caracteres")
+    if (newPassword.length < 8) {
+      setPasswordError("La nueva contrasena debe tener al menos 8 caracteres")
+      return
+    }
+
+    if (!/[A-Z]/.test(newPassword)) {
+      setPasswordError("La contrasena debe incluir al menos una mayuscula")
+      return
+    }
+
+    if (!/[0-9]/.test(newPassword)) {
+      setPasswordError("La contrasena debe incluir al menos un numero")
       return
     }
 

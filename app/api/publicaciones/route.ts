@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
+import { getServerSession } from "@/lib/auth/server"
 
-// GET /api/publicaciones - Listar publicaciones
+// GET /api/publicaciones - Listar publicaciones (publico)
 export async function GET(request: Request) {
   try {
     const { getPublicaciones } = await import("@/lib/actions/publicaciones")
@@ -27,12 +28,18 @@ export async function GET(request: Request) {
   }
 }
 
-// POST /api/publicaciones - Crear publicacion
+// POST /api/publicaciones - Crear publicacion (requiere autenticacion)
 export async function POST(request: Request) {
   try {
+    const session = await getServerSession()
+    if (!session?.user) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 })
+    }
+
     const { crearPublicacion } = await import("@/lib/actions/publicaciones")
     const body = await request.json()
 
+    // Usar el usuarioId de la sesion, NO del body (previene suplantacion)
     const publicacion = await crearPublicacion({
       especie: body.especie,
       raza: body.raza,
@@ -45,7 +52,7 @@ export async function POST(request: Request) {
       contactoNombre: body.contactoNombre,
       contactoTelefono: body.contactoTelefono,
       contactoEmail: body.contactoEmail,
-      usuarioId: body.usuarioId,
+      usuarioId: session.user.id,
       transitoUrgente: body.transitoUrgente || false,
     })
 

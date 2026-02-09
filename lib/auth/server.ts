@@ -15,3 +15,18 @@ export function getAuth() {
   }
   return _auth
 }
+
+/**
+ * Obtiene la sesion del usuario autenticado.
+ * Retorna { user, session } o null si no hay sesion valida.
+ */
+export async function getServerSession() {
+  try {
+    const auth = getAuth()
+    const { data } = await auth.getSession()
+    if (!data?.user) return null
+    return data
+  } catch {
+    return null
+  }
+}
