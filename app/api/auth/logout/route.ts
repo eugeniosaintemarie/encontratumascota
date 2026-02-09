@@ -36,7 +36,9 @@ export async function GET(request: Request) {
   // Redirigir a home
   const response = NextResponse.redirect(new URL("/", request.url))
 
-  // Borrar TODAS las cookies de neon-auth (tanto HttpOnly como no)
+  // Borrar TODAS las cookies de neon-auth.
+  // IMPORTANTE: usamos solo headers.append() porque response.cookies.set()
+  // de Next.js sobreescribe headers Set-Cookie previos al setear nuevos.
   const cookieNames = [
     "__Secure-neon-auth.session_token",
     "__Secure-neon-auth.session_data",
@@ -46,15 +48,12 @@ export async function GET(request: Request) {
   ]
 
   for (const name of cookieNames) {
-    // Con Secure y sameSite lax (como el handler original)
-    response.cookies.set(name, "", {
-      maxAge: 0,
-      path: "/",
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
-    })
-    // Tambien con sameSite none (algunas cookies usan esto)
+    // Variante SameSite=Lax
+    response.headers.append(
+      "Set-Cookie",
+      `${name}=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax`
+    )
+    // Variante SameSite=None; Partitioned (usada por neon-auth upstream)
     response.headers.append(
       "Set-Cookie",
       `${name}=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=None; Partitioned`
