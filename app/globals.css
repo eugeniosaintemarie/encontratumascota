@@ -125,3 +125,10 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Ocultar badge de reCAPTCHA v3 (esquina inferior derecha).
+   Google permite ocultarlo si se incluye atribucion en texto.
+   Ver: https://developers.google.com/recaptcha/docs/faq */
+.grecaptcha-badge {
+  visibility: hidden !important;
+}
