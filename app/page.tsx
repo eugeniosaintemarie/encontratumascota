@@ -37,11 +37,24 @@ export default function HomePage() {
 
   const handleLogout = useCallback(async () => {
     try {
-      await authClient.signOut()
+      await fetch("/api/auth/sign-out", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+      })
     } catch (e) {
-      console.error("Error al cerrar sesion:", e)
+      // Ignorar errores de red — limpiamos igual
     }
-    window.location.reload()
+    // Borrar cookies accesibles desde el cliente (por si acaso)
+    document.cookie.split(";").forEach((c) => {
+      const name = c.split("=")[0].trim()
+      if (name.includes("neon-auth") || name.includes("better-auth") || name.includes("session")) {
+        document.cookie = `${name}=; Max-Age=0; Path=/`
+        document.cookie = `${name}=; Max-Age=0; Path=/; Secure`
+      }
+    })
+    window.location.href = "/"
   }, [])
 
   const handleAuthSuccess = useCallback(() => {
