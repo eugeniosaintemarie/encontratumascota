@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db"
 import { publicaciones } from "@/lib/db/schema"
-import { eq, and, ilike, desc } from "drizzle-orm"
+import { eq, and, or, ilike, desc } from "drizzle-orm"
 import type { Especie, Sexo } from "@/lib/types"
 
 // ─── Tipos para las queries ─────────────────────────────────
@@ -20,12 +20,16 @@ export async function getPublicaciones(filtros?: FiltrosPublicaciones) {
   const conditions = []
 
   if (filtros?.soloActivas !== false) {
-    // Por defecto solo activas
+    // Por defecto traer activas + en transito (excluir cerradas definitivamente)
     if (filtros?.soloEnTransito) {
       conditions.push(eq(publicaciones.enTransito, true))
     } else {
-      conditions.push(eq(publicaciones.activa, true))
-      conditions.push(eq(publicaciones.enTransito, false))
+      conditions.push(
+        or(
+          eq(publicaciones.activa, true),
+          eq(publicaciones.enTransito, true)
+        )
+      )
     }
   }
 
