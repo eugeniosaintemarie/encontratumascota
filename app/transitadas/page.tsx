@@ -9,7 +9,7 @@ import { PerfilModal } from "@/components/perfil-modal"
 import { PawPrint } from "lucide-react"
 import { Footer } from "@/components/footer"
 import { usePublicaciones } from "@/lib/publicaciones-context"
-import { authClient } from "@/lib/auth/client"
+import { authClient, logout } from "@/lib/auth/client"
 import { mapNeonUser } from "@/lib/auth"
 import type { Especie, Sexo } from "@/lib/types"
 
@@ -50,25 +50,8 @@ export default function TransitadasPage() {
     }
   }, [isAuthenticated])
 
-  const handleLogout = useCallback(async () => {
-    try {
-      await fetch("/api/auth/sign-out", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: "{}",
-      })
-    } catch (e) {
-      // Ignorar errores de red — limpiamos igual
-    }
-    document.cookie.split(";").forEach((c) => {
-      const name = c.split("=")[0].trim()
-      if (name.includes("neon-auth") || name.includes("better-auth") || name.includes("session")) {
-        document.cookie = `${name}=; Max-Age=0; Path=/`
-        document.cookie = `${name}=; Max-Age=0; Path=/; Secure`
-      }
-    })
-    window.location.href = "/"
+  const handleLogout = useCallback(() => {
+    logout()
   }, [])
 
   return (

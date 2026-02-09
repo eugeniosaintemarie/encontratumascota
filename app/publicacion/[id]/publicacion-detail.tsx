@@ -8,7 +8,7 @@ import { AuthModal } from "@/components/auth-modal"
 import { PublicarModal } from "@/components/publicar-modal"
 import { PerfilModal } from "@/components/perfil-modal"
 import { Footer } from "@/components/footer"
-import { authClient } from "@/lib/auth/client"
+import { authClient, logout } from "@/lib/auth/client"
 import { mapNeonUser } from "@/lib/auth"
 import type { Publicacion } from "@/lib/types"
 import { ArrowLeft } from "lucide-react"
@@ -27,25 +27,8 @@ export function PublicacionDetail({ publicacion }: PublicacionDetailProps) {
   const isAuthenticated = !!session?.user
   const currentUser = session?.user ? mapNeonUser(session.user) : null
 
-  const handleLogout = useCallback(async () => {
-    try {
-      await fetch("/api/auth/sign-out", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: "{}",
-      })
-    } catch (e) {
-      // Ignorar errores de red — limpiamos igual
-    }
-    document.cookie.split(";").forEach((c) => {
-      const name = c.split("=")[0].trim()
-      if (name.includes("neon-auth") || name.includes("better-auth") || name.includes("session")) {
-        document.cookie = `${name}=; Max-Age=0; Path=/`
-        document.cookie = `${name}=; Max-Age=0; Path=/; Secure`
-      }
-    })
-    window.location.href = "/"
+  const handleLogout = useCallback(() => {
+    logout()
   }, [])
 
   const handleAuthSuccess = useCallback(() => {

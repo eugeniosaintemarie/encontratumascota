@@ -22,7 +22,7 @@ import { AlertCircle, CheckCircle2, Lock, PawPrint, Home } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { usePublicaciones } from "@/lib/publicaciones-context"
 import { especieLabels, generoLabels, razasLabels } from "@/lib/labels"
-import { authClient } from "@/lib/auth/client"
+import { authClient, logout } from "@/lib/auth/client"
 import type { Usuario } from "@/lib/types"
 
 interface PerfilModalProps {
@@ -134,9 +134,8 @@ export function PerfilModal({
     onClose()
   }
 
-  const handleLogout = async () => {
-    handleClose()
-    await onLogout()
+  const handleLogout = () => {
+    logout()
   }
 
   if (!currentUser) return null
