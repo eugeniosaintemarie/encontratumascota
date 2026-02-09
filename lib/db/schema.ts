@@ -45,4 +45,7 @@ export const publicaciones = pgTable("publicaciones", {
   transitoContactoNombre: text("transito_contacto_nombre"),
   transitoContactoTelefono: text("transito_contacto_telefono"),
   transitoContactoEmail: text("transito_contacto_email"),
+
+  // Flag de prueba — se oculta en produccion (main)
+  esPrueba: boolean("es_prueba").default(false).notNull(),
 })
