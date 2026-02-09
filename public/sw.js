@@ -33,6 +33,10 @@ self.addEventListener('fetch', (event) => {
   // Skip chrome-extension and non-http requests
   if (!event.request.url.startsWith('http')) return
 
+  // Never cache auth endpoints (cookies, tokens)
+  const url = new URL(event.request.url)
+  if (url.pathname.startsWith('/api/auth')) return
+
   event.respondWith(
     fetch(event.request)
       .then((response) => {

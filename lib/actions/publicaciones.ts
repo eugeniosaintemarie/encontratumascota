@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db"
 import { publicaciones } from "@/lib/db/schema"
-import { eq, and, ilike, desc } from "drizzle-orm"
+import { eq, and, or, ilike, desc } from "drizzle-orm"
 import type { Especie, Sexo } from "@/lib/types"
 
 // ─── Tipos para las queries ─────────────────────────────────
@@ -30,12 +30,16 @@ export async function getPublicaciones(filtros?: FiltrosPublicaciones) {
   }
 
   if (filtros?.soloActivas !== false) {
-    // Por defecto solo activas
+    // Por defecto traer activas + en transito (excluir cerradas definitivamente)
     if (filtros?.soloEnTransito) {
       conditions.push(eq(publicaciones.enTransito, true))
     } else {
-      conditions.push(eq(publicaciones.activa, true))
-      conditions.push(eq(publicaciones.enTransito, false))
+      conditions.push(
+        or(
+          eq(publicaciones.activa, true),
+          eq(publicaciones.enTransito, true)
+        )
+      )
     }
   }
 
@@ -129,15 +133,24 @@ export async function crearPublicacion(data: {
 // ─── UPDATE: Cerrar publicacion ─────────────────────────────
 export async function cerrarPublicacionDB(
   id: string,
-  motivo: "encontrado_dueno" | "adoptado" | "en_transito" | "otro"
+  motivo: "encontrado_dueno" | "adoptado" | "en_transito" | "otro",
+  transitoContacto?: { nombre: string; telefono: string; email: string }
 ) {
+  const updateData: Record<string, unknown> = {
+    activa: false,
+    enTransito: motivo === "en_transito",
+    motivoCierre: motivo,
+  }
+
+  if (motivo === "en_transito" && transitoContacto) {
+    updateData.transitoContactoNombre = transitoContacto.nombre
+    updateData.transitoContactoTelefono = transitoContacto.telefono
+    updateData.transitoContactoEmail = transitoContacto.email
+  }
+
   const [row] = await db
     .update(publicaciones)
-    .set({
-      activa: false,
-      enTransito: motivo === "en_transito",
-      motivoCierre: motivo,
-    })
+    .set(updateData)
     .where(eq(publicaciones.id, id))
     .returning()
 
@@ -210,5 +223,8 @@ function mapRowToPublicacion(row: typeof publicaciones.$inferSelect) {
     activa: row.activa,
     enTransito: row.enTransito,
     transitoUrgente: row.transitoUrgente,
+    transitoContactoNombre: row.transitoContactoNombre,
+    transitoContactoTelefono: row.transitoContactoTelefono,
+    transitoContactoEmail: row.transitoContactoEmail,
   }
 }

@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
-import { publicacionesMock, especieLabels, generoLabels, razasLabels } from "@/lib/mock-data"
+import { publicacionesMock } from "@/lib/mock-data"
+import { especieLabels, generoLabels, razasLabels } from "@/lib/labels"
 import { PublicacionDetail } from "./publicacion-detail"
 import Link from "next/link"
 

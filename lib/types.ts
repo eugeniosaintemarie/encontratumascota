@@ -48,6 +48,9 @@ export interface Publicacion {
   activa: boolean
   enTransito?: boolean
   transitoUrgente?: boolean
+  transitoContactoNombre?: string | null
+  transitoContactoTelefono?: string | null
+  transitoContactoEmail?: string | null
 }
 
 export interface Usuario {

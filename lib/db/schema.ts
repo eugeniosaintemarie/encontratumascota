@@ -40,6 +40,11 @@ export const publicaciones = pgTable("publicaciones", {
   transitoUrgente: boolean("transito_urgente").default(false).notNull(),
   motivoCierre: text("motivo_cierre"), // null = abierta
 
+  // Contacto de transito (quien tiene la mascota actualmente)
+  transitoContactoNombre: text("transito_contacto_nombre"),
+  transitoContactoTelefono: text("transito_contacto_telefono"),
+  transitoContactoEmail: text("transito_contacto_email"),
+
   // Flag de prueba — se oculta cuando SHOW_TEST_DATA != "on"
   esPrueba: boolean("es_prueba").default(false).notNull(),
 })
