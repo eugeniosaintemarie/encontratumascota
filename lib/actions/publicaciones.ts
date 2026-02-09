@@ -119,15 +119,29 @@ export async function crearPublicacion(data: {
 // ─── UPDATE: Cerrar publicacion ─────────────────────────────
 export async function cerrarPublicacionDB(
   id: string,
-  motivo: "encontrado_dueno" | "adoptado" | "en_transito" | "otro"
+  motivo: "encontrado_dueno" | "adoptado" | "en_transito" | "otro",
+  transitoContacto?: {
+    nombre: string
+    telefono: string
+    email: string
+  }
 ) {
+  const updateData: Record<string, unknown> = {
+    activa: false,
+    enTransito: motivo === "en_transito",
+    motivoCierre: motivo,
+  }
+
+  // Si es transito, guardar datos del nuevo cuidador
+  if (motivo === "en_transito" && transitoContacto) {
+    updateData.transitoContactoNombre = transitoContacto.nombre
+    updateData.transitoContactoTelefono = transitoContacto.telefono
+    updateData.transitoContactoEmail = transitoContacto.email
+  }
+
   const [row] = await db
     .update(publicaciones)
-    .set({
-      activa: false,
-      enTransito: motivo === "en_transito",
-      motivoCierre: motivo,
-    })
+    .set(updateData)
     .where(eq(publicaciones.id, id))
     .returning()
 
@@ -196,5 +210,8 @@ function mapRowToPublicacion(row: typeof publicaciones.$inferSelect) {
     activa: row.activa,
     enTransito: row.enTransito,
     transitoUrgente: row.transitoUrgente,
+    transitoContactoNombre: row.transitoContactoNombre,
+    transitoContactoTelefono: row.transitoContactoTelefono,
+    transitoContactoEmail: row.transitoContactoEmail,
   }
 }

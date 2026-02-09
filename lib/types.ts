@@ -48,6 +48,10 @@ export interface Publicacion {
   activa: boolean
   enTransito?: boolean
   transitoUrgente?: boolean
+  // Contacto de la persona que tiene la mascota en transito
+  transitoContactoNombre?: string | null
+  transitoContactoTelefono?: string | null
+  transitoContactoEmail?: string | null
 }
 
 export interface Usuario {

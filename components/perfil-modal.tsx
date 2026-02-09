@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertCircle, CheckCircle2, Lock, PawPrint, Home } from "lucide-react"
+import { AlertCircle, CheckCircle2, Lock, PawPrint, Home, UserPlus } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { usePublicaciones } from "@/lib/publicaciones-context"
 import { especieLabels, generoLabels, razasLabels } from "@/lib/labels"
@@ -47,6 +47,11 @@ export function PerfilModal({
   const [closeReason, setCloseReason] = useState<"ubicada" | "transitada" | "">("")
   const [closeSuccess, setCloseSuccess] = useState(false)
   
+  // Estado para datos de contacto de transito (nuevo cuidador)
+  const [transitoNombre, setTransitoNombre] = useState("")
+  const [transitoTelefono, setTransitoTelefono] = useState("")
+  const [transitoEmail, setTransitoEmail] = useState("")
+  
   // Estado para cambio de contrasena
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
@@ -65,18 +70,28 @@ export function PerfilModal({
   const handleClosePublicacion = async () => {
     if (!selectedPublicacion || !closeReason) return
     
+    // Si es transito, validar datos del nuevo cuidador
+    if (closeReason === "transitada") {
+      if (!transitoNombre.trim() || !transitoTelefono.trim() || !transitoEmail.trim()) return
+    }
+    
     setIsLoading(true)
-    // Simular delay de red
-    await new Promise((resolve) => setTimeout(resolve, 500))
     
     // Mapear motivo al formato del context
     const motivo = closeReason === "transitada" ? "en_transito" : "encontrado_dueno"
-    cerrarPublicacion(selectedPublicacion, motivo)
+    const transitoContacto = closeReason === "transitada" 
+      ? { nombre: transitoNombre.trim(), telefono: transitoTelefono.trim(), email: transitoEmail.trim() }
+      : undefined
+    
+    await cerrarPublicacion(selectedPublicacion, motivo, transitoContacto)
     
     setIsLoading(false)
     setCloseSuccess(true)
     setSelectedPublicacion("")
     setCloseReason("")
+    setTransitoNombre("")
+    setTransitoTelefono("")
+    setTransitoEmail("")
     
     setTimeout(() => setCloseSuccess(false), 3000)
   }
@@ -136,6 +151,9 @@ export function PerfilModal({
     setSelectedPublicacion("")
     setCloseReason("")
     setCloseSuccess(false)
+    setTransitoNombre("")
+    setTransitoTelefono("")
+    setTransitoEmail("")
     setCurrentPassword("")
     setNewPassword("")
     setConfirmNewPassword("")
@@ -225,12 +243,48 @@ export function PerfilModal({
                     </Select>
                 )}
 
+                {/* Formulario de contacto del nuevo cuidador (solo para tránsito) */}
+                {closeReason === "transitada" && (
+                  <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-3">
+                    <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                      <UserPlus className="h-4 w-4 text-primary" />
+                      Datos de contacto del nuevo cuidador
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Tus datos originales se mantienen como respaldo
+                    </p>
+                    <div className="space-y-2">
+                      <Input
+                        type="text"
+                        value={transitoNombre}
+                        onChange={(e) => setTransitoNombre(e.target.value)}
+                        placeholder="Nombre del nuevo cuidador"
+                        required
+                      />
+                      <Input
+                        type="tel"
+                        value={transitoTelefono}
+                        onChange={(e) => setTransitoTelefono(e.target.value)}
+                        placeholder="Teléfono"
+                        required
+                      />
+                      <Input
+                        type="email"
+                        value={transitoEmail}
+                        onChange={(e) => setTransitoEmail(e.target.value)}
+                        placeholder="Email"
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
+
                 <Button
                   onClick={handleClosePublicacion}
-                  disabled={!selectedPublicacion || !closeReason || isLoading}
+                  disabled={!selectedPublicacion || !closeReason || isLoading || (closeReason === "transitada" && (!transitoNombre.trim() || !transitoTelefono.trim() || !transitoEmail.trim()))}
                   className="w-full"
                 >
-                  {isLoading ? "Cerrando..." : "Cerrar publicacion"}
+                  {isLoading ? "Cerrando..." : closeReason === "transitada" ? "Dar tránsito" : "Cerrar publicacion"}
                 </Button>
               </div>
             ) : (

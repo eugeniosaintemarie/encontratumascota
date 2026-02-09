@@ -6,7 +6,7 @@ import type { Publicacion } from "./types"
 interface PublicacionesContextType {
   publicaciones: Publicacion[]
   loading: boolean
-  cerrarPublicacion: (id: string, motivo: "encontrado_dueno" | "adoptado" | "en_transito" | "otro") => void
+  cerrarPublicacion: (id: string, motivo: "encontrado_dueno" | "adoptado" | "en_transito" | "otro", transitoContacto?: { nombre: string; telefono: string; email: string }) => void
   agregarPublicacion: (publicacion: Omit<Publicacion, "id" | "fechaPublicacion">) => void
   actualizarPublicacion: (id: string, datos: Partial<Publicacion>) => void
   refetch: () => Promise<void>
@@ -44,12 +44,12 @@ export function PublicacionesProvider({ children }: { children: ReactNode }) {
     fetchPublicaciones()
   }, [fetchPublicaciones])
 
-  const cerrarPublicacion = useCallback(async (id: string, motivo: "encontrado_dueno" | "adoptado" | "en_transito" | "otro") => {
+  const cerrarPublicacion = useCallback(async (id: string, motivo: "encontrado_dueno" | "adoptado" | "en_transito" | "otro", transitoContacto?: { nombre: string; telefono: string; email: string }) => {
     try {
       const res = await fetch(`/api/publicaciones/${id}/cerrar`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ motivo }),
+        body: JSON.stringify({ motivo, transitoContacto }),
       })
       if (res.ok) {
         await fetchPublicaciones()

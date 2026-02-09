@@ -39,4 +39,10 @@ export const publicaciones = pgTable("publicaciones", {
   enTransito: boolean("en_transito").default(false).notNull(),
   transitoUrgente: boolean("transito_urgente").default(false).notNull(),
   motivoCierre: text("motivo_cierre"), // null = abierta
+
+  // Contacto de transito (persona que se queda con la mascota temporalmente)
+  // Los campos contacto_* originales se mantienen como respaldo del usuario que publico
+  transitoContactoNombre: text("transito_contacto_nombre"),
+  transitoContactoTelefono: text("transito_contacto_telefono"),
+  transitoContactoEmail: text("transito_contacto_email"),
 })

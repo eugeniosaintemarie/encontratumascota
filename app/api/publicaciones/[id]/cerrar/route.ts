@@ -24,8 +24,8 @@ export async function POST(request: Request, { params }: RouteParams) {
       return NextResponse.json({ error: "No autorizado" }, { status: 403 })
     }
 
-    const { motivo } = await request.json()
-    const publicacion = await cerrarPublicacionDB(id, motivo)
+    const { motivo, transitoContacto } = await request.json()
+    const publicacion = await cerrarPublicacionDB(id, motivo, transitoContacto)
 
     if (!publicacion) {
       return NextResponse.json({ error: "Publicacion no encontrada" }, { status: 404 })
