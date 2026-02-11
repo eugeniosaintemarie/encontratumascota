@@ -5,9 +5,10 @@ import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MapPin, Lock, Share2, Check, Loader2, AlertTriangle, UserPlus, User } from "lucide-react"
+import { MapPin, Lock, Share2, Check, Loader2, AlertTriangle, UserPlus, User, Download } from "lucide-react"
 import type { Publicacion } from "@/lib/types"
 import { razasLabels, especieLabels, generoLabels } from "@/lib/labels"
+import { generateShareImage } from "@/lib/generate-share-image"
 import { toast } from "sonner"
 
 interface PublicacionCardProps {
@@ -47,29 +48,72 @@ export function PublicacionCard({
     const title = `${especieLabels[mascota.especie]} encontrado en ${publicacion.ubicacion}`
 
     try {
-      // Intentar Web Share API (mobile nativo)
-      if (navigator.share) {
-        await navigator.share({ url, title })
+      // 1. Generar imagen para compartir (formato 9:16 stories)
+      const imageBlob = await generateShareImage(publicacion, window.location.origin)
+      const imageFile = new File([imageBlob], `mascota-${publicacion.id}.png`, {
+        type: "image/png",
+      })
+
+      // 2. Siempre copiar link al portapapeles
+      try {
+        await navigator.clipboard.writeText(url)
+      } catch {
+        // Silently fail on clipboard - some browsers block it
+      }
+
+      // 3. Intentar Web Share API con archivo (mobile nativo)
+      if (navigator.share && navigator.canShare?.({ files: [imageFile] })) {
+        await navigator.share({
+          files: [imageFile],
+          title,
+          text: `${title}\n${url}`,
+        })
+        toast.success("¡Enlace copiado al portapapeles!", {
+          description: "Podés pegarlo en Instagram u otras redes.",
+        })
         setIsSharing(false)
         return
       }
 
-      // Fallback: copiar al portapapeles
-      await navigator.clipboard.writeText(url)
+      // 4. Fallback: descargar imagen + confirmar link copiado
+      const downloadUrl = URL.createObjectURL(imageBlob)
+      const a = document.createElement("a")
+      a.href = downloadUrl
+      a.download = `mascota-${publicacion.id}.png`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(downloadUrl)
+
       setIsCopied(true)
-      toast.success("¡Enlace copiado!", {
-        description: "El enlace a la publicación está en tu portapapeles.",
+      toast.success("¡Imagen descargada y enlace copiado!", {
+        description: "Subí la imagen a tus redes y pegá el enlace.",
       })
-      setTimeout(() => setIsCopied(false), 2000)
+      setTimeout(() => setIsCopied(false), 3000)
     } catch (err) {
       // Si el usuario canceló el share nativo, no mostrar error
       if ((err as Error).name === "AbortError") {
+        // Igualmente el link se copió
+        toast.info("Enlace copiado al portapapeles", {
+          description: "Podés pegarlo donde quieras.",
+        })
         setIsSharing(false)
         return
       }
-      toast.error("No se pudo compartir", {
-        description: "Intentá copiar el enlace manualmente.",
-      })
+
+      // Fallback final: solo copiar link
+      try {
+        await navigator.clipboard.writeText(url)
+        setIsCopied(true)
+        toast.success("¡Enlace copiado!", {
+          description: "El enlace a la publicación está en tu portapapeles.",
+        })
+        setTimeout(() => setIsCopied(false), 2000)
+      } catch {
+        toast.error("No se pudo compartir", {
+          description: "Intentá copiar el enlace manualmente.",
+        })
+      }
     } finally {
       setIsSharing(false)
     }
