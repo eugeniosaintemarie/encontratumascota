@@ -43,13 +43,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${title} | Encontra Tu Mascota`,
     description,
-    openGraph: {
-      title,
-      description,
-      images: [
-        {
-          url: mascota.imagenUrl,
-          width: 400,
+    openGraph: {1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+      type: "article",
+      siteName: "Encontra Tu Mascota",
+      locale: "es_AR
           height: 300,
           alt: title,
         },
