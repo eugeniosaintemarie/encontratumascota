@@ -60,43 +60,26 @@ export function PublicacionCard({
         // Silently fail on clipboard - some browsers block it
       }
 
-      // 3. Intentar Web Share API
+      // 3. Intentar Web Share API — solo texto (WhatsApp muestra bien el texto + preview OG del link)
+      //    La imagen se descarga aparte para Instagram/redes que usen imágenes.
       if (navigator.share) {
-        const imageFile = new File([imageBlob], `mascota-${publicacion.id}.jpg`, {
-          type: "image/jpeg",
+        await navigator.share({
+          title,
+          text: shareText,
         })
 
-        // Intentar con imagen (Instagram, Telegram, etc.)
-        if (navigator.canShare?.({ files: [imageFile] })) {
-          try {
-            await navigator.share({
-              files: [imageFile],
-              title,
-              text: shareText,
-            })
-            toast.success("¡Enlace copiado al portapapeles!", {
-              description: "Podés pegarlo en Instagram u otras redes.",
-            })
-            setIsSharing(false)
-            return
-          } catch (fileErr) {
-            // Si falla con archivo, intentar solo texto (WhatsApp prefiere esto)
-            if ((fileErr as Error).name !== "AbortError") {
-              await navigator.share({ title, text: shareText })
-              toast.success("¡Compartido! Enlace copiado al portapapeles.", {
-                description: "El link de la publicación ya está en tu portapapeles.",
-              })
-              setIsSharing(false)
-              return
-            }
-            throw fileErr
-          }
-        }
+        // Después de compartir texto, descargar imagen automáticamente
+        const downloadUrl = URL.createObjectURL(imageBlob)
+        const a = document.createElement("a")
+        a.href = downloadUrl
+        a.download = `mascota-${publicacion.id}.jpg`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(downloadUrl)
 
-        // Sin soporte de archivos: share solo texto (WhatsApp, SMS, etc.)
-        await navigator.share({ title, text: shareText })
-        toast.success("¡Compartido! Enlace copiado al portapapeles.", {
-          description: "El link de la publicación ya está en tu portapapeles.",
+        toast.success("¡Compartido! Imagen descargada y enlace copiado.", {
+          description: "La imagen está en tus descargas para subirla a Instagram.",
         })
         setIsSharing(false)
         return
