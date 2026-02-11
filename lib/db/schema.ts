@@ -1,8 +1,8 @@
 import { pgTable, text, timestamp, boolean, uuid } from "drizzle-orm/pg-core"
 import { nanoid } from "nanoid"
 
-// Helper: genera un ID corto alfanumérico (8 chars ≈ 2.8 trillones de combinaciones)
-const shortId = () => nanoid(8)
+// Helper: genera un ID corto alfanumérico (10 chars ≈ 10^17 combinaciones)
+const shortId = () => nanoid(10)
 
 // ─── Usuarios ───────────────────────────────────────────────
 export const usuarios = pgTable("usuarios", {

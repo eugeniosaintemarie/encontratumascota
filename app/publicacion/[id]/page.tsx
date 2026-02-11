@@ -43,20 +43,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${title} | Encontra Tu Mascota`,
     description,
-    openGraph: {1200,
+    openGraph: {
+      title,
+      description,
+      images: [
+        {
+          url: mascota.imagenUrl,
+          width: 1200,
           height: 630,
           alt: title,
         },
       ],
       type: "article",
       siteName: "Encontra Tu Mascota",
-      locale: "es_AR
-          height: 300,
-          alt: title,
-        },
-      ],
-      type: "article",
-      siteName: "Encontra Tu Mascota",
+      locale: "es_AR",
     },
     twitter: {
       card: "summary_large_image",
