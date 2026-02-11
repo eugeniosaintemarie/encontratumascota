@@ -17,7 +17,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: 'Encontra Tu Mascota',
   description: 'Plataforma colaborativa para reunir mascotas perdidas con sus familias',
-  generator: 'v0.app',
+  generator: '',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     title: 'Encontra Tu Mascota',
   },
   icons: {
-    icon: '/favicon.svg',
+    icon: '/favicon.png',
     apple: '/apple-icon.png',
   },
   other: {

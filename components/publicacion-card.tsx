@@ -5,9 +5,10 @@ import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MapPin, Lock, Share2, Check, Loader2, AlertTriangle } from "lucide-react"
+import { MapPin, Lock, Share2, Check, Loader2, AlertTriangle, UserPlus, User, Download } from "lucide-react"
 import type { Publicacion } from "@/lib/types"
 import { razasLabels, especieLabels, generoLabels } from "@/lib/mock-data"
+import { generateShareImage } from "@/lib/generate-share-image"
 import { toast } from "sonner"
 
 interface PublicacionCardProps {
@@ -47,29 +48,72 @@ export function PublicacionCard({
     const title = `${especieLabels[mascota.especie]} encontrado en ${publicacion.ubicacion}`
 
     try {
-      // Intentar Web Share API (mobile nativo)
-      if (navigator.share) {
-        await navigator.share({ url, title })
+      // 1. Generar imagen para compartir (formato 9:16 stories)
+      const imageBlob = await generateShareImage(publicacion, window.location.origin)
+      const imageFile = new File([imageBlob], `mascota-${publicacion.id}.png`, {
+        type: "image/png",
+      })
+
+      // 2. Siempre copiar link al portapapeles
+      try {
+        await navigator.clipboard.writeText(url)
+      } catch {
+        // Silently fail on clipboard - some browsers block it
+      }
+
+      // 3. Intentar Web Share API con archivo (mobile nativo)
+      if (navigator.share && navigator.canShare?.({ files: [imageFile] })) {
+        await navigator.share({
+          files: [imageFile],
+          title,
+          text: `${title}\n${url}`,
+        })
+        toast.success("¡Enlace copiado al portapapeles!", {
+          description: "Podés pegarlo en Instagram u otras redes.",
+        })
         setIsSharing(false)
         return
       }
 
-      // Fallback: copiar al portapapeles
-      await navigator.clipboard.writeText(url)
+      // 4. Fallback: descargar imagen + confirmar link copiado
+      const downloadUrl = URL.createObjectURL(imageBlob)
+      const a = document.createElement("a")
+      a.href = downloadUrl
+      a.download = `mascota-${publicacion.id}.png`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(downloadUrl)
+
       setIsCopied(true)
-      toast.success("¡Enlace copiado!", {
-        description: "El enlace a la publicación está en tu portapapeles.",
+      toast.success("¡Imagen descargada y enlace copiado!", {
+        description: "Subí la imagen a tus redes y pegá el enlace.",
       })
-      setTimeout(() => setIsCopied(false), 2000)
+      setTimeout(() => setIsCopied(false), 3000)
     } catch (err) {
       // Si el usuario canceló el share nativo, no mostrar error
       if ((err as Error).name === "AbortError") {
+        // Igualmente el link se copió
+        toast.info("Enlace copiado al portapapeles", {
+          description: "Podés pegarlo donde quieras.",
+        })
         setIsSharing(false)
         return
       }
-      toast.error("No se pudo compartir", {
-        description: "Intentá copiar el enlace manualmente.",
-      })
+
+      // Fallback final: solo copiar link
+      try {
+        await navigator.clipboard.writeText(url)
+        setIsCopied(true)
+        toast.success("¡Enlace copiado!", {
+          description: "El enlace a la publicación está en tu portapapeles.",
+        })
+        setTimeout(() => setIsCopied(false), 2000)
+      } catch {
+        toast.error("No se pudo compartir", {
+          description: "Intentá copiar el enlace manualmente.",
+        })
+      }
     } finally {
       setIsSharing(false)
     }
@@ -137,7 +181,7 @@ export function PublicacionCard({
         </div>
         <div className="absolute left-3 bottom-3 flex flex-col gap-1.5">
           {publicacion.transitoUrgente && (
-            <Badge variant="secondary" className="bg-orange-500 text-white backdrop-blur-sm text-xs flex items-center gap-1 border-0 w-fit">
+            <Badge variant="secondary" className="text-white backdrop-blur-sm text-xs flex items-center gap-1 border-0 w-fit" style={{ backgroundColor: "#F44336" }}>
               <AlertTriangle className="h-3 w-3" />
               Tránsito urgente
             </Badge>
@@ -161,23 +205,78 @@ export function PublicacionCard({
 
         <div className="mt-auto">
           {isAuthenticated ? (
-            <div className="space-y-0.5 rounded-lg bg-secondary/50 p-3 overflow-hidden">
-              <p className="text-sm font-medium text-foreground">
-                {publicacion.contactoNombre}
-              </p>
-              <a 
-                href={`tel:${publicacion.contactoTelefono.replace(/\s/g, '')}`}
-                className="block text-sm text-muted-foreground hover:text-primary hover:underline"
-              >
-                {publicacion.contactoTelefono}
-              </a>
-              <a 
-                href={`mailto:${publicacion.contactoEmail}`}
-                className="block text-sm text-muted-foreground hover:text-primary hover:underline truncate"
-                title={publicacion.contactoEmail}
-              >
-                {publicacion.contactoEmail}
-              </a>
+            <div className="space-y-2">
+              {/* Si está en tránsito y tiene contacto de tránsito, mostrar ambos */}
+              {publicacion.enTransito && publicacion.transitoContactoNombre ? (
+                <>
+                  {/* Contacto actual (cuidador de tránsito) */}
+                  <div className="space-y-0.5 rounded-lg bg-primary/10 p-3 overflow-hidden">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <UserPlus className="h-3.5 w-3.5 text-primary" />
+                      <span className="text-xs font-medium text-primary">Cuidador actual</span>
+                    </div>
+                    <p className="text-sm font-medium text-foreground">
+                      {publicacion.transitoContactoNombre}
+                    </p>
+                    <a 
+                      href={`tel:${publicacion.transitoContactoTelefono?.replace(/\s/g, '')}`}
+                      className="block text-sm text-muted-foreground hover:text-primary hover:underline"
+                    >
+                      {publicacion.transitoContactoTelefono}
+                    </a>
+                    <a 
+                      href={`mailto:${publicacion.transitoContactoEmail}`}
+                      className="block text-sm text-muted-foreground hover:text-primary hover:underline truncate"
+                      title={publicacion.transitoContactoEmail ?? ""}
+                    >
+                      {publicacion.transitoContactoEmail}
+                    </a>
+                  </div>
+                  {/* Contacto original (quien publicó) */}
+                  <div className="space-y-0.5 rounded-lg bg-secondary/50 p-3 overflow-hidden">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <User className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="text-xs font-medium text-muted-foreground">Quien lo encontró</span>
+                    </div>
+                    <p className="text-sm font-medium text-foreground">
+                      {publicacion.contactoNombre}
+                    </p>
+                    <a 
+                      href={`tel:${publicacion.contactoTelefono.replace(/\s/g, '')}`}
+                      className="block text-sm text-muted-foreground hover:text-primary hover:underline"
+                    >
+                      {publicacion.contactoTelefono}
+                    </a>
+                    <a 
+                      href={`mailto:${publicacion.contactoEmail}`}
+                      className="block text-sm text-muted-foreground hover:text-primary hover:underline truncate"
+                      title={publicacion.contactoEmail}
+                    >
+                      {publicacion.contactoEmail}
+                    </a>
+                  </div>
+                </>
+              ) : (
+                /* Contacto normal (sin tránsito) */
+                <div className="space-y-0.5 rounded-lg bg-secondary/50 p-3 overflow-hidden">
+                  <p className="text-sm font-medium text-foreground">
+                    {publicacion.contactoNombre}
+                  </p>
+                  <a 
+                    href={`tel:${publicacion.contactoTelefono.replace(/\s/g, '')}`}
+                    className="block text-sm text-muted-foreground hover:text-primary hover:underline"
+                  >
+                    {publicacion.contactoTelefono}
+                  </a>
+                  <a 
+                    href={`mailto:${publicacion.contactoEmail}`}
+                    className="block text-sm text-muted-foreground hover:text-primary hover:underline truncate"
+                    title={publicacion.contactoEmail}
+                  >
+                    {publicacion.contactoEmail}
+                  </a>
+                </div>
+              )}
             </div>
           ) : (
             <div className="rounded-lg border border-dashed border-border bg-muted/30 p-3">

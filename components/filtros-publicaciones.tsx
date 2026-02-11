@@ -94,7 +94,7 @@ export function FiltrosPublicaciones({
             onClick={() => onTransitoUrgenteChange(!transitoUrgente)}
             className={`shrink-0 ${
               transitoUrgente
-                ? "bg-orange-500 hover:bg-orange-600 !border-orange-500"
+                ? "bg-[#B71C1C] hover:bg-[#D32F2F] !border-[#B71C1C]"
                 : "bg-white/10 hover:bg-white/20 !border-white/30"
             }`}
             title="Filtrar tránsito urgente"
@@ -118,9 +118,9 @@ export function FiltrosPublicaciones({
               variant="ghost"
               size="icon"
               onClick={onClearFilters}
-              className="shrink-0"
+              className="shrink-0 hover:bg-white/20"
             >
-              <X className="h-4 w-4" />
+              <X className="h-4 w-4 text-white" />
               <span className="sr-only">Limpiar filtros</span>
             </Button>
           )}
