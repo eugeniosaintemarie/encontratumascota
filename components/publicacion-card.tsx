@@ -45,14 +45,13 @@ export function PublicacionCard({
     setIsSharing(true)
 
     const url = `${window.location.origin}/publicacion/${publicacion.id}`
-    const title = `${especieLabels[mascota.especie]} encontrado en ${publicacion.ubicacion}`
+    const title = `${especieLabels[mascota.especie]} ${generoLabels[mascota.sexo]} ${razasLabels[mascota.raza]} encontrado en ${publicacion.ubicacion}`
+    const transitoTag = publicacion.transitoUrgente ? "\n⚠️ ¡Tránsito urgente!" : ""
+    const shareText = `🐾 *${title}*${transitoTag}\n\n${mascota.descripcion}\n\n${url}`
 
     try {
       // 1. Generar imagen para compartir (formato 4:5)
       const imageBlob = await generateShareImage(publicacion)
-      const imageFile = new File([imageBlob], `mascota-${publicacion.id}.jpg`, {
-        type: "image/jpeg",
-      })
 
       // 2. Siempre copiar link al portapapeles
       try {
@@ -61,15 +60,43 @@ export function PublicacionCard({
         // Silently fail on clipboard - some browsers block it
       }
 
-      // 3. Intentar Web Share API con archivo (mobile nativo)
-      if (navigator.share && navigator.canShare?.({ files: [imageFile] })) {
-        await navigator.share({
-          files: [imageFile],
-          title,
-          text: `${title}\n${url}`,
+      // 3. Intentar Web Share API
+      if (navigator.share) {
+        const imageFile = new File([imageBlob], `mascota-${publicacion.id}.jpg`, {
+          type: "image/jpeg",
         })
-        toast.success("¡Enlace copiado al portapapeles!", {
-          description: "Podés pegarlo en Instagram u otras redes.",
+
+        // Intentar con imagen (Instagram, Telegram, etc.)
+        if (navigator.canShare?.({ files: [imageFile] })) {
+          try {
+            await navigator.share({
+              files: [imageFile],
+              title,
+              text: shareText,
+            })
+            toast.success("¡Enlace copiado al portapapeles!", {
+              description: "Podés pegarlo en Instagram u otras redes.",
+            })
+            setIsSharing(false)
+            return
+          } catch (fileErr) {
+            // Si falla con archivo, intentar solo texto (WhatsApp prefiere esto)
+            if ((fileErr as Error).name !== "AbortError") {
+              await navigator.share({ title, text: shareText })
+              toast.success("¡Compartido! Enlace copiado al portapapeles.", {
+                description: "El link de la publicación ya está en tu portapapeles.",
+              })
+              setIsSharing(false)
+              return
+            }
+            throw fileErr
+          }
+        }
+
+        // Sin soporte de archivos: share solo texto (WhatsApp, SMS, etc.)
+        await navigator.share({ title, text: shareText })
+        toast.success("¡Compartido! Enlace copiado al portapapeles.", {
+          description: "El link de la publicación ya está en tu portapapeles.",
         })
         setIsSharing(false)
         return

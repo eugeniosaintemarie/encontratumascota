@@ -43,13 +43,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: [
         {
           url: mascota.imagenUrl,
-          width: 400,
-          height: 300,
+          width: 1200,
+          height: 630,
           alt: title,
         },
       ],
       type: "article",
       siteName: "Encontra Tu Mascota",
+      locale: "es_AR",
     },
     twitter: {
       card: "summary_large_image",
