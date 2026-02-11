@@ -14,7 +14,14 @@ export const viewport: Viewport = {
   themeColor: '#FF5722',
 }
 
+const siteUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  : process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : 'http://localhost:3000'
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: 'Encontra Tu Mascota',
   description: 'Plataforma colaborativa para reunir mascotas perdidas con sus familias',
   generator: '',

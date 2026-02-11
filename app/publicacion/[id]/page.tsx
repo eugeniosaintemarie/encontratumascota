@@ -36,8 +36,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const { mascota } = publicacion
   const ubicacionSinComa = publicacion.ubicacion.replace(",", "")
-  const transitoTag = publicacion.transitoUrgente ? " ¡TRÁNSITO URGENTE!" : ""
-  const title = `${especieLabels[mascota.especie]} ${generoLabels[mascota.sexo]} ${razasLabels[mascota.raza]} encontrado en ${ubicacionSinComa}${transitoTag}`
+  const transitoTag = publicacion.transitoUrgente ? " - Transito urgente" : ""
+  const title = `${especieLabels[mascota.especie]} ${generoLabels[mascota.sexo].toLowerCase()} ${razasLabels[mascota.raza]} encontrado en ${ubicacionSinComa}${transitoTag}`
   const description = mascota.descripcion
 
   return {

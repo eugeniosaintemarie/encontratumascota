@@ -45,9 +45,9 @@ export function PublicacionCard({
     setIsSharing(true)
 
     const url = `${window.location.origin}/publicacion/${publicacion.id}`
-    const title = `${especieLabels[mascota.especie]} ${generoLabels[mascota.sexo]} ${razasLabels[mascota.raza]} encontrado en ${publicacion.ubicacion}`
-    const transitoTag = publicacion.transitoUrgente ? "\n⚠️ ¡Tránsito urgente!" : ""
-    const shareText = `🐾 *${title}*${transitoTag}\n\n${mascota.descripcion}\n\n${url}`
+    const title = `${especieLabels[mascota.especie]} ${generoLabels[mascota.sexo].toLowerCase()} ${razasLabels[mascota.raza]} encontrado en ${publicacion.ubicacion}`
+    const transitoTag = publicacion.transitoUrgente ? " - Transito urgente" : ""
+    const shareText = `${title}${transitoTag}\n\n${mascota.descripcion}\n\n${url}`
 
     try {
       // 1. Generar imagen para compartir (formato 4:5)
@@ -60,26 +60,25 @@ export function PublicacionCard({
         // Silently fail on clipboard - some browsers block it
       }
 
-      // 3. Intentar Web Share API — solo texto (WhatsApp muestra bien el texto + preview OG del link)
-      //    La imagen se descarga aparte para Instagram/redes que usen imágenes.
+      // 3. Intentar Web Share API con imagen (Instagram Stories, etc.)
       if (navigator.share) {
-        await navigator.share({
-          title,
-          text: shareText,
+        const imageFile = new File([imageBlob], `mascota-${publicacion.id}.jpg`, {
+          type: "image/jpeg",
         })
 
-        // Después de compartir texto, descargar imagen automáticamente
-        const downloadUrl = URL.createObjectURL(imageBlob)
-        const a = document.createElement("a")
-        a.href = downloadUrl
-        a.download = `mascota-${publicacion.id}.jpg`
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-        URL.revokeObjectURL(downloadUrl)
+        if (navigator.canShare?.({ files: [imageFile] })) {
+          await navigator.share({
+            files: [imageFile],
+            title,
+            text: shareText,
+          })
+        } else {
+          // Sin soporte de archivos: share solo texto con link (OG metadata hace el preview)
+          await navigator.share({ title, text: shareText })
+        }
 
-        toast.success("¡Compartido! Imagen descargada y enlace copiado.", {
-          description: "La imagen está en tus descargas para subirla a Instagram.",
+        toast.success("Enlace copiado al portapapeles", {
+          description: "Pega el link en la publicacion para que vean los detalles.",
         })
         setIsSharing(false)
         return
