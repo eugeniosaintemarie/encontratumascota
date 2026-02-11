@@ -1,7 +1,6 @@
 import type { Publicacion } from "./types"
 import { razasLabels, especieLabels, generoLabels } from "./labels"
 
-// Instagram Stories recommended: 1080x1920 (9:16)
 const CANVAS_WIDTH = 1080
 const CANVAS_HEIGHT = 1920
 
@@ -362,7 +361,7 @@ export async function generateShareImage(
   ctx.font = `bold 34px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
   ctx.textBaseline = "top"
   ctx.textAlign = "center"
-  ctx.fillText("🐾 encontratumascota.com.ar", CANVAS_WIDTH / 2, footerY + 30)
+  ctx.fillText("🐾 encontratumascota.ar", CANVAS_WIDTH / 2, footerY + 30)
 
   // URL below
   ctx.fillStyle = "rgba(255,255,255,0.5)"
