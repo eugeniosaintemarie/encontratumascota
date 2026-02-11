@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import {
   Dialog,
   DialogContent,
@@ -20,6 +20,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
+import { ImageCropEditor } from "@/components/image-crop-editor"
+import { Upload, X, Image as ImageIcon } from "lucide-react"
 
 import type { Especie, Sexo, Raza } from "@/lib/types"
 import { usePublicaciones } from "@/lib/publicaciones-context"
@@ -56,6 +58,10 @@ export function PublicarModal({
   const [contactoEmail, setContactoEmail] = useState("")
   const [imagenUrl, setImagenUrl] = useState("")
   const [transitoUrgente, setTransitoUrgente] = useState(false)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [showCropEditor, setShowCropEditor] = useState(false)
+  const [croppedPreview, setCroppedPreview] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const razasPorEspecie: Record<Especie, { value: Raza; label: string }[]> = {
     perro: [
@@ -128,6 +134,9 @@ export function PublicarModal({
     setContactoEmail("")
     setImagenUrl("")
     setTransitoUrgente(false)
+    setImageFile(null)
+    setShowCropEditor(false)
+    setCroppedPreview(null)
   }
 
   const handleClose = () => {
@@ -276,14 +285,89 @@ export function PublicarModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="imagen">URL de la imagen (opcional)</Label>
-            <Input
-              id="imagen"
-              type="url"
-              value={imagenUrl}
-              onChange={(e) => setImagenUrl(e.target.value)}
-              placeholder="https://ejemplo.com/imagen.jpg"
-            />
+            <Label>Imagen (opcional)</Label>
+
+            {showCropEditor && imageFile ? (
+              <ImageCropEditor
+                imageFile={imageFile}
+                onCropComplete={(dataUrl) => {
+                  setCroppedPreview(dataUrl)
+                  setImagenUrl(dataUrl)
+                  setShowCropEditor(false)
+                }}
+                onCancel={() => {
+                  setShowCropEditor(false)
+                  setImageFile(null)
+                }}
+              />
+            ) : croppedPreview ? (
+              <div className="flex items-start gap-3">
+                <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg border">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={croppedPreview}
+                    alt="Preview"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <p className="text-sm text-muted-foreground">Imagen recortada</p>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setCroppedPreview(null)
+                      setImagenUrl("")
+                      setImageFile(null)
+                    }}
+                  >
+                    <X className="mr-1.5 h-3.5 w-3.5" />
+                    Quitar
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      setImageFile(file)
+                      setShowCropEditor(true)
+                    }
+                    e.target.value = ""
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  Subir imagen
+                </Button>
+                <div className="flex items-center gap-2">
+                  <div className="h-px flex-1 bg-border" />
+                  <span className="text-xs text-muted-foreground">o</span>
+                  <div className="h-px flex-1 bg-border" />
+                </div>
+                <div className="flex gap-2">
+                  <ImageIcon className="mt-2 h-4 w-4 shrink-0 text-muted-foreground" />
+                  <Input
+                    type="url"
+                    value={imagenUrl}
+                    onChange={(e) => setImagenUrl(e.target.value)}
+                    placeholder="Pegar URL de imagen"
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center space-x-2">
