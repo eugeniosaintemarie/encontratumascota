@@ -48,10 +48,10 @@ export function PublicacionCard({
     const title = `${especieLabels[mascota.especie]} encontrado en ${publicacion.ubicacion}`
 
     try {
-      // 1. Generar imagen para compartir (formato 9:16 stories)
-      const imageBlob = await generateShareImage(publicacion, window.location.origin)
-      const imageFile = new File([imageBlob], `mascota-${publicacion.id}.png`, {
-        type: "image/png",
+      // 1. Generar imagen para compartir (formato 4:5)
+      const imageBlob = await generateShareImage(publicacion)
+      const imageFile = new File([imageBlob], `mascota-${publicacion.id}.jpg`, {
+        type: "image/jpeg",
       })
 
       // 2. Siempre copiar link al portapapeles
@@ -79,7 +79,7 @@ export function PublicacionCard({
       const downloadUrl = URL.createObjectURL(imageBlob)
       const a = document.createElement("a")
       a.href = downloadUrl
-      a.download = `mascota-${publicacion.id}.png`
+      a.download = `mascota-${publicacion.id}.jpg`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)

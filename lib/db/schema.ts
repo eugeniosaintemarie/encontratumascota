@@ -1,4 +1,8 @@
 import { pgTable, text, timestamp, boolean, uuid } from "drizzle-orm/pg-core"
+import { nanoid } from "nanoid"
+
+// Helper: genera un ID corto alfanumérico (8 chars ≈ 2.8 trillones de combinaciones)
+const shortId = () => nanoid(8)
 
 // ─── Usuarios ───────────────────────────────────────────────
 export const usuarios = pgTable("usuarios", {
@@ -11,7 +15,7 @@ export const usuarios = pgTable("usuarios", {
 
 // ─── Publicaciones ──────────────────────────────────────────
 export const publicaciones = pgTable("publicaciones", {
-  id: uuid("id").defaultRandom().primaryKey(),
+  id: text("id").$defaultFn(shortId).primaryKey(),
 
   // Datos de la mascota (inline, sin tabla separada para simplificar)
   especie: text("especie").notNull(), // "perro" | "gato" | "otro"
