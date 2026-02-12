@@ -165,10 +165,10 @@ export function AuthModal({
             )}
             <Input
               id="login-email"
-              type="email"
+              type="text"
               value={loginEmail}
               onChange={(e) => setLoginEmail(e.target.value)}
-              placeholder="Email"
+              placeholder="Email o usuario"
               required
             />
             <Input
