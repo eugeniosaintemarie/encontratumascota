@@ -163,35 +163,33 @@ export function AuthModal({
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            <Input
-              id="login-email"
-              type="text"
-              value={loginEmail}
-              onChange={(e) => setLoginEmail(e.target.value)}
-              placeholder="Email o usuario"
-              required
-            />
-            <Input
-              id="login-password"
-              type="password"
-              value={loginPassword}
-              onChange={(e) => setLoginPassword(e.target.value)}
-              placeholder="Contraseña"
-              required
-            />
+            <div className="relative">
+              <Input
+                id="login-email"
+                type="text"
+                value={loginEmail}
+                onChange={(e) => setLoginEmail(e.target.value)}
+                placeholder="Correo electrónico"
+                className="pr-16"
+                required
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">(demo)</span>
+            </div>
+            <div className="relative">
+              <Input
+                id="login-password"
+                type="password"
+                value={loginPassword}
+                onChange={(e) => setLoginPassword(e.target.value)}
+                placeholder="Contraseña"
+                className="pr-16"
+                required
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">(demo)</span>
+            </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Ingresando..." : "Ingresar"}
             </Button>
-            <p className="text-center text-sm text-muted-foreground">
-              No tenes cuenta?{" "}
-              <button
-                type="button"
-                onClick={() => setView("register")}
-                className="text-primary underline-offset-4 hover:underline"
-              >
-                Registrate
-              </button>
-            </p>
           </form>
         ) : (
           <form onSubmit={handleRegister} className="space-y-4">
@@ -241,16 +239,6 @@ export function AuthModal({
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Registrando..." : "Registrarse"}
             </Button>
-            <p className="text-center text-sm text-muted-foreground">
-              Ya tenes cuenta?{" "}
-              <button
-                type="button"
-                onClick={() => setView("login")}
-                className="text-primary underline-offset-4 hover:underline"
-              >
-                Inicia sesion
-              </button>
-            </p>
           </form>
         )}
       </DialogContent>

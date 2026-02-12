@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useCallback } from "react"
+import { useState, useMemo, useCallback, useEffect } from "react"
 import { PublicacionCard } from "@/components/publicacion-card"
 import { Header } from "@/components/header"
 import { AuthModal } from "@/components/auth-modal"
@@ -9,6 +9,7 @@ import { PerfilModal } from "@/components/perfil-modal"
 import { PawPrint } from "lucide-react"
 import { Footer } from "@/components/footer"
 import { usePublicaciones } from "@/lib/publicaciones-context"
+import { getCurrentUser, logout as doLogout } from "@/lib/auth"
 import type { Especie, Sexo, Usuario } from "@/lib/types"
 
 export default function TransitadasPage() {
@@ -22,6 +23,15 @@ export default function TransitadasPage() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [isPublicarModalOpen, setIsPublicarModalOpen] = useState(false)
   const [isPerfilModalOpen, setIsPerfilModalOpen] = useState(false)
+
+  // Verificar sesion guardada al cargar
+  useEffect(() => {
+    const user = getCurrentUser()
+    if (user) {
+      setCurrentUser(user)
+      setIsAuthenticated(true)
+    }
+  }, [])
 
   const { publicaciones } = usePublicaciones()
 
@@ -46,13 +56,15 @@ export default function TransitadasPage() {
     }
   }, [isAuthenticated])
 
-  const handleLoginSuccess = useCallback((user: Usuario) => {
-    setIsAuthenticated(true)
+  const handleAuthSuccess = useCallback(() => {
+    const user = getCurrentUser()
     setCurrentUser(user)
+    setIsAuthenticated(true)
     setIsAuthModalOpen(false)
   }, [])
 
   const handleLogout = useCallback(() => {
+    doLogout()
     setIsAuthenticated(false)
     setCurrentUser(null)
   }, [])
@@ -118,7 +130,7 @@ export default function TransitadasPage() {
                   key={publicacion.id}
                   publicacion={publicacion}
                   isAuthenticated={isAuthenticated}
-                  onLoginRequired={() => setIsAuthModalOpen(true)}
+                  onRequireAuth={() => setIsAuthModalOpen(true)}
                 />
               ))}
             </div>
@@ -141,7 +153,7 @@ export default function TransitadasPage() {
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
-        onLoginSuccess={handleLoginSuccess}
+        onAuthSuccess={handleAuthSuccess}
       />
 
       <PublicarModal
