@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, ShieldCheck } from "lucide-react"
 import { authClient } from "@/lib/auth/client"
 import { useRecaptcha } from "@/hooks/use-recaptcha"
+import { useDemoMode } from "@/lib/demo-context"
 
 
 type AuthView = "login" | "register"
@@ -45,6 +46,7 @@ export function AuthModal({
   const [registerConfirmPassword, setRegisterConfirmPassword] = useState("")
 
   const { execute: executeRecaptcha } = useRecaptcha()
+  const { activateDemoMode } = useDemoMode()
 
   const handleGoogleSignIn = async () => {
     setError(null)
@@ -63,6 +65,15 @@ export function AuthModal({
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+
+    // Login demo: no pasa por Neon Auth
+    if (loginEmail === "demo" && loginPassword === "demo") {
+      activateDemoMode()
+      onAuthSuccess?.()
+      onClose()
+      return
+    }
+
     setIsLoading(true)
 
     try {
@@ -182,10 +193,11 @@ export function AuthModal({
             )}
             <Input
               id="login-email"
-              type="email"
+              type="text"
+              inputMode="email"
               value={loginEmail}
               onChange={(e) => setLoginEmail(e.target.value)}
-              placeholder="Email"
+              placeholder="Correo electrónico (demo)"
               required
             />
             <Input
@@ -193,7 +205,7 @@ export function AuthModal({
               type="password"
               value={loginPassword}
               onChange={(e) => setLoginPassword(e.target.value)}
-              placeholder="Contraseña"
+              placeholder="Contraseña (demo)"
               required
             />
             <Button type="submit" className="w-full" disabled={isLoading}>

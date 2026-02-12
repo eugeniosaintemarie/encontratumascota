@@ -46,7 +46,7 @@ export function PublicacionCard({
 
     const url = `${window.location.origin}/publicacion/${publicacion.id}`
     const title = `${especieLabels[mascota.especie]} ${generoLabels[mascota.sexo].toLowerCase()} ${razasLabels[mascota.raza]} encontrado en ${publicacion.ubicacion}`
-    const transitoTag = publicacion.transitoUrgente ? " - Transito urgente" : ""
+    const transitoTag = publicacion.transitoUrgente ? " ¡Tránsito urgente!" : ""
     const shareText = `${title}${transitoTag}\n\n${mascota.descripcion}\n\n${url}`
 
     try {

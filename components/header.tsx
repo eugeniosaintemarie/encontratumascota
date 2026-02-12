@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Plus, LogIn, Menu, Moon, Sun, User, LogOut, ArrowLeft, ExternalLink } from "lucide-react"
+import { Plus, LogIn, Menu, Moon, Sun, User, LogOut, ArrowLeft, ExternalLink, Eye } from "lucide-react"
 import Image from "next/image"
 import { useTheme } from "next-themes"
 
@@ -22,6 +22,7 @@ interface HeaderProps {
   onPerfilClick?: () => void
   onLogout?: () => void
   showBackButton?: boolean
+  isDemoMode?: boolean
 }
 
 export function Header({ 
@@ -31,6 +32,7 @@ export function Header({
   onPerfilClick,
   onLogout,
   showBackButton = false,
+  isDemoMode = false,
 }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const { setTheme, resolvedTheme } = useTheme()
@@ -71,10 +73,23 @@ export function Header({
             Publicar
           </Button>
           {isAuthenticated ? (
-            <Button variant="ghost" size="sm" onClick={onPerfilClick}>
-              <User className="mr-1.5 h-4 w-4" />
-              Mi perfil
-            </Button>
+            isDemoMode ? (
+              <>
+                <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                  <Eye className="h-3 w-3" />
+                  Demo
+                </span>
+                <Button variant="ghost" size="sm" onClick={onLogout}>
+                  <LogOut className="mr-1.5 h-4 w-4" />
+                  Salir
+                </Button>
+              </>
+            ) : (
+              <Button variant="ghost" size="sm" onClick={onPerfilClick}>
+                <User className="mr-1.5 h-4 w-4" />
+                Mi perfil
+              </Button>
+            )
           ) : (
             <Button variant="ghost" size="sm" onClick={onAccederClick}>
               <LogIn className="mr-1.5 h-4 w-4" />
@@ -122,16 +137,7 @@ export function Header({
                 Publicar
               </DropdownMenuItem>
               {isAuthenticated ? (
-                <>
-                  <DropdownMenuItem
-                    onClick={() => {
-                      setMenuOpen(false)
-                      onPerfilClick?.()
-                    }}
-                  >
-                    <User className="mr-2 h-4 w-4" />
-                    Mi perfil
-                  </DropdownMenuItem>
+                isDemoMode ? (
                   <DropdownMenuItem
                     onClick={() => {
                       setMenuOpen(false)
@@ -139,9 +145,30 @@ export function Header({
                     }}
                   >
                     <LogOut className="mr-2 h-4 w-4" />
-                    Cerrar sesion
+                    Salir del demo
                   </DropdownMenuItem>
-                </>
+                ) : (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setMenuOpen(false)
+                        onPerfilClick?.()
+                      }}
+                    >
+                      <User className="mr-2 h-4 w-4" />
+                      Mi perfil
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setMenuOpen(false)
+                        onLogout?.()
+                      }}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Cerrar sesion
+                    </DropdownMenuItem>
+                  </>
+                )
               ) : (
                 <DropdownMenuItem
                   onClick={() => {

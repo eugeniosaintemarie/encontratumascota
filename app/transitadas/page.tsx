@@ -11,6 +11,7 @@ import { Footer } from "@/components/footer"
 import { usePublicaciones } from "@/lib/publicaciones-context"
 import { authClient, logout } from "@/lib/auth/client"
 import { mapNeonUser } from "@/lib/auth"
+import { useDemoMode } from "@/lib/demo-context"
 import type { Especie, Sexo } from "@/lib/types"
 
 export default function TransitadasPage() {
@@ -24,7 +25,9 @@ export default function TransitadasPage() {
   const [isPerfilModalOpen, setIsPerfilModalOpen] = useState(false)
 
   const { data: session } = authClient.useSession()
+  const { isDemoMode, deactivateDemoMode } = useDemoMode()
   const isAuthenticated = !!session?.user
+  const canSeeContactos = isAuthenticated || isDemoMode
   const currentUser = session?.user ? mapNeonUser(session.user) : null
 
   const { publicaciones } = usePublicaciones()
@@ -51,18 +54,23 @@ export default function TransitadasPage() {
   }, [isAuthenticated])
 
   const handleLogout = useCallback(() => {
+    if (isDemoMode) {
+      deactivateDemoMode()
+      return
+    }
     logout()
-  }, [])
+  }, [isDemoMode, deactivateDemoMode])
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Header
         onPublicarClick={handlePublicarClick}
         onAccederClick={() => setIsAuthModalOpen(true)}
-        isAuthenticated={isAuthenticated}
+        isAuthenticated={isAuthenticated || isDemoMode}
         onPerfilClick={() => setIsPerfilModalOpen(true)}
         onLogout={handleLogout}
         showBackButton
+        isDemoMode={isDemoMode}
       />
 
       <main className="mx-auto max-w-7xl px-4 pt-4 pb-8 flex-1 w-full">
@@ -114,7 +122,7 @@ export default function TransitadasPage() {
                 <PublicacionCard
                   key={publicacion.id}
                   publicacion={publicacion}
-                  isAuthenticated={isAuthenticated}
+                  isAuthenticated={canSeeContactos}
                   onRequireAuth={() => setIsAuthModalOpen(true)}
                 />
               ))}
