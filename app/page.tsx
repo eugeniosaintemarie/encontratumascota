@@ -9,7 +9,6 @@ import { PublicarModal } from "@/components/publicar-modal"
 import { PerfilModal } from "@/components/perfil-modal"
 import { authClient, logout } from "@/lib/auth/client"
 import { mapNeonUser } from "@/lib/auth"
-import { useDemoMode } from "@/lib/demo-context"
 
 export default function HomePage() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
@@ -19,9 +18,7 @@ export default function HomePage() {
   const [pendingPublicacionId, setPendingPublicacionId] = useState<string | null>(null)
 
   const { data: session } = authClient.useSession()
-  const { isDemoMode, deactivateDemoMode } = useDemoMode()
   const isAuthenticated = !!session?.user
-  const canSeeContactos = isAuthenticated || isDemoMode
   const currentUser = session?.user ? mapNeonUser(session.user) : null
 
   const handlePublicarClick = useCallback(() => {
@@ -39,12 +36,8 @@ export default function HomePage() {
   }, [])
 
   const handleLogout = useCallback(() => {
-    if (isDemoMode) {
-      deactivateDemoMode()
-      return
-    }
     logout()
-  }, [isDemoMode, deactivateDemoMode])
+  }, [])
 
   const handleAuthSuccess = useCallback(() => {
     setIsAuthModalOpen(false)
@@ -81,14 +74,13 @@ export default function HomePage() {
       <Header 
         onPublicarClick={handlePublicarClick} 
         onAccederClick={handleAccederClick}
-        isAuthenticated={isAuthenticated || isDemoMode}
+        isAuthenticated={isAuthenticated}
         onPerfilClick={handlePerfilClick}
         onLogout={handleLogout}
-        isDemoMode={isDemoMode}
       />
       <main className="mx-auto max-w-7xl px-4 pt-4 pb-8">
         <ListadoPublicaciones 
-          isAuthenticated={canSeeContactos} 
+          isAuthenticated={isAuthenticated} 
           onRequireAuth={handleRequireAuthFromCard}
         />
       </main>
@@ -104,7 +96,7 @@ export default function HomePage() {
       <PublicarModal
         isOpen={isPublicarModalOpen}
         onClose={() => setIsPublicarModalOpen(false)}
-        isAuthenticated={canSeeContactos}
+        isAuthenticated={isAuthenticated}
         onRequireAuth={handleRequireAuth}
       />
 

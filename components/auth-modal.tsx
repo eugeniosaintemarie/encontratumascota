@@ -13,7 +13,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, ShieldCheck } from "lucide-react"
 import { authClient } from "@/lib/auth/client"
 import { useRecaptcha } from "@/hooks/use-recaptcha"
-import { useDemoMode } from "@/lib/demo-context"
 
 
 type AuthView = "login" | "register"
@@ -46,7 +45,6 @@ export function AuthModal({
   const [registerConfirmPassword, setRegisterConfirmPassword] = useState("")
 
   const { execute: executeRecaptcha } = useRecaptcha()
-  const { activateDemoMode } = useDemoMode()
 
   const handleGoogleSignIn = async () => {
     setError(null)
@@ -65,14 +63,6 @@ export function AuthModal({
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
-
-    // Login demo: no pasa por Neon Auth
-    if (loginEmail === "demo" && loginPassword === "demo") {
-      activateDemoMode()
-      onAuthSuccess?.()
-      onClose()
-      return
-    }
 
     setIsLoading(true)
 

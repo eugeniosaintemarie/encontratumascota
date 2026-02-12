@@ -10,7 +10,6 @@ import { PerfilModal } from "@/components/perfil-modal"
 import { Footer } from "@/components/footer"
 import { authClient, logout } from "@/lib/auth/client"
 import { mapNeonUser } from "@/lib/auth"
-import { useDemoMode } from "@/lib/demo-context"
 import type { Publicacion } from "@/lib/types"
 import { ArrowLeft } from "lucide-react"
 
@@ -25,18 +24,12 @@ export function PublicacionDetail({ publicacion }: PublicacionDetailProps) {
   const [isPerfilModalOpen, setIsPerfilModalOpen] = useState(false)
 
   const { data: session } = authClient.useSession()
-  const { isDemoMode, deactivateDemoMode } = useDemoMode()
   const isAuthenticated = !!session?.user
-  const canSeeContactos = isAuthenticated || isDemoMode
   const currentUser = session?.user ? mapNeonUser(session.user) : null
 
   const handleLogout = useCallback(() => {
-    if (isDemoMode) {
-      deactivateDemoMode()
-      return
-    }
     logout()
-  }, [isDemoMode, deactivateDemoMode])
+  }, [])
 
   const handleAuthSuccess = useCallback(() => {
     setIsAuthModalOpen(false)
@@ -47,10 +40,9 @@ export function PublicacionDetail({ publicacion }: PublicacionDetailProps) {
       <Header
         onPublicarClick={() => setIsPublicarModalOpen(true)}
         onAccederClick={() => setIsAuthModalOpen(true)}
-        isAuthenticated={isAuthenticated || isDemoMode}
+        isAuthenticated={isAuthenticated}
         onPerfilClick={() => setIsPerfilModalOpen(true)}
         onLogout={handleLogout}
-        isDemoMode={isDemoMode}
       />
       <main className="mx-auto max-w-lg px-4 pt-8 pb-8">
         <button
@@ -63,7 +55,7 @@ export function PublicacionDetail({ publicacion }: PublicacionDetailProps) {
 
         <PublicacionCard
           publicacion={publicacion}
-          isAuthenticated={canSeeContactos}
+          isAuthenticated={isAuthenticated}
           onRequireAuth={() => setIsAuthModalOpen(true)}
         />
       </main>

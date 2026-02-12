@@ -19,9 +19,6 @@ interface FiltrosPublicaciones {
 export async function getPublicaciones(filtros?: FiltrosPublicaciones) {
   const conditions = []
 
-  // Ocultar publicaciones de prueba en produccion
-  conditions.push(eq(publicaciones.esPrueba, false))
-
   if (filtros?.soloActivas !== false) {
     // Por defecto traer activas + en transito (excluir cerradas definitivamente)
     if (filtros?.soloEnTransito) {
@@ -184,7 +181,6 @@ export async function contarMascotasReunidas() {
   const conditions = [
     eq(publicaciones.activa, false),
     eq(publicaciones.enTransito, false),
-    eq(publicaciones.esPrueba, false),
   ]
 
   const rows = await db

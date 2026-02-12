@@ -6,7 +6,6 @@ import Script from 'next/script'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
 import { PublicacionesProvider } from '@/lib/publicaciones-context'
-import { DemoModeProvider } from '@/lib/demo-context'
 import { ServiceWorkerRegistration } from '@/components/sw-registration'
 import './globals.css'
 
@@ -66,11 +65,9 @@ export default function RootLayout({
           disableTransitionOnChange
           storageKey="encontratumascota-theme"
         >
-          <DemoModeProvider>
-            <PublicacionesProvider>
-              {children}
-            </PublicacionesProvider>
-          </DemoModeProvider>
+          <PublicacionesProvider>
+            {children}
+          </PublicacionesProvider>
           <Toaster />
           <ServiceWorkerRegistration />
         </ThemeProvider>
