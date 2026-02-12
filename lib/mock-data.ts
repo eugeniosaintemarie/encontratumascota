@@ -183,6 +183,9 @@ export const publicacionesMock: Publicacion[] = [
     activa: false,
     enTransito: true,
     transitoUrgente: true,
+    transitoContactoNombre: "María López",
+    transitoContactoTelefono: "+54 11 9876-5432",
+    transitoContactoEmail: "maria.lopez@gmail.com",
   },
   {
     id: "9",
