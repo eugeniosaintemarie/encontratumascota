@@ -44,7 +44,7 @@ export function PublicarModal({
   const [isLoading, setIsLoading] = useState(false)
   const { agregarPublicacion } = usePublicaciones()
   const { data: session } = authClient.useSession()
-  
+
   // Form state
   const [especie, setEspecie] = useState<Especie | "">("")
   const [raza, setRaza] = useState<Raza | "">("")
@@ -60,6 +60,7 @@ export function PublicarModal({
   const [transitoUrgente, setTransitoUrgente] = useState(false)
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [showCropEditor, setShowCropEditor] = useState(false)
+  const [croppedBlob, setCroppedBlob] = useState<Blob | null>(null)
   const [croppedPreview, setCroppedPreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -88,8 +89,30 @@ export function PublicarModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    
+
     try {
+      let finalImagenUrl = imagenUrl
+
+      // Si hay un blob recortado, subirlo a Vercel Blob primero
+      if (croppedBlob) {
+        const formData = new FormData()
+        formData.append("file", croppedBlob, `mascota-${Date.now()}.jpg`)
+        formData.append("usuarioId", session?.user?.id || "")
+
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        })
+
+        if (!uploadRes.ok) {
+          const uploadErr = await uploadRes.json()
+          throw new Error(uploadErr.error || "Error al subir la imagen")
+        }
+
+        const { url } = await uploadRes.json()
+        finalImagenUrl = url
+      }
+
       await agregarPublicacion({
         mascota: {
           id: "",
@@ -98,7 +121,7 @@ export function PublicarModal({
           sexo: sexo as Sexo,
           color,
           descripcion,
-          imagenUrl: imagenUrl || "/placeholder.svg",
+          imagenUrl: finalImagenUrl || "/placeholder.svg",
         },
         ubicacion,
         fechaEncuentro: new Date(fechaEncuentro),
@@ -109,13 +132,13 @@ export function PublicarModal({
         activa: true,
         transitoUrgente,
       })
-      
+
       resetForm()
       onClose()
       toast.success("Publicacion creada exitosamente!")
     } catch (error) {
       console.error("Error creando publicacion:", error)
-      toast.error("Error al crear la publicacion")
+      toast.error(error instanceof Error ? error.message : "Error al crear la publicacion")
     } finally {
       setIsLoading(false)
     }
@@ -136,6 +159,8 @@ export function PublicarModal({
     setTransitoUrgente(false)
     setImageFile(null)
     setShowCropEditor(false)
+    if (croppedPreview) URL.revokeObjectURL(croppedPreview)
+    setCroppedBlob(null)
     setCroppedPreview(null)
   }
 
@@ -290,9 +315,10 @@ export function PublicarModal({
             {showCropEditor && imageFile ? (
               <ImageCropEditor
                 imageFile={imageFile}
-                onCropComplete={(dataUrl) => {
-                  setCroppedPreview(dataUrl)
-                  setImagenUrl(dataUrl)
+                onCropComplete={(blob, previewUrl) => {
+                  setCroppedBlob(blob)
+                  setCroppedPreview(previewUrl)
+                  setImagenUrl("") // Clear any pasted URL since we have a blob
                   setShowCropEditor(false)
                 }}
                 onCancel={() => {
@@ -317,7 +343,9 @@ export function PublicarModal({
                     variant="ghost"
                     size="sm"
                     onClick={() => {
+                      if (croppedPreview) URL.revokeObjectURL(croppedPreview)
                       setCroppedPreview(null)
+                      setCroppedBlob(null)
                       setImagenUrl("")
                       setImageFile(null)
                     }}

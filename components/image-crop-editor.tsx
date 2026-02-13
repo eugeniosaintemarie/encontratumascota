@@ -7,7 +7,7 @@ import { ZoomIn, ZoomOut, Check, RotateCcw } from "lucide-react"
 
 interface ImageCropEditorProps {
   imageFile: File
-  onCropComplete: (croppedDataUrl: string) => void
+  onCropComplete: (blob: Blob, previewUrl: string) => void
   onCancel: () => void
 }
 
@@ -110,7 +110,7 @@ export function ImageCropEditor({
   const handlePointerDown = (e: React.PointerEvent) => {
     setIsDragging(true)
     dragStart.current = { x: e.clientX, y: e.clientY, ox: offsetX, oy: offsetY }
-    ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
+      ; (e.target as HTMLElement).setPointerCapture(e.pointerId)
   }
 
   const handlePointerMove = (e: React.PointerEvent) => {
@@ -179,8 +179,16 @@ export function ImageCropEditor({
       imageEl.height * scale * ratio
     )
 
-    const dataUrl = outCanvas.toDataURL("image/jpeg", 0.88)
-    onCropComplete(dataUrl)
+    outCanvas.toBlob(
+      (blob) => {
+        if (blob) {
+          const previewUrl = URL.createObjectURL(blob)
+          onCropComplete(blob, previewUrl)
+        }
+      },
+      "image/jpeg",
+      0.88
+    )
   }
 
   if (!imageSrc) return null

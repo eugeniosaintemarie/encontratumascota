@@ -24,8 +24,8 @@ interface HeaderProps {
   showBackButton?: boolean
 }
 
-export function Header({ 
-  onPublicarClick, 
+export function Header({
+  onPublicarClick,
   onAccederClick,
   isAuthenticated = false,
   onPerfilClick,
@@ -71,10 +71,10 @@ export function Header({
             Publicar
           </Button>
           {isAuthenticated ? (
-              <Button variant="ghost" size="sm" onClick={onPerfilClick}>
-                <User className="mr-1.5 h-4 w-4" />
-                Mi perfil
-              </Button>
+            <Button variant="ghost" size="sm" onClick={onPerfilClick}>
+              <User className="mr-1.5 h-4 w-4" />
+              Mi perfil
+            </Button>
           ) : (
             <Button variant="ghost" size="sm" onClick={onAccederClick}>
               <LogIn className="mr-1.5 h-4 w-4" />
@@ -122,27 +122,26 @@ export function Header({
                 Publicar
               </DropdownMenuItem>
               {isAuthenticated ? (
-                  <>
-                    <DropdownMenuItem
-                      onClick={() => {
-                        setMenuOpen(false)
-                        onPerfilClick?.()
-                      }}
-                    >
-                      <User className="mr-2 h-4 w-4" />
-                      Mi perfil
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => {
-                        setMenuOpen(false)
-                        onLogout?.()
-                      }}
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Cerrar sesion
-                    </DropdownMenuItem>
-                  </
-                )
+                <>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setMenuOpen(false)
+                      onPerfilClick?.()
+                    }}
+                  >
+                    <User className="mr-2 h-4 w-4" />
+                    Mi perfil
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setMenuOpen(false)
+                      onLogout?.()
+                    }}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Cerrar sesion
+                  </DropdownMenuItem>
+                </>
               ) : (
                 <DropdownMenuItem
                   onClick={() => {
