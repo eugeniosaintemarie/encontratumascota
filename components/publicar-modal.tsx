@@ -26,6 +26,7 @@ import { Upload, X, Image as ImageIcon } from "lucide-react"
 import type { Especie, Sexo, Raza } from "@/lib/types"
 import { usePublicaciones } from "@/lib/publicaciones-context"
 import { authClient } from "@/lib/auth/client"
+import { useImageUpload } from "@/hooks/use-image-upload"
 import { toast } from "sonner"
 
 interface PublicarModalProps {
@@ -44,6 +45,7 @@ export function PublicarModal({
   const [isLoading, setIsLoading] = useState(false)
   const { agregarPublicacion } = usePublicaciones()
   const { data: session } = authClient.useSession()
+  const { uploadImage, isUploading: isUploadingImage } = useImageUpload()
 
   // Form state
   const [especie, setEspecie] = useState<Especie | "">("")
@@ -95,22 +97,13 @@ export function PublicarModal({
 
       // Si hay un blob recortado, subirlo a Vercel Blob primero
       if (croppedBlob) {
-        const formData = new FormData()
-        formData.append("file", croppedBlob, `mascota-${Date.now()}.jpg`)
-        formData.append("usuarioId", session?.user?.id || "")
-
-        const uploadRes = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        })
-
-        if (!uploadRes.ok) {
-          const uploadErr = await uploadRes.json()
-          throw new Error(uploadErr.error || "Error al subir la imagen")
+        try {
+          const url = await uploadImage(croppedBlob, session?.user?.id || undefined)
+          finalImagenUrl = url
+        } catch (error) {
+          console.error("Error subiendo imagen:", error)
+          throw new Error("Error al subir la imagen. Intenta nuevamente.")
         }
-
-        const { url } = await uploadRes.json()
-        finalImagenUrl = url
       }
 
       await agregarPublicacion({
@@ -449,8 +442,8 @@ export function PublicarModal({
           </div>
 
           <div className="flex gap-3 pt-2">
-            <Button type="submit" className="flex-1" disabled={isLoading}>
-              {isLoading ? "Publicando..." : "Publicar"}
+            <Button type="submit" className="flex-1" disabled={isLoading || isUploadingImage}>
+              {isLoading || isUploadingImage ? "Publicando..." : "Publicar"}
             </Button>
             <Button type="button" variant="outline" onClick={handleClose}>
               Cancelar

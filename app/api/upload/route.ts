@@ -28,34 +28,44 @@ export async function POST(request: Request) {
         // Validar tipo de archivo
         if (!file.type.startsWith("image/")) {
             return NextResponse.json(
-                { error: "El archivo debe ser una imagen" },
+                { error: "El archivo debe ser una imagen válida (JPG, PNG, WebP, etc)" },
                 { status: 400 }
             )
         }
 
         // Validar tamaño (max 4.5 MB para Vercel serverless)
-        if (file.size > 4.5 * 1024 * 1024) {
+        const MAX_SIZE_MB = 4.5
+        if (file.size > MAX_SIZE_MB * 1024 * 1024) {
             return NextResponse.json(
-                { error: "La imagen no puede superar 4.5 MB" },
+                { error: `La imagen supera el límite de ${MAX_SIZE_MB}MB` },
                 { status: 400 }
             )
         }
 
         // Generar nombre único para el archivo
         const timestamp = Date.now()
-        const extension = file.type === "image/png" ? "png" : "jpg"
-        const filename = `mascotas/${timestamp}.${extension}`
+        // Normalizar extensión
+        const extension = file.type.split("/")[1] || "jpg"
+        const filename = `mascotas/img-${timestamp}.${extension}`
 
-        const blob = await put(filename, file, {
-            access: "public",
-            contentType: file.type,
-        })
+        try {
+            const blob = await put(filename, file, {
+                access: "public",
+                contentType: file.type,
+            })
 
-        return NextResponse.json({ url: blob.url })
+            return NextResponse.json({ url: blob.url })
+        } catch (uploadError) {
+            console.error("Vercel Blob put error:", uploadError)
+            return NextResponse.json(
+                { error: "Error interno al guardar la imagen en la nube" },
+                { status: 502 }
+            )
+        }
     } catch (error) {
-        console.error("Error subiendo imagen:", error)
+        console.error("Unexpected error handling upload request:", error)
         return NextResponse.json(
-            { error: "Error al subir la imagen" },
+            { error: "Error inesperado al procesar la subida" },
             { status: 500 }
         )
     }
