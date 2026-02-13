@@ -19,6 +19,11 @@ interface FiltrosPublicaciones {
 export async function getPublicaciones(filtros?: FiltrosPublicaciones) {
   const conditions = []
 
+  // Filtrar publicaciones de prueba si no estamos en modo demo
+  if (process.env.NEXT_PUBLIC_IS_DEMO !== "true") {
+    conditions.push(eq(publicaciones.esPrueba, false))
+  }
+
   if (filtros?.soloActivas !== false) {
     // Por defecto traer activas + en transito (excluir cerradas definitivamente)
     if (filtros?.soloEnTransito) {
@@ -61,10 +66,17 @@ export async function getPublicaciones(filtros?: FiltrosPublicaciones) {
 
 // ─── SELECT: Obtener publicacion por ID ─────────────────────
 export async function getPublicacionById(id: string) {
+  const conditions = [eq(publicaciones.id, id)]
+
+  // Filtrar publicaciones de prueba si no estamos en modo demo
+  if (process.env.NEXT_PUBLIC_IS_DEMO !== "true") {
+    conditions.push(eq(publicaciones.esPrueba, false))
+  }
+
   const rows = await db
     .select()
     .from(publicaciones)
-    .where(eq(publicaciones.id, id))
+    .where(and(...conditions))
     .limit(1)
 
   if (rows.length === 0) return null
@@ -73,10 +85,20 @@ export async function getPublicacionById(id: string) {
 
 // ─── SELECT: Obtener publicaciones de un usuario ────────────
 export async function getPublicacionesByUsuario(usuarioId: string) {
+  const conditions = [
+    eq(publicaciones.usuarioId, usuarioId),
+    eq(publicaciones.activa, true)
+  ]
+
+  // Filtrar publicaciones de prueba si no estamos en modo demo
+  if (process.env.NEXT_PUBLIC_IS_DEMO !== "true") {
+    conditions.push(eq(publicaciones.esPrueba, false))
+  }
+
   const rows = await db
     .select()
     .from(publicaciones)
-    .where(and(eq(publicaciones.usuarioId, usuarioId), eq(publicaciones.activa, true)))
+    .where(and(...conditions))
     .orderBy(desc(publicaciones.fechaPublicacion))
 
   return rows.map(mapRowToPublicacion)
@@ -97,6 +119,7 @@ export async function crearPublicacion(data: {
   contactoEmail: string
   usuarioId: string
   transitoUrgente?: boolean
+  esPrueba?: boolean
 }) {
   const [row] = await db
     .insert(publicaciones)
@@ -114,6 +137,7 @@ export async function crearPublicacion(data: {
       contactoEmail: data.contactoEmail,
       usuarioId: data.usuarioId,
       transitoUrgente: data.transitoUrgente ?? false,
+      esPrueba: data.esPrueba ?? false,
     })
     .returning()
 
@@ -165,6 +189,7 @@ export async function actualizarPublicacionDB(
     activa: boolean
     enTransito: boolean
     transitoUrgente: boolean
+    esPrueba: boolean
   }>
 ) {
   const [row] = await db
@@ -182,6 +207,11 @@ export async function contarMascotasReunidas() {
     eq(publicaciones.activa, false),
     eq(publicaciones.enTransito, false),
   ]
+
+  // Filtrar publicaciones de prueba si no estamos en modo demo
+  if (process.env.NEXT_PUBLIC_IS_DEMO !== "true") {
+    conditions.push(eq(publicaciones.esPrueba, false))
+  }
 
   const rows = await db
     .select()
@@ -212,6 +242,7 @@ function mapRowToPublicacion(row: typeof publicaciones.$inferSelect) {
     contactoEmail: row.contactoEmail,
     usuarioId: row.usuarioId,
     activa: row.activa,
+    esPrueba: row.esPrueba,
     enTransito: row.enTransito,
     transitoUrgente: row.transitoUrgente,
     transitoContactoNombre: row.transitoContactoNombre,

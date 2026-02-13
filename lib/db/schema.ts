@@ -40,6 +40,7 @@ export const publicaciones = pgTable("publicaciones", {
 
   // Estado
   activa: boolean("activa").default(true).notNull(),
+  esPrueba: boolean("es_prueba").default(false).notNull(),
   enTransito: boolean("en_transito").default(false).notNull(),
   transitoUrgente: boolean("transito_urgente").default(false).notNull(),
   motivoCierre: text("motivo_cierre"), // null = abierta
