@@ -30,7 +30,7 @@ export function PublicacionCard({
   onRequireAuth,
 }: PublicacionCardProps) {
   const { mascota } = publicacion
-  
+
   const [isSharing, setIsSharing] = useState(false)
   const [isCopied, setIsCopied] = useState(false)
 
@@ -129,13 +129,13 @@ export function PublicacionCard({
   }
 
   // Limitar descripcion a 140 caracteres y capitalizar primera letra
-  const descripcionLimitada = mascota.descripcion.length > 140 
-    ? mascota.descripcion.slice(0, 140).trim() + "..." 
+  const descripcionLimitada = mascota.descripcion.length > 140
+    ? mascota.descripcion.slice(0, 140).trim() + "..."
     : mascota.descripcion
   const descripcionFormateada = descripcionLimitada.charAt(0).toUpperCase() + descripcionLimitada.slice(1).toLowerCase()
 
   return (
-    <Card 
+    <Card
       id={`publicacion-${publicacion.id}`}
       className="group flex flex-col overflow-hidden transition-all hover:shadow-lg p-0 gap-0"
     >
@@ -215,33 +215,36 @@ export function PublicacionCard({
         <div className="mt-auto">
           {isAuthenticated ? (
             <div className="space-y-2">
-              {/* Si está en tránsito y tiene contacto de tránsito, mostrar ambos */}
-              {publicacion.enTransito && publicacion.transitoContactoNombre ? (
+              {/* Si está en tránsito, mostramos quién lo encontró y (si hay) quién lo cuida */}
+              {publicacion.enTransito ? (
                 <>
-                  {/* Contacto actual (cuidador de tránsito) */}
-                  <div className="space-y-0.5 rounded-lg bg-primary/10 p-3 overflow-hidden">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <UserPlus className="h-3.5 w-3.5 text-primary" />
-                      <span className="text-xs font-medium text-primary">Cuidador actual</span>
+                  {/* Contacto actual (cuidador de tránsito) - solo si existe */}
+                  {publicacion.transitoContactoNombre && (
+                    <div className="space-y-0.5 rounded-lg bg-primary/10 p-3 overflow-hidden">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <UserPlus className="h-3.5 w-3.5 text-primary" />
+                        <span className="text-xs font-medium text-primary">Cuidador actual</span>
+                      </div>
+                      <p className="text-sm font-medium text-foreground">
+                        {publicacion.transitoContactoNombre}
+                      </p>
+                      <a
+                        href={`tel:${publicacion.transitoContactoTelefono?.replace(/\s/g, '')}`}
+                        className="block text-sm text-muted-foreground hover:text-primary hover:underline"
+                      >
+                        {publicacion.transitoContactoTelefono}
+                      </a>
+                      <a
+                        href={`mailto:${publicacion.transitoContactoEmail}`}
+                        className="block text-sm text-muted-foreground hover:text-primary hover:underline truncate"
+                        title={publicacion.transitoContactoEmail ?? ""}
+                      >
+                        {publicacion.transitoContactoEmail}
+                      </a>
                     </div>
-                    <p className="text-sm font-medium text-foreground">
-                      {publicacion.transitoContactoNombre}
-                    </p>
-                    <a 
-                      href={`tel:${publicacion.transitoContactoTelefono?.replace(/\s/g, '')}`}
-                      className="block text-sm text-muted-foreground hover:text-primary hover:underline"
-                    >
-                      {publicacion.transitoContactoTelefono}
-                    </a>
-                    <a 
-                      href={`mailto:${publicacion.transitoContactoEmail}`}
-                      className="block text-sm text-muted-foreground hover:text-primary hover:underline truncate"
-                      title={publicacion.transitoContactoEmail ?? ""}
-                    >
-                      {publicacion.transitoContactoEmail}
-                    </a>
-                  </div>
-                  {/* Contacto original (quien publicó) */}
+                  )}
+
+                  {/* Contacto original (quien publicó) - SIEMPRE visible si está en tránsito */}
                   <div className="space-y-0.5 rounded-lg bg-secondary/50 p-3 overflow-hidden">
                     <div className="flex items-center gap-1.5 mb-1">
                       <User className="h-3.5 w-3.5 text-muted-foreground" />
@@ -250,13 +253,13 @@ export function PublicacionCard({
                     <p className="text-sm font-medium text-foreground">
                       {publicacion.contactoNombre}
                     </p>
-                    <a 
+                    <a
                       href={`tel:${publicacion.contactoTelefono.replace(/\s/g, '')}`}
                       className="block text-sm text-muted-foreground hover:text-primary hover:underline"
                     >
                       {publicacion.contactoTelefono}
                     </a>
-                    <a 
+                    <a
                       href={`mailto:${publicacion.contactoEmail}`}
                       className="block text-sm text-muted-foreground hover:text-primary hover:underline truncate"
                       title={publicacion.contactoEmail}
@@ -271,13 +274,13 @@ export function PublicacionCard({
                   <p className="text-sm font-medium text-foreground">
                     {publicacion.contactoNombre}
                   </p>
-                  <a 
+                  <a
                     href={`tel:${publicacion.contactoTelefono.replace(/\s/g, '')}`}
                     className="block text-sm text-muted-foreground hover:text-primary hover:underline"
                   >
                     {publicacion.contactoTelefono}
                   </a>
-                  <a 
+                  <a
                     href={`mailto:${publicacion.contactoEmail}`}
                     className="block text-sm text-muted-foreground hover:text-primary hover:underline truncate"
                     title={publicacion.contactoEmail}
@@ -292,7 +295,7 @@ export function PublicacionCard({
               <div className="flex items-center gap-2 text-sm text-foreground/70">
                 <Lock className="h-4 w-4 shrink-0" />
                 <span>
-                  <button 
+                  <button
                     type="button"
                     onClick={handleLoginClick}
                     className="text-primary hover:underline font-medium"

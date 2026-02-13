@@ -98,6 +98,11 @@ export async function crearPublicacion(data: {
   usuarioId: string
   transitoUrgente?: boolean
 }) {
+  // Blindaje: No permitir crear publicaciones a usuarios demo/admin
+  if (data.usuarioId === "demo" || data.usuarioId === "admin") {
+    throw new Error("Acción no permitida para este usuario")
+  }
+
   const [row] = await db
     .insert(publicaciones)
     .values({
@@ -126,6 +131,12 @@ export async function cerrarPublicacionDB(
   motivo: "encontrado_dueno" | "adoptado" | "en_transito" | "otro",
   transitoContacto?: { nombre: string; telefono: string; email: string }
 ) {
+  // Blindaje: Verificar que la publicacion no pertenezca a demo/admin
+  const publicacion = await getPublicacionById(id)
+  if (publicacion && (publicacion.usuarioId === "demo" || publicacion.usuarioId === "admin")) {
+    throw new Error("Acción no permitida para este usuario")
+  }
+
   const updateData: Record<string, unknown> = {
     activa: false,
     enTransito: motivo === "en_transito",
@@ -162,6 +173,12 @@ export async function actualizarPublicacionDB(
     transitoUrgente: boolean
   }>
 ) {
+  // Blindaje: Verificar que la publicacion no pertenezca a demo/admin
+  const existingPub = await getPublicacionById(id)
+  if (existingPub && (existingPub.usuarioId === "demo" || existingPub.usuarioId === "admin")) {
+    throw new Error("Acción no permitida para este usuario")
+  }
+
   const [row] = await db
     .update(publicaciones)
     .set(datos)
