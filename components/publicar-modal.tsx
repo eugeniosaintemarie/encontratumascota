@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import {
   Dialog,
   DialogContent,
@@ -20,10 +20,13 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
+import { ImageCropEditor } from "@/components/image-crop-editor"
+import { Upload, X, Image as ImageIcon } from "lucide-react"
 
 import type { Especie, Sexo, Raza } from "@/lib/types"
 import { usePublicaciones } from "@/lib/publicaciones-context"
 import { authClient } from "@/lib/auth/client"
+import { useImageUpload } from "@/hooks/use-image-upload"
 import { toast } from "sonner"
 
 interface PublicarModalProps {
@@ -42,7 +45,8 @@ export function PublicarModal({
   const [isLoading, setIsLoading] = useState(false)
   const { agregarPublicacion } = usePublicaciones()
   const { data: session } = authClient.useSession()
-  
+  const { uploadImage, isUploading: isUploadingImage } = useImageUpload()
+
   // Form state
   const [especie, setEspecie] = useState<Especie | "">("")
   const [raza, setRaza] = useState<Raza | "">("")
@@ -56,6 +60,11 @@ export function PublicarModal({
   const [contactoEmail, setContactoEmail] = useState("")
   const [imagenUrl, setImagenUrl] = useState("")
   const [transitoUrgente, setTransitoUrgente] = useState(false)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [showCropEditor, setShowCropEditor] = useState(false)
+  const [croppedBlob, setCroppedBlob] = useState<Blob | null>(null)
+  const [croppedPreview, setCroppedPreview] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const razasPorEspecie: Record<Especie, { value: Raza; label: string }[]> = {
     perro: [
@@ -82,8 +91,21 @@ export function PublicarModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    
+
     try {
+      let finalImagenUrl = imagenUrl
+
+      // Si hay un blob recortado, subirlo a Vercel Blob primero
+      if (croppedBlob) {
+        try {
+          const url = await uploadImage(croppedBlob, session?.user?.id || undefined)
+          finalImagenUrl = url
+        } catch (error) {
+          console.error("Error subiendo imagen:", error)
+          throw new Error("Error al subir la imagen. Intenta nuevamente.")
+        }
+      }
+
       await agregarPublicacion({
         mascota: {
           id: "",
@@ -92,7 +114,7 @@ export function PublicarModal({
           sexo: sexo as Sexo,
           color,
           descripcion,
-          imagenUrl: imagenUrl || "/placeholder.svg",
+          imagenUrl: finalImagenUrl || "/placeholder.svg",
         },
         ubicacion,
         fechaEncuentro: new Date(fechaEncuentro),
@@ -103,13 +125,13 @@ export function PublicarModal({
         activa: true,
         transitoUrgente,
       })
-      
+
       resetForm()
       onClose()
       toast.success("Publicacion creada exitosamente!")
     } catch (error) {
       console.error("Error creando publicacion:", error)
-      toast.error("Error al crear la publicacion")
+      toast.error(error instanceof Error ? error.message : "Error al crear la publicacion")
     } finally {
       setIsLoading(false)
     }
@@ -128,6 +150,11 @@ export function PublicarModal({
     setContactoEmail("")
     setImagenUrl("")
     setTransitoUrgente(false)
+    setImageFile(null)
+    setShowCropEditor(false)
+    if (croppedPreview) URL.revokeObjectURL(croppedPreview)
+    setCroppedBlob(null)
+    setCroppedPreview(null)
   }
 
   const handleClose = () => {
@@ -276,14 +303,92 @@ export function PublicarModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="imagen">URL de la imagen (opcional)</Label>
-            <Input
-              id="imagen"
-              type="url"
-              value={imagenUrl}
-              onChange={(e) => setImagenUrl(e.target.value)}
-              placeholder="https://ejemplo.com/imagen.jpg"
-            />
+            <Label>Imagen (opcional)</Label>
+
+            {showCropEditor && imageFile ? (
+              <ImageCropEditor
+                imageFile={imageFile}
+                onCropComplete={(blob, previewUrl) => {
+                  setCroppedBlob(blob)
+                  setCroppedPreview(previewUrl)
+                  setImagenUrl("") // Clear any pasted URL since we have a blob
+                  setShowCropEditor(false)
+                }}
+                onCancel={() => {
+                  setShowCropEditor(false)
+                  setImageFile(null)
+                }}
+              />
+            ) : croppedPreview ? (
+              <div className="flex items-start gap-3">
+                <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg border">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={croppedPreview}
+                    alt="Preview"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <p className="text-sm text-muted-foreground">Imagen recortada</p>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      if (croppedPreview) URL.revokeObjectURL(croppedPreview)
+                      setCroppedPreview(null)
+                      setCroppedBlob(null)
+                      setImagenUrl("")
+                      setImageFile(null)
+                    }}
+                  >
+                    <X className="mr-1.5 h-3.5 w-3.5" />
+                    Quitar
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      setImageFile(file)
+                      setShowCropEditor(true)
+                    }
+                    e.target.value = ""
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  Subir imagen
+                </Button>
+                <div className="flex items-center gap-2">
+                  <div className="h-px flex-1 bg-border" />
+                  <span className="text-xs text-muted-foreground">o</span>
+                  <div className="h-px flex-1 bg-border" />
+                </div>
+                <div className="flex gap-2">
+                  <ImageIcon className="mt-2 h-4 w-4 shrink-0 text-muted-foreground" />
+                  <Input
+                    type="url"
+                    value={imagenUrl}
+                    onChange={(e) => setImagenUrl(e.target.value)}
+                    placeholder="Pegar URL de imagen"
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center space-x-2">
@@ -337,8 +442,8 @@ export function PublicarModal({
           </div>
 
           <div className="flex gap-3 pt-2">
-            <Button type="submit" className="flex-1" disabled={isLoading}>
-              {isLoading ? "Publicando..." : "Publicar"}
+            <Button type="submit" className="flex-1" disabled={isLoading || isUploadingImage}>
+              {isLoading || isUploadingImage ? "Publicando..." : "Publicar"}
             </Button>
             <Button type="button" variant="outline" onClick={handleClose}>
               Cancelar

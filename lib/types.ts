@@ -46,6 +46,7 @@ export interface Publicacion {
   contactoEmail: string
   usuarioId: string
   activa: boolean
+  esPrueba?: boolean
   enTransito?: boolean
   transitoUrgente?: boolean
   // Contacto de la persona que tiene la mascota en transito

@@ -1,4 +1,8 @@
 import { pgTable, text, timestamp, boolean, uuid } from "drizzle-orm/pg-core"
+import { nanoid } from "nanoid"
+
+// Helper: genera un ID corto alfanumérico (10 chars)
+const shortId = () => nanoid(10)
 
 // ─── Usuarios ───────────────────────────────────────────────
 export const usuarios = pgTable("usuarios", {
@@ -11,7 +15,7 @@ export const usuarios = pgTable("usuarios", {
 
 // ─── Publicaciones ──────────────────────────────────────────
 export const publicaciones = pgTable("publicaciones", {
-  id: uuid("id").defaultRandom().primaryKey(),
+  id: text("id").$defaultFn(shortId).primaryKey(),
 
   // Datos de la mascota (inline, sin tabla separada para simplificar)
   especie: text("especie").notNull(), // "perro" | "gato" | "otro"
@@ -36,6 +40,7 @@ export const publicaciones = pgTable("publicaciones", {
 
   // Estado
   activa: boolean("activa").default(true).notNull(),
+  esPrueba: boolean("es_prueba").default(false).notNull(),
   enTransito: boolean("en_transito").default(false).notNull(),
   transitoUrgente: boolean("transito_urgente").default(false).notNull(),
   motivoCierre: text("motivo_cierre"), // null = abierta
@@ -45,7 +50,4 @@ export const publicaciones = pgTable("publicaciones", {
   transitoContactoNombre: text("transito_contacto_nombre"),
   transitoContactoTelefono: text("transito_contacto_telefono"),
   transitoContactoEmail: text("transito_contacto_email"),
-
-  // Flag de prueba — se oculta en produccion (main)
-  esPrueba: boolean("es_prueba").default(false).notNull(),
 })

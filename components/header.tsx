@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Plus, LogIn, Menu, Moon, Sun, User, LogOut, ArrowLeft } from "lucide-react"
+import { Plus, LogIn, Menu, Moon, Sun, User, LogOut, ArrowLeft, ExternalLink } from "lucide-react"
 import Image from "next/image"
 import { useTheme } from "next-themes"
 
@@ -24,8 +24,8 @@ interface HeaderProps {
   showBackButton?: boolean
 }
 
-export function Header({ 
-  onPublicarClick, 
+export function Header({
+  onPublicarClick,
   onAccederClick,
   isAuthenticated = false,
   onPerfilClick,
@@ -52,6 +52,12 @@ export function Header({
 
         {/* Desktop navigation */}
         <nav className="hidden sm:flex items-center gap-2">
+          <a href="https://encontratumascotademo.vercel.app/" target="_blank" rel="noopener noreferrer">
+            <Button variant="ghost" size="sm">
+              <ExternalLink className="mr-1.5 h-4 w-4" />
+              Demo
+            </Button>
+          </a>
           {showBackButton && (
             <Link href="/">
               <Button variant="ghost" size="sm">
@@ -88,6 +94,13 @@ export function Header({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem asChild>
+                <a href="https://encontratumascotademo.vercel.app/" target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Demo
+                </a>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               {showBackButton && (
                 <>
                   <DropdownMenuItem asChild>

@@ -30,7 +30,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const { mascota } = publicacion
   const ubicacionSinComa = publicacion.ubicacion.replace(",", "")
-  const title = `${especieLabels[mascota.especie as Especie]} ${generoLabels[mascota.sexo as Sexo]} ${razasLabels[mascota.raza as Raza]} encontrado en ${ubicacionSinComa}`
+  const transitoTag = publicacion.transitoUrgente ? " ¡Tránsito urgente!" : ""
+  const title = `${especieLabels[mascota.especie as Especie]} ${generoLabels[mascota.sexo as Sexo].toLowerCase()} ${razasLabels[mascota.raza as Raza]} encontrado en ${ubicacionSinComa}${transitoTag}`
   const description = mascota.descripcion
 
   return {
@@ -42,13 +43,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: [
         {
           url: mascota.imagenUrl,
-          width: 400,
-          height: 300,
+          width: 1200,
+          height: 630,
           alt: title,
         },
       ],
       type: "article",
       siteName: "Encontra Tu Mascota",
+      locale: "es_AR",
     },
     twitter: {
       card: "summary_large_image",
