@@ -83,27 +83,6 @@ export async function getPublicacionById(id: string) {
   return mapRowToPublicacion(rows[0])
 }
 
-// ─── SELECT: Obtener publicaciones de un usuario ────────────
-export async function getPublicacionesByUsuario(usuarioId: string) {
-  const conditions = [
-    eq(publicaciones.usuarioId, usuarioId),
-    eq(publicaciones.activa, true)
-  ]
-
-  // Filtrar publicaciones de prueba si no estamos en modo demo
-  if (process.env.NEXT_PUBLIC_IS_DEMO !== "true") {
-    conditions.push(eq(publicaciones.esPrueba, false))
-  }
-
-  const rows = await db
-    .select()
-    .from(publicaciones)
-    .where(and(...conditions))
-    .orderBy(desc(publicaciones.fechaPublicacion))
-
-  return rows.map(mapRowToPublicacion)
-}
-
 // ─── INSERT: Crear publicacion ──────────────────────────────
 export async function crearPublicacion(data: {
   especie: string
