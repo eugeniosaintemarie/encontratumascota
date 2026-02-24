@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { ListadoPublicaciones } from "@/components/listado-publicaciones"
@@ -18,8 +18,10 @@ export default function HomePage() {
   const [pendingPublicacionId, setPendingPublicacionId] = useState<string | null>(null)
 
   const { data: session } = authClient.useSession()
-  const isAuthenticated = !!session?.user
-  const currentUser = session?.user ? mapNeonUser(session.user) : null
+  const [demoUser, setDemoUser] = useState<any | null>(null)
+
+  const isAuthenticated = !!session?.user || !!demoUser
+  const currentUser = session?.user ? mapNeonUser(session.user) : demoUser ? mapNeonUser(demoUser) : null
 
   const handlePublicarClick = useCallback(() => {
     setIsPublicarModalOpen(true)
@@ -41,6 +43,13 @@ export default function HomePage() {
 
   const handleAuthSuccess = useCallback(() => {
     setIsAuthModalOpen(false)
+    // Try fetching server session in case demo login was used (demo_public cookie)
+    void (async () => {
+      try {
+        const user = await (await import("@/lib/auth/client")).fetchServerSession()
+        if (user) setDemoUser(user)
+      } catch {}
+    })()
     
     // Si hay una publicacion pendiente, hacer scroll hacia ella
     if (pendingPublicacionId !== null) {
@@ -63,6 +72,21 @@ export default function HomePage() {
     setAuthInitialView("login")
     setIsAuthModalOpen(true)
   }, [])
+
+  // On mount, if there's no neon session but demo_public cookie exists, fetch server session
+  useEffect(() => {
+    if (!session?.user) {
+      const cookies = typeof document !== 'undefined' ? document.cookie : ''
+      if (cookies.includes('demo_public=1')) {
+        void (async () => {
+          try {
+            const user = await (await import("@/lib/auth/client")).fetchServerSession()
+            if (user) setDemoUser(user)
+          } catch {}
+        })()
+      }
+    }
+  }, [session])
 
   const handleRequireAuth = useCallback(() => {
     setAuthInitialView("login")

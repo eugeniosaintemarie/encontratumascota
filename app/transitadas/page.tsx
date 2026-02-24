@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useCallback } from "react"
+import { useState, useMemo, useCallback, useEffect } from "react"
 import { PublicacionCard } from "@/components/publicacion-card"
 import { Header } from "@/components/header"
 import { AuthModal } from "@/components/auth-modal"
@@ -24,8 +24,10 @@ export default function TransitadasPage() {
   const [isPerfilModalOpen, setIsPerfilModalOpen] = useState(false)
 
   const { data: session } = authClient.useSession()
-  const isAuthenticated = !!session?.user
-  const currentUser = session?.user ? mapNeonUser(session.user) : null
+  const [demoUser, setDemoUser] = useState<any | null>(null)
+
+  const isAuthenticated = !!session?.user || !!demoUser
+  const currentUser = session?.user ? mapNeonUser(session.user) : demoUser ? mapNeonUser(demoUser) : null
 
   const { publicaciones } = usePublicaciones()
 
@@ -49,6 +51,21 @@ export default function TransitadasPage() {
       setIsAuthModalOpen(true)
     }
   }, [isAuthenticated])
+
+  // On mount, if neon session missing but demo_public cookie set, fetch server session
+  useEffect(() => {
+    if (!session?.user) {
+      const cookies = typeof document !== 'undefined' ? document.cookie : ''
+      if (cookies.includes('demo_public=1')) {
+        void (async () => {
+          try {
+            const user = await (await import("@/lib/auth/client")).fetchServerSession()
+            if (user) setDemoUser(user)
+          } catch {}
+        })()
+      }
+    }
+  }, [session])
 
   const handleLogout = useCallback(() => {
     logout()

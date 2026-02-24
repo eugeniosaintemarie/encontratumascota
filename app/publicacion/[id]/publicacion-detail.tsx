@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Header } from "@/components/header"
 import { PublicacionCard } from "@/components/publicacion-card"
@@ -24,8 +24,26 @@ export function PublicacionDetail({ publicacion }: PublicacionDetailProps) {
   const [isPerfilModalOpen, setIsPerfilModalOpen] = useState(false)
 
   const { data: session } = authClient.useSession()
-  const isAuthenticated = !!session?.user
-  const currentUser = session?.user ? mapNeonUser(session.user) : null
+  const { data: session } = authClient.useSession()
+  const [demoUser, setDemoUser] = useState<any | null>(null)
+
+  const isAuthenticated = !!session?.user || !!demoUser
+  const currentUser = session?.user ? mapNeonUser(session.user) : demoUser ? mapNeonUser(demoUser) : null
+
+  // On mount detect demo_public cookie and fetch server session if needed
+  useEffect(() => {
+    if (!session?.user) {
+      const cookies = typeof document !== 'undefined' ? document.cookie : ''
+      if (cookies.includes('demo_public=1')) {
+        void (async () => {
+          try {
+            const user = await (await import("@/lib/auth/client")).fetchServerSession()
+            if (user) setDemoUser(user)
+          } catch {}
+        })()
+      }
+    }
+  }, [session])
 
   const handleLogout = useCallback(() => {
     logout()

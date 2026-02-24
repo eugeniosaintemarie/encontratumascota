@@ -18,6 +18,18 @@ export function PublicacionesProvider({ children }: { children: ReactNode }) {
   const [publicaciones, setPublicaciones] = useState<Publicacion[]>([])
   const [loading, setLoading] = useState(true)
 
+  // Mezcla in-place segura (Fisher-Yates) sobre una copia
+  const shuffleArray = <T,>(arr: T[]) => {
+    const a = arr.slice()
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      const tmp = a[i]
+      a[i] = a[j]
+      a[j] = tmp
+    }
+    return a
+  }
+
   // Intentar cargar desde la API (DB) al montar
   const fetchPublicaciones = useCallback(async () => {
     try {
@@ -30,7 +42,8 @@ export function PublicacionesProvider({ children }: { children: ReactNode }) {
             fechaPublicacion: new Date(p.fechaPublicacion),
             fechaEncuentro: new Date(p.fechaEncuentro),
           }))
-          setPublicaciones(pubs)
+          // Mostrar en orden aleatorio en cada carga para dar visibilidad a todas
+          setPublicaciones(shuffleArray(pubs))
         }
       }
     } catch (e) {

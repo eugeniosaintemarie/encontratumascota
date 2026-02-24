@@ -5,10 +5,10 @@ import { publicaciones } from "@/lib/db/schema"
 import { eq, and, or, ilike, desc } from "drizzle-orm"
 import type { Especie, Sexo } from "@/lib/types"
 import { mockPublicaciones } from "@/lib/mock-data"
+import { isDemoHost } from "@/lib/env"
 import type { Publicacion } from "@/lib/types"
 
-const isDemoBranch = process.env.VERCEL_GIT_COMMIT_REF === "demo"
-const isDemoEnv = process.env.NEXT_PUBLIC_IS_DEMO === "true" || isDemoBranch
+const isDemoEnv = isDemoHost(undefined)
 
 // ─── Tipos para las queries ─────────────────────────────────
 interface FiltrosPublicaciones {
@@ -23,11 +23,12 @@ interface FiltrosPublicaciones {
 }
 
 // ─── SELECT: Obtener publicaciones ──────────────────────────
-export async function getPublicaciones(filtros?: FiltrosPublicaciones) {
+export async function getPublicaciones(filtros?: FiltrosPublicaciones, opts?: { forceDemo?: boolean }) {
   const conditions = []
 
   // Filtrar publicaciones de prueba si no estamos en modo demo
-  if (!isDemoEnv) {
+  const isDemo = opts?.forceDemo ?? isDemoEnv
+  if (!isDemo) {
     conditions.push(eq(publicaciones.esPrueba, false))
   }
 
@@ -79,7 +80,7 @@ export async function getPublicaciones(filtros?: FiltrosPublicaciones) {
   let result = rows.map(mapRowToPublicacion)
 
   // Inyectar mocks estaticos si estamos en demo
-  if (isDemoEnv) {
+  if (isDemo) {
     const mockFiltradas = mockPublicaciones.filter((pub) => {
       if (filtros?.soloActivas !== false) {
         if (filtros?.soloEnTransito && !pub.enTransito) return false
@@ -94,25 +95,29 @@ export async function getPublicaciones(filtros?: FiltrosPublicaciones) {
       return true
     })
 
+    // Force mock publicaciones to belong to demo-admin so demo shows admin-owned posts
+    const mockAdjusted = mockFiltradas.map((p) => ({ ...p, usuarioId: "demo-admin" }))
     // Agregamos las de prueba primero
-    result = [...mockFiltradas, ...result]
+    result = [...mockAdjusted, ...result]
   }
 
   return result
 }
 
 // ─── SELECT: Obtener publicacion por ID ─────────────────────
-export async function getPublicacionById(id: string) {
+export async function getPublicacionById(id: string, opts?: { forceDemo?: boolean }) {
   const conditions = [eq(publicaciones.id, id)]
 
+  const isDemo = opts?.forceDemo ?? isDemoEnv
+
   // Buscar primero en los mocks si es demo
-  if (isDemoEnv) {
+  if (isDemo) {
     const mockPub = mockPublicaciones.find((p) => p.id === id)
-    if (mockPub) return mockPub
+    if (mockPub) return { ...mockPub, usuarioId: "demo-admin" }
   }
 
   // Filtrar publicaciones de prueba si no estamos en modo demo
-  if (!isDemoEnv) {
+  if (!isDemo) {
     conditions.push(eq(publicaciones.esPrueba, false))
   }
 

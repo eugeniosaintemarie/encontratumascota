@@ -8,15 +8,16 @@ export async function POST(request: Request, { params }: RouteParams) {
   const { id } = await params
 
   try {
-    const session = await getServerSession()
+    const session = await getServerSession(request)
     if (!session?.user) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 })
     }
 
     const { getPublicacionById, cerrarPublicacionDB } = await import("@/lib/actions/publicaciones")
+    const { isDemoRequest } = await import("@/lib/env")
 
     // Verificar que la publicacion pertenece al usuario
-    const existing = await getPublicacionById(id)
+    const existing = await getPublicacionById(id, { forceDemo: isDemoRequest(request) })
     if (!existing) {
       return NextResponse.json({ error: "Publicacion no encontrada" }, { status: 404 })
     }

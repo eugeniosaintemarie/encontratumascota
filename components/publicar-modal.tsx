@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import {
   Dialog,
   DialogContent,
@@ -46,6 +46,24 @@ export function PublicarModal({
   const { agregarPublicacion } = usePublicaciones()
   const { data: session } = authClient.useSession()
   const { uploadImage, isUploading: isUploadingImage } = useImageUpload()
+  const [demoUser, setDemoUser] = useState<any | null>(null)
+
+  // If neon session is missing but demo_public cookie exists, fetch server session
+  useEffect(() => {
+    if (!session?.user) {
+      const cookies = typeof document !== 'undefined' ? document.cookie : ''
+      if (cookies.includes('demo_public=1')) {
+        void (async () => {
+          try {
+            const user = await (await import('@/lib/auth/client')).fetchServerSession()
+            if (user) setDemoUser(user)
+          } catch (e) {
+            // ignore
+          }
+        })()
+      }
+    }
+  }, [session])
 
   // Form state
   const [paso, setPaso] = useState<1 | 2>(1)
@@ -108,7 +126,7 @@ export function PublicarModal({
 
       // Subir imagen a Vercel Blob
       try {
-        const url = await uploadImage(croppedBlob, session?.user?.id || undefined)
+        const url = await uploadImage(croppedBlob, session?.user?.id || demoUser?.id || undefined)
         finalImagenUrl = url
       } catch (error) {
         console.error("Error subiendo imagen:", error)
@@ -133,7 +151,7 @@ export function PublicarModal({
         contactoTelefono,
         contactoEmail,
         mostrarContactoPublico,
-        usuarioId: session?.user?.id || "",
+        usuarioId: session?.user?.id || demoUser?.id || "",
         activa: true,
         transitoUrgente: tipoPublicacion === "perdida" ? transitoUrgente : false,
       })
@@ -212,9 +230,6 @@ export function PublicarModal({
 
         {paso === 1 && (
           <div className="flex flex-col gap-4 py-6">
-            <h3 className="text-center text-lg font-medium text-foreground">
-              ¿Qué tipo de publicación querés realizar?
-            </h3>
             <div className="grid gap-4 sm:grid-cols-2 mt-4">
               <button
                 type="button"
@@ -222,15 +237,16 @@ export function PublicarModal({
                   setTipoPublicacion("perdida")
                   setPaso(2)
                 }}
-                className="flex flex-col items-center justify-center p-6 gap-4 rounded-xl border-2 border-border hover:border-primary hover:bg-primary/5 transition-all outline-none"
+                className="flex flex-col items-center justify-center p-6 gap-4 rounded-xl border-2 border-border hover:border-primary hover:bg-primary/5 transform-gpu transition-transform duration-150 active:scale-95 active:translate-y-0.5 focus:outline-none cursor-pointer select-none"
+                aria-pressed={tipoPublicacion === "perdida"}
               >
                 <div className="p-4 rounded-full bg-primary/10 text-primary">
                   <Search className="h-8 w-8" />
                 </div>
                 <div className="text-center">
-                  <h4 className="font-semibold text-lg">Mascota Perdida</h4>
+                  <h4 className="font-semibold text-lg">Perdida</h4>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Encontraste una mascota que creeés que tiene familia y está perdida.
+                    Encontraste una mascota que creeés que tiene familia y está perdida
                   </p>
                 </div>
               </button>
@@ -241,15 +257,16 @@ export function PublicarModal({
                   setTipoPublicacion("adopcion")
                   setPaso(2)
                 }}
-                className="flex flex-col items-center justify-center p-6 gap-4 rounded-xl border-2 border-border hover:border-primary hover:bg-primary/5 transition-all outline-none"
+                className="flex flex-col items-center justify-center p-6 gap-4 rounded-xl border-2 border-border hover:border-primary hover:bg-primary/5 transform-gpu transition-transform duration-150 active:scale-95 active:translate-y-0.5 focus:outline-none cursor-pointer select-none"
+                aria-pressed={tipoPublicacion === "adopcion"}
               >
                 <div className="p-4 rounded-full bg-primary/10 text-primary">
                   <Heart className="h-8 w-8" />
                 </div>
                 <div className="text-center">
-                  <h4 className="font-semibold text-lg">Mascota en Adopción</h4>
+                  <h4 className="font-semibold text-lg">Adopción</h4>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Tenés o estás cuidando una mascota y le estás buscando su primer familia.
+                    Tenés o estás cuidando una mascota y le estás buscando su primer familia
                   </p>
                 </div>
               </button>
@@ -260,8 +277,7 @@ export function PublicarModal({
         {paso === 2 && (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="especie">Tipo de mascota</Label>
+              <div className="space-y-2 my-2">
                 <Select
                   value={especie}
                   onValueChange={(v) => {
@@ -270,7 +286,7 @@ export function PublicarModal({
                   }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar tipo" />
+                    <SelectValue placeholder="Tipo" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="perro">Perro</SelectItem>
@@ -280,15 +296,14 @@ export function PublicarModal({
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="raza">Raza</Label>
+              <div className="space-y-2 my-2">
                 <Select
                   value={raza}
                   onValueChange={(v) => setRaza(v as Raza)}
                   disabled={!especie}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar raza" />
+                    <SelectValue placeholder="Raza" />
                   </SelectTrigger>
                   <SelectContent>
                     {especie &&
@@ -300,12 +315,13 @@ export function PublicarModal({
                   </SelectContent>
                 </Select>
               </div>
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="sexo">Genero</Label>
+            <div className="grid gap-4 sm:grid-cols-3 mt-2">
+              <div className="space-y-2 my-2 sm:col-span-1">
                 <Select value={sexo} onValueChange={(v) => setSexo(v as Sexo)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar genero" />
+                    <SelectValue placeholder="Genero" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="macho">Macho</SelectItem>
@@ -315,26 +331,24 @@ export function PublicarModal({
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="color">Color</Label>
+              <div className="space-y-2 my-2 sm:col-span-2">
                 <Input
                   id="color"
                   type="text"
                   value={color}
                   onChange={(e) => setColor(e.target.value)}
-                  placeholder="Ej: Marron con manchas blancas"
+                  placeholder="Color - Ej: Marron con manchas blancas"
                   required
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="descripcion">Descripcion</Label>
               <Textarea
                 id="descripcion"
                 value={descripcion}
                 onChange={(e) => setDescripcion(e.target.value)}
-                placeholder="Descripcion detallada de la mascota encontrada..."
+                placeholder="Descripcion lo más detallada posible"
                 rows={3}
                 required
               />
@@ -357,7 +371,7 @@ export function PublicarModal({
 
               {tipoPublicacion === "perdida" ? (
                 <div className="space-y-2">
-                  <Label htmlFor="fecha">Fecha de encuentro</Label>
+                  <Label htmlFor="fecha">Fecha cuando fue encontrada</Label>
                   <Input
                     id="fecha"
                     type="date"
@@ -374,7 +388,7 @@ export function PublicarModal({
                     type="text"
                     value={edad}
                     onChange={(e) => setEdad(e.target.value)}
-                    placeholder="Ej: 2 meses, 3 años"
+                    placeholder="Ej: 3 años"
                     required
                   />
                 </div>
@@ -382,7 +396,6 @@ export function PublicarModal({
             </div>
 
             <div className="space-y-2">
-              <Label>Imagen (opcional)</Label>
 
               {showCropEditor && imageFile ? (
                 <ImageCropEditor
@@ -432,6 +445,7 @@ export function PublicarModal({
                     type="file"
                     accept="image/*"
                     className="hidden"
+                    aria-required="true"
                     onChange={(e) => {
                       const file = e.target.files?.[0]
                       if (file) {
@@ -448,7 +462,7 @@ export function PublicarModal({
                     onClick={() => fileInputRef.current?.click()}
                   >
                     <Upload className="mr-2 h-4 w-4" />
-                    Subir imagen
+                    Subir foto
                   </Button>
                 </div>
               )}
@@ -470,55 +484,54 @@ export function PublicarModal({
                   </Label>
                 </div>
               )}
+            </div>
 
-              <div className="flex items-start space-x-2">
+            <div className="border-t border-border py-6">
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className="space-y-2 sm:col-span-2">
+                  <Input
+                    id="contacto-nombre"
+                    type="text"
+                    value={contactoNombre}
+                    onChange={(e) => setContactoNombre(e.target.value)}
+                    placeholder="Nombre y apellido"
+                    required
+                  />
+                </div>
+                <div className="space-y-2 sm:col-span-1">
+                  <Input
+                    id="contacto-telefono"
+                    type="tel"
+                    value={contactoTelefono}
+                    onChange={(e) => setContactoTelefono(e.target.value)}
+                    placeholder="Teléfono"
+                    required
+                  />
+                </div>
+                <div className="space-y-2 sm:col-span-3">
+                  <Input
+                    id="contacto-email"
+                    type="email"
+                    value={contactoEmail}
+                    onChange={(e) => setContactoEmail(e.target.value)}
+                    placeholder="Email"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="mt-3 flex items-start space-x-2">
                 <Checkbox
                   id="mostrar-contacto"
                   checked={mostrarContactoPublico}
                   onCheckedChange={(checked) => setMostrarContactoPublico(checked === true)}
                 />
                 <Label htmlFor="mostrar-contacto" className="text-sm font-medium leading-none cursor-pointer">
-                  Mostrar mis datos de contacto al público
+                  Datos públicos
                   <span className="block text-xs font-normal text-muted-foreground mt-0.5">
-                    Si marcás esta opción, cualquier persona (incluso sin cuenta) podrá ver tu número y email.
+                    Cualquier persona sin cuenta podrá ver tu número y email
                   </span>
                 </Label>
-              </div>
-            </div>
-
-            <div className="border-t border-border pt-4">
-              <h4 className="mb-3 font-medium">Datos de contacto</h4>
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div className="space-y-2">
-                  <Label htmlFor="contacto-nombre">Nombre</Label>
-                  <Input
-                    id="contacto-nombre"
-                    type="text"
-                    value={contactoNombre}
-                    onChange={(e) => setContactoNombre(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="contacto-telefono">Telefono</Label>
-                  <Input
-                    id="contacto-telefono"
-                    type="tel"
-                    value={contactoTelefono}
-                    onChange={(e) => setContactoTelefono(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="contacto-email">Email</Label>
-                  <Input
-                    id="contacto-email"
-                    type="email"
-                    value={contactoEmail}
-                    onChange={(e) => setContactoEmail(e.target.value)}
-                    required
-                  />
-                </div>
               </div>
             </div>
 

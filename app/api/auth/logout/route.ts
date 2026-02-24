@@ -60,5 +60,11 @@ export async function GET(request: Request) {
     )
   }
 
+  // Borrar cookie de sesion demo si existe
+  response.headers.append(
+    "Set-Cookie",
+    `demo_session=; Max-Age=0; Path=/; HttpOnly; SameSite=Lax`
+  )
+
   return response
 }

@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Select,
@@ -66,25 +67,44 @@ export function FiltrosPublicaciones({
   onSearch,
   hasActiveFilters,
 }: FiltrosPublicacionesProps) {
+  const [hintFirst, setHintFirst] = useState(false)
+  const [hintSecond, setHintSecond] = useState(false)
+
+  useEffect(() => {
+    // Play a subtle hint animation: first button, then second
+    const t1 = setTimeout(() => setHintFirst(true), 300)
+    const t2 = setTimeout(() => setHintFirst(false), 900)
+    const t3 = setTimeout(() => setHintSecond(true), 1100)
+    const t4 = setTimeout(() => setHintSecond(false), 1700)
+
+    return () => {
+      clearTimeout(t1)
+      clearTimeout(t2)
+      clearTimeout(t3)
+      clearTimeout(t4)
+    }
+  }, [])
   return (
     <div className="flex flex-col gap-4">
       {/* Tabs Type Selector */}
       <div className="flex w-full items-center justify-between gap-2 p-1 bg-muted/30 rounded-xl border">
         <button
-          className={`px-4 py-2 text-sm font-medium transition-colors flex-1 text-center rounded-lg ${tipoPublicacion === "perdida"
+          className={`px-4 py-2 text-sm font-medium flex-1 text-center rounded-lg transform-gpu transition-all duration-150 active:scale-95 active:translate-y-0.5 focus:outline-none cursor-pointer select-none ${tipoPublicacion === "perdida"
             ? "bg-[#FF8A65] text-white shadow-sm"
             : "text-muted-foreground hover:bg-muted/50"
-            }`}
+            } ${hintFirst ? 'shadow-lg ring-2 ring-primary/30' : ''}`}
           onClick={() => onTipoPublicacionChange(tipoPublicacion === "perdida" ? undefined : "perdida")}
+          aria-pressed={tipoPublicacion === "perdida"}
         >
           Mascotas perdidas, que esperan ser encontradas por sus dueños
         </button>
         <button
-          className={`px-4 py-2 text-sm font-medium transition-colors flex-1 text-center rounded-lg ${tipoPublicacion === "adopcion"
+          className={`px-4 py-2 text-sm font-medium flex-1 text-center rounded-lg transform-gpu transition-all duration-150 active:scale-95 active:translate-y-0.5 focus:outline-none cursor-pointer select-none ${tipoPublicacion === "adopcion"
             ? "bg-[#FF8A65] text-white shadow-sm"
             : "text-muted-foreground hover:bg-muted/50"
-            }`}
+            } ${hintSecond ? 'shadow-lg ring-2 ring-primary/30' : ''}`}
           onClick={() => onTipoPublicacionChange(tipoPublicacion === "adopcion" ? undefined : "adopcion")}
+          aria-pressed={tipoPublicacion === "adopcion"}
         >
           Mascotas en adopcion, que buscan su primer familia
         </button>

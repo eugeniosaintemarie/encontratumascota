@@ -70,12 +70,30 @@ export function AuthModal({
       (loginEmail === "admin" && loginPassword === "admin") ||
       (loginEmail === "demo" && loginPassword === "demo")
     ) {
-      setTimeout(() => {
-        onAuthSuccess?.()
-        onClose()
-        setIsLoading(false)
-      }, 500)
-      return
+        try {
+          // Intentar login demo en el servidor para establecer cookie demo_session
+          const res = await fetch("/api/auth/demo-login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: loginEmail, password: loginPassword }),
+          })
+          if (res.ok) {
+            // Demo login succeeded on server; reload so client picks up demo session/cookies
+            try {
+              window.location.reload()
+            } catch {
+              onAuthSuccess?.()
+              onClose()
+            }
+          } else {
+            setError("Credenciales demo invalidas")
+          }
+        } catch (e) {
+          setError("Error conectando al servidor de demo")
+        } finally {
+          setIsLoading(false)
+        }
+        return
     }
 
     try {

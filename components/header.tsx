@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -35,6 +35,18 @@ export function Header({
   const [menuOpen, setMenuOpen] = useState(false)
   const { setTheme, resolvedTheme } = useTheme()
   const isDark = resolvedTheme === "dark"
+  const [isDemoEnv, setIsDemoEnv] = useState(false)
+
+  // Detect demo host on client-side (origin-based)
+  useEffect(() => {
+    try {
+      const host = window.location.host.toLowerCase()
+      const isDemo = host.includes("encontratumascotademo.vercel.app") || host.startsWith("localhost") || host.startsWith("127.0.0.1")
+      setIsDemoEnv(isDemo)
+    } catch {
+      setIsDemoEnv(false)
+    }
+  }, [])
 
   const handleThemeToggle = useCallback(() => {
     setTheme(isDark ? "light" : "dark")
@@ -52,12 +64,14 @@ export function Header({
 
         {/* Desktop navigation */}
         <nav className="hidden sm:flex items-center gap-2">
-          <a href="https://encontratumascotademo.vercel.app/" target="_blank" rel="noopener noreferrer">
-            <Button variant="ghost" size="sm">
-              <ExternalLink className="mr-1.5 h-4 w-4" />
-              Demo
-            </Button>
-          </a>
+          {!isDemoEnv && (
+            <a href="https://encontratumascotademo.vercel.app/" target="_blank" rel="noopener noreferrer">
+              <Button variant="ghost" size="sm">
+                <ExternalLink className="mr-1.5 h-4 w-4" />
+                Demo
+              </Button>
+            </a>
+          )}
           {showBackButton && (
             <Link href="/">
               <Button variant="ghost" size="sm">
@@ -66,7 +80,7 @@ export function Header({
               </Button>
             </Link>
           )}
-          <Button variant="outline" size="sm" onClick={onPublicarClick}>
+          <Button variant="outline" size="sm" onClick={() => (isAuthenticated ? onPublicarClick() : onAccederClick())}>
             <Plus className="mr-1.5 h-4 w-4" />
             Publicar
           </Button>
@@ -87,19 +101,21 @@ export function Header({
         {/* Mobile hamburger menu */}
         <div className="sm:hidden">
           <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
-            <DropdownMenuTrigger asChild>
+              <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-9 w-9">
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Menu</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem asChild>
-                <a href="https://encontratumascotademo.vercel.app/" target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="mr-2 h-4 w-4" />
-                  Demo
-                </a>
-              </DropdownMenuItem>
+              {!isDemoEnv && (
+                <DropdownMenuItem asChild>
+                  <a href="https://encontratumascotademo.vercel.app/" target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    Demo
+                  </a>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               {showBackButton && (
                 <>
@@ -115,7 +131,7 @@ export function Header({
               <DropdownMenuItem
                 onClick={() => {
                   setMenuOpen(false)
-                  onPublicarClick()
+                  isAuthenticated ? onPublicarClick() : onAccederClick()
                 }}
               >
                 <Plus className="mr-2 h-4 w-4" />

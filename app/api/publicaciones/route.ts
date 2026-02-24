@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "@/lib/auth/server"
+import { isDemoRequest } from "@/lib/env"
 
 // GET /api/publicaciones - Listar publicaciones (publico)
 export async function GET(request: Request) {
@@ -19,7 +20,7 @@ export async function GET(request: Request) {
       ubicacion,
       transitoUrgente: transitoUrgente || undefined,
       soloEnTransito: soloEnTransito || undefined,
-    })
+    }, { forceDemo: isDemoRequest(request) })
 
     return NextResponse.json({ publicaciones })
   } catch (error) {
@@ -31,7 +32,7 @@ export async function GET(request: Request) {
 // POST /api/publicaciones - Crear publicacion (requiere autenticacion)
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession()
+    const session = await getServerSession(request)
     if (!session?.user) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 })
     }
@@ -41,20 +42,24 @@ export async function POST(request: Request) {
 
     // Usar el usuarioId de la sesion, NO del body (previene suplantacion)
     const publicacion = await crearPublicacion({
+      tipoPublicacion: body.tipoPublicacion,
       especie: body.especie,
       raza: body.raza,
       sexo: body.sexo,
       color: body.color,
       descripcion: body.descripcion,
+      edad: body.edad,
       imagenUrl: body.imagenUrl || "",
       ubicacion: body.ubicacion,
-      fechaEncuentro: new Date(body.fechaEncuentro),
+      fechaEncuentro: body.fechaEncuentro ? new Date(body.fechaEncuentro) : undefined,
       contactoNombre: body.contactoNombre,
       contactoTelefono: body.contactoTelefono,
       contactoEmail: body.contactoEmail,
+      mostrarContactoPublico: !!body.mostrarContactoPublico,
       usuarioId: session.user.id,
-      transitoUrgente: body.transitoUrgente || false,
-    })
+      transitoUrgente: !!body.transitoUrgente,
+      esPrueba: !!body.esPrueba,
+    }, { forceDemo: isDemoRequest(request) })
 
     return NextResponse.json({ publicacion }, { status: 201 })
   } catch (error) {
