@@ -103,7 +103,7 @@ export function AuthModal({
       })
 
       if (result.error) {
-        setError(result.error.message || "Email o contrasena incorrectos")
+        setError(result.error.message || "Email o contraseña incorrectos")
       } else {
         onAuthSuccess?.()
         onClose()
@@ -125,17 +125,17 @@ export function AuthModal({
     }
 
     if (registerPassword.length < 8) {
-      setError("La contrasena debe tener al menos 8 caracteres")
+      setError("La contraseña debe tener al menos 8 caracteres")
       return
     }
 
     if (!/[A-Z]/.test(registerPassword)) {
-      setError("La contrasena debe incluir al menos una mayuscula")
+      setError("La contraseña debe incluir al menos una mayuscula")
       return
     }
 
     if (!/[0-9]/.test(registerPassword)) {
-      setError("La contrasena debe incluir al menos un numero")
+      setError("La contraseña debe incluir al menos un numero")
       return
     }
 

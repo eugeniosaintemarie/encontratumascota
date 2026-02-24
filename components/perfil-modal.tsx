@@ -52,7 +52,7 @@ export function PerfilModal({
   const [transitoTelefono, setTransitoTelefono] = useState("")
   const [transitoEmail, setTransitoEmail] = useState("")
   
-  // Estado para cambio de contrasena
+  // Estado para cambio de contraseña
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
   const [confirmNewPassword, setConfirmNewPassword] = useState("")
@@ -101,19 +101,19 @@ export function PerfilModal({
     setPasswordError(null)
     setPasswordSuccess(false)
 
-    // Validar nueva contrasena
+    // Validar nueva contraseña
     if (newPassword.length < 8) {
-      setPasswordError("La nueva contrasena debe tener al menos 8 caracteres")
+      setPasswordError("La nueva contraseña debe tener al menos 8 caracteres")
       return
     }
 
     if (!/[A-Z]/.test(newPassword)) {
-      setPasswordError("La contrasena debe incluir al menos una mayuscula")
+      setPasswordError("La contraseña debe incluir al menos una mayuscula")
       return
     }
 
     if (!/[0-9]/.test(newPassword)) {
-      setPasswordError("La contrasena debe incluir al menos un numero")
+      setPasswordError("La contraseña debe incluir al menos un numero")
       return
     }
 
@@ -131,7 +131,7 @@ export function PerfilModal({
       })
       
       if (result.error) {
-        setPasswordError(result.error.message || "Error al cambiar contrasena")
+        setPasswordError(result.error.message || "Error al cambiar contraseña")
       } else {
         setPasswordSuccess(true)
         setCurrentPassword("")
@@ -236,7 +236,7 @@ export function PerfilModal({
                         <SelectItem value="transitada">
                           <div className="flex items-center gap-2">
                             <PawPrint className="h-4 w-4" />
-                            Mascota en tránsito
+                            Mascota tránsitada a nuevo cuidador
                           </div>
                         </SelectItem>
                       </SelectContent>
@@ -307,14 +307,14 @@ export function PerfilModal({
               <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
                 <AlertDescription className="text-green-600">
-                  Contrasena cambiada exitosamente
+                  Contraseña cambiada exitosamente
                 </AlertDescription>
               </Alert>
             )}
 
             <form onSubmit={handleChangePassword} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="current-password">Contrasena actual</Label>
+                <Label htmlFor="current-password">Contraseña actual</Label>
                 <Input
                   id="current-password"
                   type="password"
@@ -324,7 +324,7 @@ export function PerfilModal({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="new-password">Nueva contrasena</Label>
+                <Label htmlFor="new-password">Nueva contraseña</Label>
                 <Input
                   id="new-password"
                   type="password"

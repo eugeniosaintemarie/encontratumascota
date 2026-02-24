@@ -132,3 +132,38 @@
 .grecaptcha-badge {
   visibility: hidden !important;
 }
+
+/* Make the native datepicker calendar icon visible in white on dark inputs */
+input[type="date"] {
+  color: white;
+}
+
+/* WebKit-based browsers (Chrome, Edge, Safari) */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(2) saturate(0%);
+  opacity: 0.95;
+  /* Reduce left margin so the icon sits closer to the text (match publicar modal spacing) */
+  margin-left: -6px !important;
+}
+
+/* Firefox */
+input[type="date"]::-moz-calendar-picker-indicator {
+  filter: invert(1) brightness(2);
+  /* similar adjustment for Firefox */
+  margin-left: -6px;
+}
+
+/* Tighter spacing for the calendar icon inside the search filters */
+.fecha-buscador input[type="date"]::-webkit-calendar-picker-indicator {
+  margin-left: -8px;
+}
+.fecha-buscador input[type="date"]::-moz-calendar-picker-indicator {
+  margin-left: -8px;
+}
+
+/* Hide spinner/clear buttons where present to keep visuals clean */
+input[type="date"]::-webkit-clear-button,
+input[type="date"]::-webkit-inner-spin-button {
+  display: none;
+}
+

@@ -1,7 +1,5 @@
 "use server"
 
-import { db } from "@/lib/db"
-import { publicaciones } from "@/lib/db/schema"
 import { eq, and, or, ilike, desc } from "drizzle-orm"
 import type { Especie, Sexo } from "@/lib/types"
 import { mockPublicaciones } from "@/lib/mock-data"
@@ -24,57 +22,64 @@ interface FiltrosPublicaciones {
 
 // ─── SELECT: Obtener publicaciones ──────────────────────────
 export async function getPublicaciones(filtros?: FiltrosPublicaciones, opts?: { forceDemo?: boolean }) {
-  const conditions = []
+  const conditions: any[] = []
 
   // Filtrar publicaciones de prueba si no estamos en modo demo
   const isDemo = opts?.forceDemo ?? isDemoEnv
+  let rows: any[] = []
+
   if (!isDemo) {
-    conditions.push(eq(publicaciones.esPrueba, false))
-  }
+    // Lazy-import DB/schema only when needed (avoids throwing when DATABASE_URL is missing in dev)
+    const { db } = await import("@/lib/db")
+    const { publicaciones } = await import("@/lib/db/schema")
 
-  if (filtros?.soloActivas !== false) {
-    // Por defecto traer activas + en transito (excluir cerradas definitivamente)
-    if (filtros?.soloEnTransito) {
-      conditions.push(eq(publicaciones.enTransito, true))
-    } else {
-      conditions.push(
-        or(
-          eq(publicaciones.activa, true),
-          eq(publicaciones.enTransito, true)
-        )
-      )
+    if (!isDemo) {
+      conditions.push(eq(publicaciones.esPrueba, false))
     }
-  }
 
-  if (filtros?.tipoPublicacion) {
-    conditions.push(eq(publicaciones.tipoPublicacion, filtros.tipoPublicacion))
-  }
+    if (filtros?.soloActivas !== false) {
+      if (filtros?.soloEnTransito) {
+        conditions.push(eq(publicaciones.enTransito, true))
+      } else {
+        conditions.push(
+          or(
+            eq(publicaciones.activa, true),
+            eq(publicaciones.enTransito, true)
+          )
+        )
+      }
+    }
 
-  if (filtros?.especie && filtros.especie !== "todos") {
-    conditions.push(eq(publicaciones.especie, filtros.especie))
-  }
+    if (filtros?.tipoPublicacion) {
+      conditions.push(eq(publicaciones.tipoPublicacion, filtros.tipoPublicacion))
+    }
 
-  if (filtros?.raza && filtros.raza !== "todos") {
-    conditions.push(eq(publicaciones.raza, filtros.raza))
-  }
+    if (filtros?.especie && filtros.especie !== "todos") {
+      conditions.push(eq(publicaciones.especie, filtros.especie))
+    }
 
-  if (filtros?.sexo && filtros.sexo !== "todos") {
-    conditions.push(eq(publicaciones.sexo, filtros.sexo))
-  }
+    if (filtros?.raza && filtros.raza !== "todos") {
+      conditions.push(eq(publicaciones.raza, filtros.raza))
+    }
 
-  if (filtros?.ubicacion) {
-    conditions.push(ilike(publicaciones.ubicacion, `%${filtros.ubicacion}%`))
-  }
+    if (filtros?.sexo && filtros.sexo !== "todos") {
+      conditions.push(eq(publicaciones.sexo, filtros.sexo))
+    }
 
-  if (filtros?.transitoUrgente) {
-    conditions.push(eq(publicaciones.transitoUrgente, true))
-  }
+    if (filtros?.ubicacion) {
+      conditions.push(ilike(publicaciones.ubicacion, `%${filtros.ubicacion}%`))
+    }
 
-  const rows = await db
-    .select()
-    .from(publicaciones)
-    .where(conditions.length > 0 ? and(...conditions) : undefined)
-    .orderBy(desc(publicaciones.fechaPublicacion))
+    if (filtros?.transitoUrgente) {
+      conditions.push(eq(publicaciones.transitoUrgente, true))
+    }
+
+    rows = await db
+      .select()
+      .from(publicaciones)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(publicaciones.fechaPublicacion))
+  }
 
   // Transformar a las interfaces del frontend
   let result = rows.map(mapRowToPublicacion)
@@ -106,8 +111,6 @@ export async function getPublicaciones(filtros?: FiltrosPublicaciones, opts?: { 
 
 // ─── SELECT: Obtener publicacion por ID ─────────────────────
 export async function getPublicacionById(id: string, opts?: { forceDemo?: boolean }) {
-  const conditions = [eq(publicaciones.id, id)]
-
   const isDemo = opts?.forceDemo ?? isDemoEnv
 
   // Buscar primero en los mocks si es demo
@@ -116,7 +119,10 @@ export async function getPublicacionById(id: string, opts?: { forceDemo?: boolea
     if (mockPub) return { ...mockPub, usuarioId: "demo-admin" }
   }
 
-  // Filtrar publicaciones de prueba si no estamos en modo demo
+  // Si no es demo, consultar la DB (lazy-import)
+  const { db } = await import("@/lib/db")
+  const { publicaciones } = await import("@/lib/db/schema")
+  const conditions = [eq(publicaciones.id, id)]
   if (!isDemo) {
     conditions.push(eq(publicaciones.esPrueba, false))
   }
@@ -151,6 +157,9 @@ export async function crearPublicacion(data: {
   transitoUrgente?: boolean
   esPrueba?: boolean
 }) {
+  const { db } = await import("@/lib/db")
+  const { publicaciones } = await import("@/lib/db/schema")
+
   const [row] = await db
     .insert(publicaciones)
     .values({
@@ -200,6 +209,9 @@ export async function cerrarPublicacionDB(
     updateData.transitoContactoEmail = transitoContacto.email
   }
 
+  const { db } = await import("@/lib/db")
+  const { publicaciones } = await import("@/lib/db/schema")
+
   const [row] = await db
     .update(publicaciones)
     .set(updateData)
@@ -225,6 +237,10 @@ export async function actualizarPublicacionDB(
     esPrueba: boolean
   }>
 ) {
+
+  const { db } = await import("@/lib/db")
+  const { publicaciones } = await import("@/lib/db/schema")
+
   const [row] = await db
     .update(publicaciones)
     .set(datos)
@@ -237,9 +253,14 @@ export async function actualizarPublicacionDB(
 // ─── Contador de mascotas reunidas ──────────────────────────
 export async function contarMascotasReunidas() {
   const conditions = [
-    eq(publicaciones.activa, false),
-    eq(publicaciones.enTransito, false),
+    // lazy-import schema for conditions
+    // (we'll import publicaciones below)
   ]
+  const { db } = await import("@/lib/db")
+  const { publicaciones } = await import("@/lib/db/schema")
+
+  conditions.push(eq(publicaciones.activa, false))
+  conditions.push(eq(publicaciones.enTransito, false))
 
   // Filtrar publicaciones de prueba si no estamos en modo demo
   if (!isDemoEnv) {

@@ -203,7 +203,7 @@ export function PublicacionCard({
         <div className="absolute right-3 bottom-3">
           <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm text-xs border-0">
             {publicacion.tipoPublicacion === "adopcion"
-              ? `~ ${mascota.edad}`
+              ? `${mascota.edad}`
               : publicacion.fechaEncuentro ? formatDate(publicacion.fechaEncuentro) : ""}
           </Badge>
         </div>

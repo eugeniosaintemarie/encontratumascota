@@ -1,0 +1,82 @@
+[
+  {
+    "id": "buenos-aires-caballito",
+    "name": "Caballito",
+    "city": "Ciudad Autónoma de Buenos Aires",
+    "province": "Buenos Aires",
+    "lat": -34.6297,
+    "lon": -58.4333
+  },
+  {
+    "id": "buenos-aires-palermo",
+    "name": "Palermo",
+    "city": "Ciudad Autónoma de Buenos Aires",
+    "province": "Buenos Aires",
+    "lat": -34.5811,
+    "lon": -58.4145
+  },
+  {
+    "id": "buenos-aires-recoleta",
+    "name": "Recoleta",
+    "city": "Ciudad Autónoma de Buenos Aires",
+    "province": "Buenos Aires",
+    "lat": -34.5883,
+    "lon": -58.3922
+  },
+  {
+    "id": "buenos-aires-almagro",
+    "name": "Almagro",
+    "city": "Ciudad Autónoma de Buenos Aires",
+    "province": "Buenos Aires",
+    "lat": -34.6141,
+    "lon": -58.4186
+  },
+  {
+    "id": "buenos-aires-belgrano",
+    "name": "Belgrano",
+    "city": "Ciudad Autónoma de Buenos Aires",
+    "province": "Buenos Aires",
+    "lat": -34.5596,
+    "lon": -58.4395
+  },
+  {
+    "id": "buenos-aires-flores",
+    "name": "Flores",
+    "city": "Ciudad Autónoma de Buenos Aires",
+    "province": "Buenos Aires",
+    "lat": -34.6195,
+    "lon": -58.4440
+  },
+  {
+    "id": "buenos-aires-mataderos",
+    "name": "Mataderos",
+    "city": "Ciudad Autónoma de Buenos Aires",
+    "province": "Buenos Aires",
+    "lat": -34.6483,
+    "lon": -58.4872
+  },
+  {
+    "id": "cordoba-nueva-cordoba",
+    "name": "Nueva Córdoba",
+    "city": "Córdoba",
+    "province": "Córdoba",
+    "lat": -31.4201,
+    "lon": -64.1888
+  },
+  {
+    "id": "mendoza-centro",
+    "name": "Centro",
+    "city": "Mendoza",
+    "province": "Mendoza",
+    "lat": -32.8908,
+    "lon": -68.8272
+  },
+  {
+    "id": "rosario-centro",
+    "name": "Centro",
+    "city": "Rosario",
+    "province": "Santa Fe",
+    "lat": -32.9468,
+    "lon": -60.6393
+  }
+]

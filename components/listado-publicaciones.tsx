@@ -22,6 +22,7 @@ export function ListadoPublicaciones({
   const [raza, setRaza] = useState<string | "todos">("todos")
   const [sexo, setSexo] = useState<Sexo | "todos">("todos")
   const [ubicacion, setUbicacion] = useState("")
+  const [fechaDesde, setFechaDesde] = useState<string | undefined>(undefined)
   const [transitoUrgente, setTransitoUrgente] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const ITEMS_PER_PAGE = 10
@@ -39,6 +40,14 @@ export function ListadoPublicaciones({
         !pub.ubicacion.toLowerCase().includes(ubicacion.toLowerCase())
       )
         return false
+      // Filtrar por fechaDesde sólo para publicaciones de pérdida
+      if (tipoPublicacion !== 'adopcion' && fechaDesde) {
+        try {
+          const since = new Date(fechaDesde)
+          if (isNaN(since.getTime())) return false
+          if (pub.fechaPublicacion < since) return false
+        } catch { /* ignore parse errors */ }
+      }
       // Filtrar por tránsito urgente
       if (tipoPublicacion === "perdida" && transitoUrgente && !pub.transitoUrgente) return false
       // Excluir las que están en tránsito (van a otra página)
@@ -54,13 +63,14 @@ export function ListadoPublicaciones({
   }, [publicacionesFiltradas, currentPage])
 
   const hasActiveFilters =
-    especie !== "todos" || raza !== "todos" || sexo !== "todos" || ubicacion !== "" || transitoUrgente
+    especie !== "todos" || raza !== "todos" || sexo !== "todos" || ubicacion !== "" || transitoUrgente || !!fechaDesde
 
   const clearFilters = () => {
     setEspecie("todos")
     setRaza("todos")
     setSexo("todos")
     setUbicacion("")
+    setFechaDesde(undefined)
     setTransitoUrgente(false)
     setCurrentPage(1)
   }
@@ -77,6 +87,7 @@ export function ListadoPublicaciones({
         raza={raza}
         sexo={sexo}
         ubicacion={ubicacion}
+        fechaDesde={fechaDesde}
         transitoUrgente={transitoUrgente}
         onTipoPublicacionChange={(v) => {
           setTipoPublicacion(v)
@@ -96,6 +107,10 @@ export function ListadoPublicaciones({
         }}
         onUbicacionChange={(v) => {
           setUbicacion(v)
+          setCurrentPage(1)
+        }}
+        onFechaDesdeChange={(v) => {
+          setFechaDesde(v || undefined)
           setCurrentPage(1)
         }}
         onTransitoUrgenteChange={(v) => {
@@ -122,7 +137,7 @@ export function ListadoPublicaciones({
           </div>
           {/* Paginación */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center space-x-2 pt-8">
+            <div className="flex items-center justify-center space-x-2 pt-4 pb-0">
               {currentPage > 1 ? (
                 <Button
                   variant="outline"

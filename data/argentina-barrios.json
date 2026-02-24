@@ -1,0 +1,31 @@
+{
+  "meta": {
+    "source": "custom-list",
+    "note": "This is a small sample. Expand with full dataset when available."
+  },
+  "provinces": [
+    {
+      "name": "Ciudad Autónoma de Buenos Aires",
+      "code": "CABA",
+      "barrios": [
+        { "name": "Caballito", "city": "Buenos Aires", "lat": -34.6365, "lng": -58.4360 },
+        { "name": "Palermo", "city": "Buenos Aires", "lat": -34.5833, "lng": -58.4333 },
+        { "name": "Almagro", "city": "Buenos Aires", "lat": -34.6094, "lng": -58.4189 }
+      ]
+    },
+    {
+      "name": "Provincia de Buenos Aires",
+      "code": "BA",
+      "barrios": [
+        { "name": "La Plata Centro", "city": "La Plata", "lat": -34.9205, "lng": -57.9536 }
+      ]
+    },
+    {
+      "name": "Provincia de Córdoba",
+      "code": "CBA",
+      "barrios": [
+        { "name": "Nueva Córdoba", "city": "Córdoba", "lat": -31.4170, "lng": -64.1836 }
+      ]
+    }
+  ]
+}

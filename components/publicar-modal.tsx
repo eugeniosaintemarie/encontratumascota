@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ImageCropEditor } from "@/components/image-crop-editor"
+import LocationAutocomplete from "@/components/location-autocomplete"
 import { Upload, X, Heart, Search } from "lucide-react"
 
 import type { Especie, Sexo, Raza, TipoPublicacion } from "@/lib/types"
@@ -86,6 +87,15 @@ export function PublicarModal({
   const [croppedBlob, setCroppedBlob] = useState<Blob | null>(null)
   const [croppedPreview, setCroppedPreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const dateInputRef = useRef<HTMLInputElement | null>(null)
+
+  const pad = (n: number) => n.toString().padStart(2, "0")
+  const formatDateDisplay = (iso?: string) => {
+    if (!iso) return ""
+    const d = new Date(iso)
+    if (Number.isNaN(d.getTime())) return ""
+    return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`
+  }
 
   const razasPorEspecie: Record<Especie, { value: Raza; label: string }[]> = {
     perro: [
@@ -117,6 +127,31 @@ export function PublicarModal({
     if (!croppedBlob) {
       toast.error("Por favor, subí una foto de la mascota obligatoriamente.")
       return
+    }
+
+    // Validar email de contacto (si existe)
+    const email = contactoEmail?.trim()
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (email && !emailRegex.test(email)) {
+      toast.error("El email de contacto no tiene un formato válido.")
+      return
+    }
+
+    // Validar teléfono argentino (si existe)
+    const telefono = contactoTelefono?.trim()
+    if (telefono) {
+      const digits = telefono.replace(/\D/g, "")
+      const isArg = (() => {
+        if (digits.length < 8) return false
+        if (digits.startsWith('54')) return true // +54 country code
+        if (digits.startsWith('0')) return true // national with trunk
+        // Allow common local lengths (e.g., 10-13 digits after various formats)
+        return digits.length >= 10 && digits.length <= 13
+      })()
+      if (!isArg) {
+        toast.error("El teléfono no parece ser un número argentino válido.")
+        return
+      }
     }
 
     setIsLoading(true)
@@ -229,8 +264,8 @@ export function PublicarModal({
         </DialogHeader>
 
         {paso === 1 && (
-          <div className="flex flex-col gap-4 py-6">
-            <div className="grid gap-4 sm:grid-cols-2 mt-4">
+          <div className="flex flex-col gap-4">
+            <div className="grid gap-4 sm:grid-cols-2">
               <button
                 type="button"
                 onClick={() => {
@@ -264,7 +299,7 @@ export function PublicarModal({
                   <Heart className="h-8 w-8" />
                 </div>
                 <div className="text-center">
-                  <h4 className="font-semibold text-lg">Adopción</h4>
+                  <h4 className="font-semibold text-lg">En Adopción</h4>
                   <p className="text-sm text-muted-foreground mt-1">
                     Tenés o estás cuidando una mascota y le estás buscando su primer familia
                   </p>
@@ -276,8 +311,9 @@ export function PublicarModal({
 
         {paso === 2 && (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2 my-2">
+            <div className="h-3" />
+            <div className="grid gap-2 sm:grid-cols-2 mt-0">
+              <div className="space-y-2 sm:col-span-1">
                 <Select
                   value={especie}
                   onValueChange={(v) => {
@@ -285,7 +321,7 @@ export function PublicarModal({
                     setRaza("")
                   }}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Tipo" />
                   </SelectTrigger>
                   <SelectContent>
@@ -296,13 +332,13 @@ export function PublicarModal({
                 </Select>
               </div>
 
-              <div className="space-y-2 my-2">
+              <div className="space-y-2 sm:col-span-1">
                 <Select
                   value={raza}
                   onValueChange={(v) => setRaza(v as Raza)}
                   disabled={!especie}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Raza" />
                   </SelectTrigger>
                   <SelectContent>
@@ -317,10 +353,10 @@ export function PublicarModal({
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-3 mt-2">
-              <div className="space-y-2 my-2 sm:col-span-1">
+            <div className="grid gap-2 sm:grid-cols-3">
+              <div className="space-y-2 sm:col-span-1">
                 <Select value={sexo} onValueChange={(v) => setSexo(v as Sexo)}>
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Genero" />
                   </SelectTrigger>
                   <SelectContent>
@@ -331,14 +367,15 @@ export function PublicarModal({
                 </Select>
               </div>
 
-              <div className="space-y-2 my-2 sm:col-span-2">
+              <div className="space-y-2 sm:col-span-2">
                 <Input
                   id="color"
                   type="text"
                   value={color}
                   onChange={(e) => setColor(e.target.value)}
-                  placeholder="Color - Ej: Marron con manchas blancas"
+                  placeholder="Color - Ejemplo: Marron con manchas blancas"
                   required
+                  className="w-full"
                 />
               </div>
             </div>
@@ -354,31 +391,56 @@ export function PublicarModal({
               />
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
+            <div className="grid gap-2 sm:grid-cols-2 mt-[25px] mb-2">
+                <div className="space-y-2">
                 <Label htmlFor="ubicacion">
                   {tipoPublicacion === "perdida" ? "Ubicación donde fue encontrada" : "Ubicación donde está alojada"}
                 </Label>
-                <Input
-                  id="ubicacion"
-                  type="text"
+                {/* Location autocomplete */}
+                <LocationAutocomplete
                   value={ubicacion}
-                  onChange={(e) => setUbicacion(e.target.value)}
-                  placeholder="Ej: Palermo, CABA"
-                  required
+                  onChange={(v) => setUbicacion(v)}
+                  onSelect={(place) => setUbicacion(place.address)}
+                  placeholder="Ejemplo: Almagro, CABA"
                 />
               </div>
 
               {tipoPublicacion === "perdida" ? (
                 <div className="space-y-2">
-                  <Label htmlFor="fecha">Fecha cuando fue encontrada</Label>
-                  <Input
-                    id="fecha"
-                    type="date"
-                    value={fechaEncuentro}
-                    onChange={(e) => setFechaEncuentro(e.target.value)}
-                    required
-                  />
+                  <Label htmlFor="fecha">Fecha de cuando fue encontrada</Label>
+                  <div className="relative">
+                    <input
+                      ref={dateInputRef}
+                      id="fecha-hidden"
+                      type="date"
+                      value={fechaEncuentro}
+                      onChange={(e) => setFechaEncuentro(e.target.value)}
+                      className="absolute left-0 top-0 h-0 w-0 opacity-0 pointer-events-none"
+                      aria-hidden
+                    />
+
+                    <div>
+                      <input
+                        ref={dateInputRef}
+                        id="fecha-hidden"
+                        type="date"
+                        value={fechaEncuentro}
+                        onChange={(e) => setFechaEncuentro(e.target.value)}
+                        className="absolute left-0 top-0 h-0 w-0 opacity-0 pointer-events-none"
+                        aria-hidden
+                      />
+                      <button
+                        type="button"
+                        className="flex w-full items-center justify-between rounded-md border border-input bg-transparent px-3 h-9 text-base"
+                        onClick={() => dateInputRef.current?.showPicker?.() || dateInputRef.current?.focus()}
+                      >
+                        <span className={fechaEncuentro ? 'text-foreground text-base' : 'text-muted-foreground text-base'}>
+                          {fechaEncuentro ? formatDateDisplay(fechaEncuentro) : 'dd/mm/aaaa'}
+                        </span>
+                        {/* calendar icon removed to match compact header styling */}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -388,14 +450,14 @@ export function PublicarModal({
                     type="text"
                     value={edad}
                     onChange={(e) => setEdad(e.target.value)}
-                    placeholder="Ej: 3 años"
+                    placeholder="Ejemplo: cachorrito"
                     required
                   />
                 </div>
               )}
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 mt-[25px]">
 
               {showCropEditor && imageFile ? (
                 <ImageCropEditor
@@ -439,7 +501,7 @@ export function PublicarModal({
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 my-2">
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -468,9 +530,9 @@ export function PublicarModal({
               )}
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-3 my-2">
               {tipoPublicacion === "perdida" && (
-                <div className="flex items-start space-x-2">
+                <div className="flex items-start space-x-2 mt-[25px]">
                   <Checkbox
                     id="transito-urgente"
                     checked={transitoUrgente}
@@ -486,15 +548,15 @@ export function PublicarModal({
               )}
             </div>
 
-            <div className="border-t border-border py-6">
-              <div className="grid gap-4 sm:grid-cols-3">
+            <div className="mt-6 border-t border-primary pb-6">
+              <div className="mt-[25px] grid gap-4 sm:grid-cols-3">
                 <div className="space-y-2 sm:col-span-2">
                   <Input
                     id="contacto-nombre"
                     type="text"
                     value={contactoNombre}
                     onChange={(e) => setContactoNombre(e.target.value)}
-                    placeholder="Nombre y apellido"
+                    placeholder="Nombre"
                     required
                   />
                 </div>
@@ -508,7 +570,7 @@ export function PublicarModal({
                     required
                   />
                 </div>
-                <div className="space-y-2 sm:col-span-3">
+                <div className="space-y-2 sm:col-span-3 mt-[8px]">
                   <Input
                     id="contacto-email"
                     type="email"
@@ -520,7 +582,7 @@ export function PublicarModal({
                 </div>
               </div>
 
-              <div className="mt-3 flex items-start space-x-2">
+              <div className="mt-3 flex items-start space-x-2 mt-[25px]">
                 <Checkbox
                   id="mostrar-contacto"
                   checked={mostrarContactoPublico}
@@ -535,7 +597,7 @@ export function PublicarModal({
               </div>
             </div>
 
-            <div className="flex gap-3 pt-2">
+            <div className="flex gap-3 py-2">
               <Button type="button" variant="outline" onClick={() => setPaso(1)}>
                 Atrás
               </Button>

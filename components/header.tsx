@@ -57,7 +57,7 @@ export function Header({
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
           <Image src="/logo.png" alt="Encontra Tu Mascota" width={36} height={36} className="h-9 w-9 rounded-lg" />
-          <span className="text-lg font-semibold text-foreground">
+          <span className="text-lg font-semibold !text-white">
             Encontra Tu Mascota
           </span>
         </Link>
