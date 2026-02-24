@@ -146,6 +146,8 @@ export function PublicacionCard({
           className="object-cover object-top transition-transform duration-300 group-hover:scale-105 h-full w-full"
         />
 
+        {/* imagen renderizada */}
+
         {/* Botón de compartir */}
         <div className="absolute right-3 top-3 z-10">
           <Button

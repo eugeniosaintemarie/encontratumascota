@@ -30,21 +30,25 @@ self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (event.request.method !== 'GET') return
 
-  // Skip chrome-extension and non-http requests
-  if (!event.request.url.startsWith('http')) return
+  // Skip non-http or cross-origin requests (don't intercept external images/assets)
+  try {
+    const url = new URL(event.request.url)
+    if (url.origin !== self.location.origin) return
 
-  // NUNCA cachear endpoints de autenticacion
-  const url = new URL(event.request.url)
-  if (url.pathname.startsWith('/api/auth')) return
+    // NUNCA cachear endpoints de autenticacion
+    if (url.pathname.startsWith('/api/auth')) return
+  } catch (e) {
+    return
+  }
 
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Clone and cache successful responses
-        if (response && response.status === 200) {
+        // Only cache successful same-origin responses (avoid opaque cross-origin issues)
+        if (response && response.ok && (response.type === 'basic' || response.type === 'cors')) {
           const responseClone = response.clone()
           caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone)
+            cache.put(event.request, responseClone).catch(() => {})
           })
         }
         return response

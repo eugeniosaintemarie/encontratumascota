@@ -44,7 +44,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; img-src * https: http: data: blob: 'unsafe-inline'; media-src *; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';"
+            value: "default-src 'self'; img-src 'self' https: data: blob:; media-src *; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';"
           },
           {
             key: 'X-Frame-Options',
