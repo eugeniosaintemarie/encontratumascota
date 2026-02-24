@@ -30,7 +30,7 @@ export function PublicacionCard({
   onRequireAuth,
 }: PublicacionCardProps) {
   const { mascota } = publicacion
-  
+
   const [isSharing, setIsSharing] = useState(false)
   const [isCopied, setIsCopied] = useState(false)
 
@@ -129,23 +129,21 @@ export function PublicacionCard({
   }
 
   // Limitar descripcion a 140 caracteres y capitalizar primera letra
-  const descripcionLimitada = mascota.descripcion.length > 140 
-    ? mascota.descripcion.slice(0, 140).trim() + "..." 
+  const descripcionLimitada = mascota.descripcion.length > 140
+    ? mascota.descripcion.slice(0, 140).trim() + "..."
     : mascota.descripcion
   const descripcionFormateada = descripcionLimitada.charAt(0).toUpperCase() + descripcionLimitada.slice(1).toLowerCase()
 
   return (
-    <Card 
+    <Card
       id={`publicacion-${publicacion.id}`}
       className="group flex flex-col overflow-hidden transition-all hover:shadow-lg p-0 gap-0"
     >
       <div className="relative aspect-square overflow-hidden bg-muted">
-        <Image
+        <img
           src={mascota.imagenUrl || "/placeholder.svg"}
           alt={`${especieLabels[mascota.especie]} encontrado`}
-          fill
-          className="object-cover object-top transition-transform duration-300 group-hover:scale-105"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className="object-cover object-top transition-transform duration-300 group-hover:scale-105 h-full w-full"
         />
 
         {/* Botón de compartir */}
@@ -202,7 +200,9 @@ export function PublicacionCard({
         </div>
         <div className="absolute right-3 bottom-3">
           <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm text-xs border-0">
-            {formatDate(publicacion.fechaEncuentro)}
+            {publicacion.tipoPublicacion === "adopcion"
+              ? `~ ${mascota.edad}`
+              : publicacion.fechaEncuentro ? formatDate(publicacion.fechaEncuentro) : ""}
           </Badge>
         </div>
       </div>
@@ -213,7 +213,7 @@ export function PublicacionCard({
         </p>
 
         <div className="mt-auto">
-          {isAuthenticated ? (
+          {isAuthenticated || publicacion.mostrarContactoPublico ? (
             <div className="space-y-2">
               {/* Si está en tránsito y tiene contacto de tránsito, mostrar ambos */}
               {publicacion.enTransito && publicacion.transitoContactoNombre ? (
@@ -227,13 +227,13 @@ export function PublicacionCard({
                     <p className="text-sm font-medium text-foreground">
                       {publicacion.transitoContactoNombre}
                     </p>
-                    <a 
+                    <a
                       href={`tel:${publicacion.transitoContactoTelefono?.replace(/\s/g, '')}`}
                       className="block text-sm text-muted-foreground hover:text-primary hover:underline"
                     >
                       {publicacion.transitoContactoTelefono}
                     </a>
-                    <a 
+                    <a
                       href={`mailto:${publicacion.transitoContactoEmail}`}
                       className="block text-sm text-muted-foreground hover:text-primary hover:underline truncate"
                       title={publicacion.transitoContactoEmail ?? ""}
@@ -250,13 +250,13 @@ export function PublicacionCard({
                     <p className="text-sm font-medium text-foreground">
                       {publicacion.contactoNombre}
                     </p>
-                    <a 
+                    <a
                       href={`tel:${publicacion.contactoTelefono.replace(/\s/g, '')}`}
                       className="block text-sm text-muted-foreground hover:text-primary hover:underline"
                     >
                       {publicacion.contactoTelefono}
                     </a>
-                    <a 
+                    <a
                       href={`mailto:${publicacion.contactoEmail}`}
                       className="block text-sm text-muted-foreground hover:text-primary hover:underline truncate"
                       title={publicacion.contactoEmail}
@@ -271,13 +271,13 @@ export function PublicacionCard({
                   <p className="text-sm font-medium text-foreground">
                     {publicacion.contactoNombre}
                   </p>
-                  <a 
+                  <a
                     href={`tel:${publicacion.contactoTelefono.replace(/\s/g, '')}`}
                     className="block text-sm text-muted-foreground hover:text-primary hover:underline"
                   >
                     {publicacion.contactoTelefono}
                   </a>
-                  <a 
+                  <a
                     href={`mailto:${publicacion.contactoEmail}`}
                     className="block text-sm text-muted-foreground hover:text-primary hover:underline truncate"
                     title={publicacion.contactoEmail}
@@ -292,7 +292,7 @@ export function PublicacionCard({
               <div className="flex items-center gap-2 text-sm text-foreground/70">
                 <Lock className="h-4 w-4 shrink-0" />
                 <span>
-                  <button 
+                  <button
                     type="button"
                     onClick={handleLoginClick}
                     className="text-primary hover:underline font-medium"

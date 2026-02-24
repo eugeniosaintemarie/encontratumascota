@@ -32,18 +32,23 @@ export interface Mascota {
   sexo: Sexo
   color: string
   descripcion: string
+  edad?: string | null
   imagenUrl: string
 }
 
+export type TipoPublicacion = "perdida" | "adopcion"
+
 export interface Publicacion {
   id: string
+  tipoPublicacion: TipoPublicacion
   mascota: Mascota
   ubicacion: string
   fechaPublicacion: Date
-  fechaEncuentro: Date
+  fechaEncuentro?: Date | null
   contactoNombre: string
   contactoTelefono: string
   contactoEmail: string
+  mostrarContactoPublico: boolean
   usuarioId: string
   activa: boolean
   esPrueba?: boolean

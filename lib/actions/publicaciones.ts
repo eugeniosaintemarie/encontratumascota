@@ -4,10 +4,17 @@ import { db } from "@/lib/db"
 import { publicaciones } from "@/lib/db/schema"
 import { eq, and, or, ilike, desc } from "drizzle-orm"
 import type { Especie, Sexo } from "@/lib/types"
+import { mockPublicaciones } from "@/lib/mock-data"
+import type { Publicacion } from "@/lib/types"
+
+const isDemoBranch = process.env.VERCEL_GIT_COMMIT_REF === "demo"
+const isDemoEnv = process.env.NEXT_PUBLIC_IS_DEMO === "true" || isDemoBranch
 
 // ─── Tipos para las queries ─────────────────────────────────
 interface FiltrosPublicaciones {
+  tipoPublicacion?: "perdida" | "adopcion"
   especie?: Especie | "todos"
+  raza?: string | "todos"
   sexo?: Sexo | "todos"
   ubicacion?: string
   transitoUrgente?: boolean
@@ -20,7 +27,7 @@ export async function getPublicaciones(filtros?: FiltrosPublicaciones) {
   const conditions = []
 
   // Filtrar publicaciones de prueba si no estamos en modo demo
-  if (process.env.NEXT_PUBLIC_IS_DEMO !== "true") {
+  if (!isDemoEnv) {
     conditions.push(eq(publicaciones.esPrueba, false))
   }
 
@@ -38,8 +45,16 @@ export async function getPublicaciones(filtros?: FiltrosPublicaciones) {
     }
   }
 
+  if (filtros?.tipoPublicacion) {
+    conditions.push(eq(publicaciones.tipoPublicacion, filtros.tipoPublicacion))
+  }
+
   if (filtros?.especie && filtros.especie !== "todos") {
     conditions.push(eq(publicaciones.especie, filtros.especie))
+  }
+
+  if (filtros?.raza && filtros.raza !== "todos") {
+    conditions.push(eq(publicaciones.raza, filtros.raza))
   }
 
   if (filtros?.sexo && filtros.sexo !== "todos") {
@@ -61,15 +76,43 @@ export async function getPublicaciones(filtros?: FiltrosPublicaciones) {
     .orderBy(desc(publicaciones.fechaPublicacion))
 
   // Transformar a las interfaces del frontend
-  return rows.map(mapRowToPublicacion)
+  let result = rows.map(mapRowToPublicacion)
+
+  // Inyectar mocks estaticos si estamos en demo
+  if (isDemoEnv) {
+    const mockFiltradas = mockPublicaciones.filter((pub) => {
+      if (filtros?.soloActivas !== false) {
+        if (filtros?.soloEnTransito && !pub.enTransito) return false
+        if (!filtros?.soloEnTransito && !pub.activa && !pub.enTransito) return false
+      }
+      if (filtros?.tipoPublicacion && pub.tipoPublicacion !== filtros.tipoPublicacion) return false
+      if (filtros?.especie && filtros.especie !== "todos" && pub.mascota.especie !== filtros.especie) return false
+      if (filtros?.raza && filtros.raza !== "todos" && pub.mascota.raza !== filtros.raza) return false
+      if (filtros?.sexo && filtros.sexo !== "todos" && pub.mascota.sexo !== filtros.sexo) return false
+      if (filtros?.ubicacion && !pub.ubicacion.toLowerCase().includes(filtros.ubicacion.toLowerCase())) return false
+      if (filtros?.transitoUrgente && !pub.transitoUrgente) return false
+      return true
+    })
+
+    // Agregamos las de prueba primero
+    result = [...mockFiltradas, ...result]
+  }
+
+  return result
 }
 
 // ─── SELECT: Obtener publicacion por ID ─────────────────────
 export async function getPublicacionById(id: string) {
   const conditions = [eq(publicaciones.id, id)]
 
+  // Buscar primero en los mocks si es demo
+  if (isDemoEnv) {
+    const mockPub = mockPublicaciones.find((p) => p.id === id)
+    if (mockPub) return mockPub
+  }
+
   // Filtrar publicaciones de prueba si no estamos en modo demo
-  if (process.env.NEXT_PUBLIC_IS_DEMO !== "true") {
+  if (!isDemoEnv) {
     conditions.push(eq(publicaciones.esPrueba, false))
   }
 
@@ -85,17 +128,20 @@ export async function getPublicacionById(id: string) {
 
 // ─── INSERT: Crear publicacion ──────────────────────────────
 export async function crearPublicacion(data: {
+  tipoPublicacion: "perdida" | "adopcion"
   especie: string
   raza: string
   sexo: string
   color: string
   descripcion: string
+  edad?: string
   imagenUrl?: string
   ubicacion: string
-  fechaEncuentro: Date
+  fechaEncuentro?: Date
   contactoNombre: string
   contactoTelefono: string
   contactoEmail: string
+  mostrarContactoPublico: boolean
   usuarioId: string
   transitoUrgente?: boolean
   esPrueba?: boolean
@@ -103,17 +149,20 @@ export async function crearPublicacion(data: {
   const [row] = await db
     .insert(publicaciones)
     .values({
+      tipoPublicacion: data.tipoPublicacion,
       especie: data.especie,
       raza: data.raza,
       sexo: data.sexo,
       color: data.color,
       descripcion: data.descripcion,
+      edad: data.edad,
       imagenUrl: data.imagenUrl || "",
       ubicacion: data.ubicacion,
-      fechaEncuentro: data.fechaEncuentro,
+      fechaEncuentro: data.fechaEncuentro || null,
       contactoNombre: data.contactoNombre,
       contactoTelefono: data.contactoTelefono,
       contactoEmail: data.contactoEmail,
+      mostrarContactoPublico: data.mostrarContactoPublico,
       usuarioId: data.usuarioId,
       transitoUrgente: data.transitoUrgente ?? false,
       esPrueba: data.esPrueba ?? false,
@@ -188,7 +237,7 @@ export async function contarMascotasReunidas() {
   ]
 
   // Filtrar publicaciones de prueba si no estamos en modo demo
-  if (process.env.NEXT_PUBLIC_IS_DEMO !== "true") {
+  if (!isDemoEnv) {
     conditions.push(eq(publicaciones.esPrueba, false))
   }
 
@@ -201,9 +250,10 @@ export async function contarMascotasReunidas() {
 }
 
 // ─── Helper: mapear row de DB a interface del frontend ──────
-function mapRowToPublicacion(row: typeof publicaciones.$inferSelect) {
+function mapRowToPublicacion(row: typeof publicaciones.$inferSelect): Publicacion {
   return {
     id: row.id,
+    tipoPublicacion: row.tipoPublicacion as "perdida" | "adopcion",
     mascota: {
       id: row.id, // Usamos el mismo ID ya que no hay tabla separada
       especie: row.especie as Especie,
@@ -211,6 +261,7 @@ function mapRowToPublicacion(row: typeof publicaciones.$inferSelect) {
       sexo: row.sexo as Sexo,
       color: row.color,
       descripcion: row.descripcion,
+      edad: row.edad,
       imagenUrl: row.imagenUrl || "",
     },
     ubicacion: row.ubicacion,
@@ -219,6 +270,7 @@ function mapRowToPublicacion(row: typeof publicaciones.$inferSelect) {
     contactoNombre: row.contactoNombre,
     contactoTelefono: row.contactoTelefono,
     contactoEmail: row.contactoEmail,
+    mostrarContactoPublico: row.mostrarContactoPublico,
     usuarioId: row.usuarioId,
     activa: row.activa,
     esPrueba: row.esPrueba,

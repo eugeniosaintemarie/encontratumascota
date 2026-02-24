@@ -3,9 +3,10 @@
 import { useState, useMemo } from "react"
 import { PublicacionCard } from "@/components/publicacion-card"
 import { FiltrosPublicaciones } from "@/components/filtros-publicaciones"
-import { PawPrint } from "lucide-react"
+import { PawPrint, ChevronLeft, ChevronRight } from "lucide-react"
 import { usePublicaciones } from "@/lib/publicaciones-context"
-import type { Especie, Sexo } from "@/lib/types"
+import { Button } from "@/components/ui/button"
+import type { Especie, Sexo, TipoPublicacion } from "@/lib/types"
 
 interface ListadoPublicacionesProps {
   isAuthenticated?: boolean
@@ -16,16 +17,22 @@ export function ListadoPublicaciones({
   isAuthenticated = false,
   onRequireAuth,
 }: ListadoPublicacionesProps) {
+  const [tipoPublicacion, setTipoPublicacion] = useState<TipoPublicacion>("perdida")
   const [especie, setEspecie] = useState<Especie | "todos">("todos")
+  const [raza, setRaza] = useState<string | "todos">("todos")
   const [sexo, setSexo] = useState<Sexo | "todos">("todos")
   const [ubicacion, setUbicacion] = useState("")
   const [transitoUrgente, setTransitoUrgente] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const ITEMS_PER_PAGE = 10
 
   const { publicaciones } = usePublicaciones()
 
   const publicacionesFiltradas = useMemo(() => {
     return publicaciones.filter((pub) => {
+      if (pub.tipoPublicacion !== tipoPublicacion) return false
       if (especie !== "todos" && pub.mascota.especie !== especie) return false
+      if (raza !== "todos" && pub.mascota.raza !== raza) return false
       if (sexo !== "todos" && pub.mascota.sexo !== sexo) return false
       if (
         ubicacion &&
@@ -33,21 +40,29 @@ export function ListadoPublicaciones({
       )
         return false
       // Filtrar por tránsito urgente
-      if (transitoUrgente && !pub.transitoUrgente) return false
+      if (tipoPublicacion === "perdida" && transitoUrgente && !pub.transitoUrgente) return false
       // Excluir las que están en tránsito (van a otra página)
       if (pub.enTransito) return false
       return pub.activa
     })
-  }, [especie, sexo, ubicacion, transitoUrgente, publicaciones])
+  }, [tipoPublicacion, especie, raza, sexo, ubicacion, transitoUrgente, publicaciones])
+
+  const totalPages = Math.ceil(publicacionesFiltradas.length / ITEMS_PER_PAGE)
+  const paginatedPublicaciones = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+    return publicacionesFiltradas.slice(startIndex, startIndex + ITEMS_PER_PAGE)
+  }, [publicacionesFiltradas, currentPage])
 
   const hasActiveFilters =
-    especie !== "todos" || sexo !== "todos" || ubicacion !== "" || transitoUrgente
+    especie !== "todos" || raza !== "todos" || sexo !== "todos" || ubicacion !== "" || transitoUrgente
 
   const clearFilters = () => {
     setEspecie("todos")
+    setRaza("todos")
     setSexo("todos")
     setUbicacion("")
     setTransitoUrgente(false)
+    setCurrentPage(1)
   }
 
   const handleSearch = () => {
@@ -57,30 +72,80 @@ export function ListadoPublicaciones({
   return (
     <div className="space-y-4">
       <FiltrosPublicaciones
+        tipoPublicacion={tipoPublicacion}
         especie={especie}
+        raza={raza}
         sexo={sexo}
         ubicacion={ubicacion}
         transitoUrgente={transitoUrgente}
-        onEspecieChange={setEspecie}
-        onSexoChange={setSexo}
-        onUbicacionChange={setUbicacion}
-        onTransitoUrgenteChange={setTransitoUrgente}
+        onTipoPublicacionChange={(v) => {
+          setTipoPublicacion(v)
+          setCurrentPage(1)
+        }}
+        onEspecieChange={(v) => {
+          setEspecie(v)
+          setCurrentPage(1)
+        }}
+        onRazaChange={(v) => {
+          setRaza(v)
+          setCurrentPage(1)
+        }}
+        onSexoChange={(v) => {
+          setSexo(v)
+          setCurrentPage(1)
+        }}
+        onUbicacionChange={(v) => {
+          setUbicacion(v)
+          setCurrentPage(1)
+        }}
+        onTransitoUrgenteChange={(v) => {
+          setTransitoUrgente(v)
+          setCurrentPage(1)
+        }}
         onClearFilters={clearFilters}
         onSearch={handleSearch}
         hasActiveFilters={hasActiveFilters}
       />
 
-      {publicacionesFiltradas.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-          {publicacionesFiltradas.map((publicacion) => (
-            <PublicacionCard
-              key={publicacion.id}
-              publicacion={publicacion}
-              isAuthenticated={isAuthenticated}
-              onRequireAuth={onRequireAuth}
-            />
-          ))}
-        </div>
+      {paginatedPublicaciones.length > 0 ? (
+        <>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+            {paginatedPublicaciones.map((publicacion) => (
+              <PublicacionCard
+                key={publicacion.id}
+                publicacion={publicacion}
+                isAuthenticated={isAuthenticated}
+                onRequireAuth={onRequireAuth}
+              />
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center space-x-2 pt-6">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4 mr-2" />
+                Anterior
+              </Button>
+              <div className="text-sm font-medium">
+                Página {currentPage} de {totalPages}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Siguiente
+                <ChevronRight className="h-4 w-4 ml-2" />
+              </Button>
+            </div>
+          )}
+        </>
       ) : (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 py-16">
           <PawPrint className="mb-4 h-12 w-12 text-muted-foreground/50" />

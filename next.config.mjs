@@ -16,6 +16,22 @@ const nextConfig = {
         protocol: "https",
         hostname: "*.public.blob.vercel-storage.com",
       },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "loremflickr.com",
+      },
+      {
+        protocol: "https",
+        hostname: "picsum.photos",
+      },
+      {
+        protocol: "https",
+        hostname: "fastly.picsum.photos",
+      },
     ],
   },
   turbopack: {
@@ -28,7 +44,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; img-src *; media-src *; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
+            value: "default-src 'self'; img-src * https: http: data: blob: 'unsafe-inline'; media-src *; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';"
           },
           {
             key: 'X-Frame-Options',

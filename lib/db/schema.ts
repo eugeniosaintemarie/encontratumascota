@@ -23,17 +23,20 @@ export const publicaciones = pgTable("publicaciones", {
   sexo: text("sexo").notNull(), // "macho" | "hembra" | "desconocido"
   color: text("color").notNull(),
   descripcion: text("descripcion").notNull(),
+  edad: text("edad"), // Solo para adopcion: "~ X años o meses"
   imagenUrl: text("imagen_url").default(""),
 
   // Datos de la publicacion
+  tipoPublicacion: text("tipo_publicacion").default("perdida").notNull(), // "perdida" | "adopcion"
   ubicacion: text("ubicacion").notNull(),
   fechaPublicacion: timestamp("fecha_publicacion", { withTimezone: true }).defaultNow().notNull(),
-  fechaEncuentro: timestamp("fecha_encuentro", { withTimezone: true }).notNull(),
+  fechaEncuentro: timestamp("fecha_encuentro", { withTimezone: true }), // Solo para perdida
 
   // Contacto
   contactoNombre: text("contacto_nombre").notNull(),
   contactoTelefono: text("contacto_telefono").notNull(),
   contactoEmail: text("contacto_email").notNull(),
+  mostrarContactoPublico: boolean("mostrar_contacto_publico").default(false).notNull(),
 
   // Relacion con usuario (Neon Auth usa IDs de texto)
   usuarioId: text("usuario_id").notNull(),
