@@ -208,7 +208,7 @@ export function PublicacionCard({
       </div>
 
       <CardContent className="flex flex-1 flex-col px-[10px] py-[10px]">
-        <p className="text-sm text-foreground/80 line-clamp-3 mb-[10px]">
+        <p className="text-sm text-foreground/80 line-clamp-3 mb-[10px] min-h-[60px]">
           {descripcionFormateada}
         </p>
 
@@ -295,7 +295,7 @@ export function PublicacionCard({
                   <button
                     type="button"
                     onClick={handleLoginClick}
-                    className="text-primary hover:underline font-medium"
+                    className="text-primary hover:underline font-medium whitespace-nowrap"
                   >
                     Inicia sesion o registrate
                   </button>

@@ -32,13 +32,13 @@ const razasPorEspecie: Record<string, { value: string; label: string }[]> = {
 }
 
 interface FiltrosPublicacionesProps {
-  tipoPublicacion: TipoPublicacion
+  tipoPublicacion: TipoPublicacion | undefined
   especie: Especie | "todos"
   raza: string | "todos"
   sexo: Sexo | "todos"
   ubicacion: string
   transitoUrgente: boolean
-  onTipoPublicacionChange: (value: TipoPublicacion) => void
+  onTipoPublicacionChange: (value: TipoPublicacion | undefined) => void
   onEspecieChange: (value: Especie | "todos") => void
   onRazaChange: (value: string | "todos") => void
   onSexoChange: (value: Sexo | "todos") => void
@@ -69,22 +69,22 @@ export function FiltrosPublicaciones({
   return (
     <div className="flex flex-col gap-4">
       {/* Tabs Type Selector */}
-      <div className="flex w-full items-center justify-center sm:justify-start gap-4 pb-2 border-b">
+      <div className="flex w-full items-center justify-between gap-2 p-1 bg-muted/30 rounded-xl border">
         <button
-          className={`pb-2 px-1 text-sm font-medium border-b-2 transition-colors ${tipoPublicacion === "perdida"
-              ? "border-primary text-primary"
-              : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted"
+          className={`px-4 py-2 text-sm font-medium transition-colors flex-1 text-center rounded-lg ${tipoPublicacion === "perdida"
+            ? "bg-[#FF8A65] text-white shadow-sm"
+            : "text-muted-foreground hover:bg-muted/50"
             }`}
-          onClick={() => onTipoPublicacionChange("perdida")}
+          onClick={() => onTipoPublicacionChange(tipoPublicacion === "perdida" ? undefined : "perdida")}
         >
           Mascotas perdidas, que esperan ser encontradas por sus dueños
         </button>
         <button
-          className={`pb-2 px-1 text-sm font-medium border-b-2 transition-colors ${tipoPublicacion === "adopcion"
-              ? "border-primary text-primary"
-              : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted"
+          className={`px-4 py-2 text-sm font-medium transition-colors flex-1 text-center rounded-lg ${tipoPublicacion === "adopcion"
+            ? "bg-[#FF8A65] text-white shadow-sm"
+            : "text-muted-foreground hover:bg-muted/50"
             }`}
-          onClick={() => onTipoPublicacionChange("adopcion")}
+          onClick={() => onTipoPublicacionChange(tipoPublicacion === "adopcion" ? undefined : "adopcion")}
         >
           Mascotas en adopcion, que buscan su primer familia
         </button>
@@ -161,8 +161,8 @@ export function FiltrosPublicaciones({
                 size="icon"
                 onClick={() => onTransitoUrgenteChange(!transitoUrgente)}
                 className={`shrink-0 ${transitoUrgente
-                    ? "bg-[#B71C1C] hover:bg-[#D32F2F] !border-[#B71C1C]"
-                    : "bg-white/10 hover:bg-white/20 !border-white/30"
+                  ? "bg-[#B71C1C] hover:bg-[#D32F2F] !border-[#B71C1C]"
+                  : "bg-white/10 hover:bg-white/20 !border-white/30"
                   }`}
                 title="Filtrar tránsito urgente"
               >

@@ -24,9 +24,9 @@ export function Footer() {
             <span>mascotas reunidas con sus familias</span>
           </p>
           <p className="text-sm text-foreground text-center sm:text-left">
-            No encontras tu mascota perdida?{" "}
+            No encontras a tu mascota perdida?{" "}
             <Link href="/transitadas" className="text-[#FF8A65] hover:underline font-medium">
-              Busca si le dieron tránsito urgente ubicandola con otra familia
+              Busca si cedieron el tránsito con otra persona
             </Link>
           </p>
         </div>

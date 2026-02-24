@@ -17,7 +17,7 @@ export function ListadoPublicaciones({
   isAuthenticated = false,
   onRequireAuth,
 }: ListadoPublicacionesProps) {
-  const [tipoPublicacion, setTipoPublicacion] = useState<TipoPublicacion>("perdida")
+  const [tipoPublicacion, setTipoPublicacion] = useState<TipoPublicacion | undefined>(undefined)
   const [especie, setEspecie] = useState<Especie | "todos">("todos")
   const [raza, setRaza] = useState<string | "todos">("todos")
   const [sexo, setSexo] = useState<Sexo | "todos">("todos")
@@ -30,7 +30,7 @@ export function ListadoPublicaciones({
 
   const publicacionesFiltradas = useMemo(() => {
     return publicaciones.filter((pub) => {
-      if (pub.tipoPublicacion !== tipoPublicacion) return false
+      if (tipoPublicacion !== undefined && pub.tipoPublicacion !== tipoPublicacion) return false
       if (especie !== "todos" && pub.mascota.especie !== especie) return false
       if (raza !== "todos" && pub.mascota.raza !== raza) return false
       if (sexo !== "todos" && pub.mascota.sexo !== sexo) return false
@@ -106,43 +106,54 @@ export function ListadoPublicaciones({
         onSearch={handleSearch}
         hasActiveFilters={hasActiveFilters}
       />
-
+      {/* Renderizado de Publicaciones */}
       {paginatedPublicaciones.length > 0 ? (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             {paginatedPublicaciones.map((publicacion) => (
-              <PublicacionCard
-                key={publicacion.id}
-                publicacion={publicacion}
-                isAuthenticated={isAuthenticated}
-                onRequireAuth={onRequireAuth}
-              />
+              <div key={publicacion.id} className="fade-in">
+                <PublicacionCard
+                  publicacion={publicacion}
+                  isAuthenticated={isAuthenticated}
+                  onRequireAuth={onRequireAuth}
+                />
+              </div>
             ))}
           </div>
-
+          {/* Paginación */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center space-x-2 pt-6">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft className="h-4 w-4 mr-2" />
-                Anterior
-              </Button>
-              <div className="text-sm font-medium">
-                Página {currentPage} de {totalPages}
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-              >
-                Siguiente
-                <ChevronRight className="h-4 w-4 ml-2" />
-              </Button>
+            <div className="flex items-center justify-center space-x-2 pt-8">
+              {currentPage > 1 ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="min-w-[100px]"
+                >
+                  <ChevronLeft className="h-4 w-4 mr-2" />
+
+                </Button>
+              ) : (
+                <div className="min-w-[100px]" /> /* Espaciador invisible para mantener el centro */
+              )}
+              <span className="text-sm text-muted-foreground min-w-[100px] text-center">
+                {currentPage} / {totalPages}
+              </span>
+              {currentPage < totalPages ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="min-w-[100px]"
+                >
+
+                  <ChevronRight className="h-4 w-4 ml-2" />
+                </Button>
+              ) : (
+                <div className="min-w-[100px]" /> /* Espaciador invisible para mantener el centro */
+              )}
             </div>
           )}
         </>
