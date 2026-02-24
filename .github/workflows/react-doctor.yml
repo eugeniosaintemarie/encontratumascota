@@ -1,0 +1,21 @@
+name: React Doctor
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  react-doctor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: React Doctor
+        uses: millionco/react-doctor@0.0.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
