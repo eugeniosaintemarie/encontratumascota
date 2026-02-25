@@ -39,7 +39,7 @@ export function Header({
   useEffect(() => {
     try {
       const host = window.location.host.toLowerCase()
-      const isDemo = host.includes("encontratumascotademo.vercel.app") || host.startsWith("localhost") || host.startsWith("127.0.0.1")
+      const isDemo = host.includes("demo.encontratumascota.ar") || host.startsWith("localhost") || host.startsWith("127.0.0.1")
       setIsDemoEnv(isDemo)
     } catch {
       setIsDemoEnv(false)
@@ -63,7 +63,7 @@ export function Header({
         {/* Desktop navigation */}
         <nav className="hidden sm:flex items-center gap-2">
           {!isDemoEnv && (
-            <a href="https://encontratumascotademo.vercel.app/" target="_blank" rel="noopener noreferrer">
+            <a href="https://demo.encontratumascota.ar/" target="_blank" rel="noopener noreferrer">
               <Button variant="ghost" size="sm">
                 <ExternalLink className="mr-1.5 h-4 w-4" />
                 Demo
@@ -100,7 +100,7 @@ export function Header({
             <DropdownMenuContent align="end" className="w-48">
               {!isDemoEnv && (
                 <DropdownMenuItem asChild>
-                  <a href="https://encontratumascotademo.vercel.app/" target="_blank" rel="noopener noreferrer">
+                  <a href="https://demo.encontratumascota.ar/" target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="mr-2 h-4 w-4" />
                     Demo
                   </a>

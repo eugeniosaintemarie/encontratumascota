@@ -13,7 +13,7 @@ export function isDemoHost(host?: string) {
   const h = host.toLowerCase()
 
   // Demo hosts: vercel demo domain and localhost
-  if (h.includes("encontratumascotademo.vercel.app")) return true
+  if (h.includes("demo.encontratumascota.ar")) return true
   if (h.startsWith("localhost") || h.startsWith("127.0.0.1")) return true
 
   // Production host explicit
