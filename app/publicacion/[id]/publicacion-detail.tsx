@@ -24,7 +24,6 @@ export function PublicacionDetail({ publicacion }: PublicacionDetailProps) {
   const [isPerfilModalOpen, setIsPerfilModalOpen] = useState(false)
 
   const { data: session } = authClient.useSession()
-  const { data: session } = authClient.useSession()
   const [demoUser, setDemoUser] = useState<any | null>(null)
 
   const isAuthenticated = !!session?.user || !!demoUser
