@@ -42,6 +42,7 @@ interface FiltrosPublicacionesProps {
   ubicacion: string
   fechaDesde?: string
   transitoUrgente: boolean
+  hideTipoSelector?: boolean
   onTipoPublicacionChange: (value: TipoPublicacion | undefined) => void
   onEspecieChange: (value: Especie | "todos") => void
   onRazaChange: (value: string | "todos") => void
@@ -72,6 +73,7 @@ export function FiltrosPublicaciones({
   onClearFilters,
   onSearch,
   hasActiveFilters,
+  hideTipoSelector = false,
 }: FiltrosPublicacionesProps) {
   // Hint animation removed: buttons are static now
   const [activeClearField, setActiveClearField] = useState<string | null>(null)
@@ -101,10 +103,11 @@ export function FiltrosPublicaciones({
   return (
     <div className="flex flex-col gap-4">
       {/* Tabs Type Selector */}
-      <div className="flex w-full items-center justify-between gap-2 p-1 bg-muted/30 rounded-xl border">
+      {!hideTipoSelector && (
+        <div className="flex w-full items-center justify-between gap-2 p-1 bg-muted/30 rounded-xl border">
         <button
           className={`px-4 py-2 text-sm font-medium flex-1 text-center rounded-lg transform-gpu transition-all duration-150 active:scale-95 active:translate-y-0.5 focus:outline-none cursor-pointer select-none ${tipoPublicacion === "perdida"
-            ? "!bg-white !text-black shadow-sm"
+            ? "!bg-[var(--salmon)] !text-white shadow-sm dark:!bg-[var(--salmon)] dark:!text-white"
             : "text-foreground dark:!text-white hover:bg-muted/50"
             }`}
           onClick={() => onTipoPublicacionChange(tipoPublicacion === "perdida" ? undefined : "perdida")}
@@ -114,27 +117,28 @@ export function FiltrosPublicaciones({
         </button>
         <button
           className={`px-4 py-2 text-sm font-medium flex-1 text-center rounded-lg transform-gpu transition-all duration-150 active:scale-95 active:translate-y-0.5 focus:outline-none cursor-pointer select-none ${tipoPublicacion === "adopcion"
-            ? "!bg-white !text-black shadow-sm"
+            ? "!bg-[var(--salmon)] !text-white shadow-sm dark:!bg-[var(--salmon)] dark:!text-white"
             : "text-foreground dark:!text-white hover:bg-muted/50"
             }`}
           onClick={() => onTipoPublicacionChange(tipoPublicacion === "adopcion" ? undefined : "adopcion")}
           aria-pressed={tipoPublicacion === "adopcion"}
         >
-          Mascotas en adopcion, que buscan su primer familia
+          Mascotas en adopción, que buscan su primer familia
         </button>
       </div>
+      )}
 
       {tipoPublicacion !== undefined ? (
-        <div className="rounded-xl border border-primary bg-primary p-4 shadow-sm w-full">
+        <div className="rounded-xl bg-[var(--salmon)] p-4 shadow-sm w-full">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <div className="relative flex-1">
               <LocationAutocomplete
                 value={ubicacion}
                 onChange={(v) => onUbicacionChange(v)}
                 onSelect={(place) => onUbicacionChange(place.address)}
-                placeholder="Buscar por ubicacion..."
+                placeholder="Buscar por ubicación..."
                 showDropdown={false}
-                className="bg-white/10 border-white/30 placeholder:text-white/70 text-white"
+                className="bg-[var(--salmon)] placeholder:text-white text-white"
               />
             </div>
 
@@ -149,7 +153,7 @@ export function FiltrosPublicaciones({
                 <SelectTrigger
                   onFocus={() => setActiveClearField('especie')}
                   onBlur={() => setActiveClearField(null)}
-                  className="w-full sm:w-[140px] bg-white/10 !text-white border-white/30 [&_svg]:!text-white/70"
+                  className="w-full sm:w-[140px] !bg-[var(--salmon)] !text-white border-white/30 [&_svg]:!text-white/70"
                 >
                   <SelectValue placeholder="Tipo" />
                 </SelectTrigger>
@@ -169,7 +173,7 @@ export function FiltrosPublicaciones({
                 <SelectTrigger
                   onFocus={() => setActiveClearField('raza')}
                   onBlur={() => setActiveClearField(null)}
-                  className="w-full sm:w-[140px] bg-white/10 !text-white border-white/30 [&_svg]:!text-white/70"
+                  className="w-full sm:w-[140px] !bg-[var(--salmon)] !text-white border-white/30 [&_svg]:!text-white/70"
                 >
                   <SelectValue placeholder="Raza" />
                 </SelectTrigger>
@@ -190,12 +194,12 @@ export function FiltrosPublicaciones({
                 <SelectTrigger
                   onFocus={() => setActiveClearField('sexo')}
                   onBlur={() => setActiveClearField(null)}
-                  className="w-[140px] bg-white/10 !text-white border-white/30 [&_svg]:!text-white/70"
+                  className="w-[140px] !bg-[var(--salmon)] !text-white border-white/30 [&_svg]:!text-white/70"
                 >
-                  <SelectValue placeholder="Genero" />
+                  <SelectValue placeholder="Género" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="todos">Genero</SelectItem>
+                  <SelectItem value="todos">Género</SelectItem>
                   <SelectItem value="macho">Macho</SelectItem>
                   <SelectItem value="hembra">Hembra</SelectItem>
                   <SelectItem value="desconocido">Desconocido</SelectItem>
@@ -234,8 +238,8 @@ export function FiltrosPublicaciones({
           </div>
         </div>
       ) : (
-        <div className="rounded-xl bg-[#ff8a65] p-6 text-center text-sm text-white">
-          Selecciona arriba el tipo de mascota que estas buscando para activar los filtros de busqueda
+        <div className="rounded-xl bg-[var(--salmon)] p-6 text-center text-sm text-white">
+          Selecciona arriba el tipo de mascota que estás buscando para activar los filtros de búsqueda
         </div>
       )}
     </div>

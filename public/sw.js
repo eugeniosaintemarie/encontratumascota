@@ -2,7 +2,7 @@ const CACHE_NAME = 'encontratumascota-v1'
 
 const PRECACHE_URLS = [
   '/',
-  '/transitadas',
+  '/reunidas',
   '/favicon.svg',
   '/apple-icon.png',
 ]

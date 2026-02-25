@@ -1,7 +1,9 @@
 "use client"
 
 import { useState, useMemo, useCallback, useEffect } from "react"
+import { useItemsPerPage } from "@/hooks/use-items-per-page"
 import { PublicacionCard } from "@/components/publicacion-card"
+import { FiltrosPublicaciones } from "@/components/filtros-publicaciones"
 import { Header } from "@/components/header"
 import { AuthModal } from "@/components/auth-modal"
 import { PublicarModal } from "@/components/publicar-modal"
@@ -13,10 +15,11 @@ import { authClient, logout } from "@/lib/auth/client"
 import { mapNeonUser } from "@/lib/auth"
 import type { Especie, Sexo } from "@/lib/types"
 
-export default function TransitadasPage() {
+export default function ReunidasPage() {
   const [especie, setEspecie] = useState<Especie | "todos">("todos")
   const [sexo, setSexo] = useState<Sexo | "todos">("todos")
   const [ubicacion, setUbicacion] = useState("")
+  const [raza, setRaza] = useState<string | "todos">("todos")
 
   // Auth state via Neon Auth
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
@@ -30,19 +33,22 @@ export default function TransitadasPage() {
   const currentUser = session?.user ? mapNeonUser(session.user) : demoUser ? mapNeonUser(demoUser) : null
 
   const { publicaciones } = usePublicaciones()
+  const itemsPerPage = useItemsPerPage()
 
-  const publicacionesTransito = useMemo(() => {
+  const publicacionesReunidas = useMemo(() => {
     return publicaciones.filter((pub) => {
       if (especie !== "todos" && pub.mascota.especie !== especie) return false
+      if (raza !== "todos" && pub.mascota.raza !== raza) return false
       if (sexo !== "todos" && pub.mascota.sexo !== sexo) return false
       if (
         ubicacion &&
         !pub.ubicacion.toLowerCase().includes(ubicacion.toLowerCase())
       )
         return false
-      return pub.enTransito === true
+      // Reunidas = publicacion cerrada (no activa) y no en tránsito
+      return pub.activa === false && pub.enTransito === false
     })
-  }, [especie, sexo, ubicacion, publicaciones])
+  }, [especie, raza, sexo, ubicacion, publicaciones])
 
   const handlePublicarClick = useCallback(() => {
     if (isAuthenticated) {
@@ -79,55 +85,39 @@ export default function TransitadasPage() {
         isAuthenticated={isAuthenticated}
         onPerfilClick={() => setIsPerfilModalOpen(true)}
         onLogout={handleLogout}
-        showBackButton
       />
 
       <main className="mx-auto max-w-7xl px-4 pt-4 pb-8 flex-1 w-full">
         <div className="space-y-4">
-          <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-            <h2 className="text-lg font-semibold text-foreground shrink-0">
-              Mascotas en tránsito esperando a sus dueños:
-            </h2>
-            <div className="rounded-xl border border-primary bg-primary p-4 shadow-sm flex-1">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                <div className="relative flex-1">
-                  <input
-                    placeholder="Buscar por ubicacion..."
-                    value={ubicacion}
-                    onChange={(e) => setUbicacion(e.target.value)}
-                    className="flex h-9 w-full rounded-md border bg-white/10 border-white/30 px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-white/70 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    style={{ color: 'white' }}
-                  />
-                </div>
-                <div className="flex gap-3">
-                  <select
-                    value={especie}
-                    onChange={(e) => setEspecie(e.target.value as Especie | "todos")}
-                    className="h-9 w-[140px] rounded-md border bg-white/10 border-white/30 px-3 text-sm text-white"
-                  >
-                    <option value="todos">Tipo</option>
-                    <option value="perro">Perro</option>
-                    <option value="gato">Gato</option>
-                    <option value="otro">Otro</option>
-                  </select>
-                  <select
-                    value={sexo}
-                    onChange={(e) => setSexo(e.target.value as Sexo | "todos")}
-                    className="h-9 w-[140px] rounded-md border bg-white/10 border-white/30 px-3 text-sm text-white"
-                  >
-                    <option value="todos">Género</option>
-                    <option value="macho">Macho</option>
-                    <option value="hembra">Hembra</option>
-                    <option value="desconocido">Desconocido</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
+          <FiltrosPublicaciones
+            tipoPublicacion={"adopcion"}
+            especie={especie}
+            raza={raza}
+            sexo={sexo}
+            ubicacion={ubicacion}
+            fechaDesde={undefined}
+            transitoUrgente={false}
+            onTipoPublicacionChange={() => { /* noop: fixed to adopcion */ }}
+            hideTipoSelector={true}
+            onEspecieChange={(v) => setEspecie(v)}
+            onRazaChange={(v) => setRaza(v)}
+            onSexoChange={(v) => setSexo(v)}
+            onUbicacionChange={(v) => setUbicacion(v)}
+            onFechaDesdeChange={() => {}}
+            onTransitoUrgenteChange={() => {}}
+            onClearFilters={() => {
+              setEspecie("todos")
+              setRaza("todos")
+              setSexo("todos")
+              setUbicacion("")
+            }}
+            onSearch={() => {}}
+            hasActiveFilters={especie !== "todos" || raza !== "todos" || sexo !== "todos" || ubicacion !== ""}
+          />
 
-          {publicacionesTransito.length > 0 ? (
+          {publicacionesReunidas.length > 0 ? (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-              {publicacionesTransito.map((publicacion) => (
+              {publicacionesReunidas.slice(0, itemsPerPage).map((publicacion) => (
                 <PublicacionCard
                   key={publicacion.id}
                   publicacion={publicacion}
@@ -140,10 +130,10 @@ export default function TransitadasPage() {
             <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 py-16">
               <PawPrint className="mb-4 h-12 w-12 text-muted-foreground/50" />
               <h3 className="text-lg font-medium text-foreground">
-                No hay mascotas en tránsito
+                Todavía no hay mascotas que hayan sido reunidas con sus familias
               </h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                Las mascotas que se marquen como "en tránsito" aparecerán aquí
+                Las publicaciones cerradas aparecerán aquí
               </p>
             </div>
           )}

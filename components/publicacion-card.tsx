@@ -215,13 +215,17 @@ export function PublicacionCard({
         </p>
 
         <div className="mt-auto">
-          {isAuthenticated || publicacion.mostrarContactoPublico ? (
-            <div className="space-y-2">
+          {(() => {
+            const isCerrada = publicacion.activa === false && !publicacion.enTransito
+            const canSeeContact = isAuthenticated || (publicacion.mostrarContactoPublico && !isCerrada)
+            return canSeeContact
+          })() ? (
+            <div className="space-y-2 rounded-lg bg-[#FF8A65]/10 min-h-[84px]">
               {/* Si está en tránsito y tiene contacto de tránsito, mostrar ambos */}
               {publicacion.enTransito && publicacion.transitoContactoNombre ? (
                 <>
                   {/* Contacto actual (cuidador de tránsito) */}
-                  <div className="space-y-0.5 rounded-lg bg-primary/10 p-3 overflow-hidden">
+                  <div className="space-y-0.5 rounded-lg bg-transparent p-3 overflow-hidden">
                     <div className="flex items-center gap-1.5 mb-1">
                       <UserPlus className="h-3.5 w-3.5 text-primary" />
                       <span className="text-xs font-medium text-primary">Cuidador actual</span>
@@ -231,20 +235,20 @@ export function PublicacionCard({
                     </p>
                     <a
                       href={`tel:${publicacion.transitoContactoTelefono?.replace(/\s/g, '')}`}
-                      className="block text-sm text-muted-foreground hover:text-primary hover:underline"
+                      className="block text-sm text-muted-foreground hover:text-primary"
                     >
                       {publicacion.transitoContactoTelefono}
                     </a>
                     <a
                       href={`mailto:${publicacion.transitoContactoEmail}`}
-                      className="block text-sm text-muted-foreground hover:text-primary hover:underline truncate"
+                      className="block text-sm text-muted-foreground hover:text-primary truncate"
                       title={publicacion.transitoContactoEmail ?? ""}
                     >
                       {publicacion.transitoContactoEmail}
                     </a>
                   </div>
                   {/* Contacto original (quien publicó) */}
-                  <div className="space-y-0.5 rounded-lg bg-secondary/50 p-3 overflow-hidden">
+                  <div className="space-y-0.5 rounded-lg bg-transparent p-3 overflow-hidden">
                     <div className="flex items-center gap-1.5 mb-1">
                       <User className="h-3.5 w-3.5 text-muted-foreground" />
                       <span className="text-xs font-medium text-muted-foreground">Quien lo encontró</span>
@@ -254,13 +258,13 @@ export function PublicacionCard({
                     </p>
                     <a
                       href={`tel:${publicacion.contactoTelefono.replace(/\s/g, '')}`}
-                      className="block text-sm text-muted-foreground hover:text-primary hover:underline"
+                      className="block text-sm text-muted-foreground hover:text-primary"
                     >
                       {publicacion.contactoTelefono}
                     </a>
                     <a
                       href={`mailto:${publicacion.contactoEmail}`}
-                      className="block text-sm text-muted-foreground hover:text-primary hover:underline truncate"
+                      className="block text-sm text-muted-foreground hover:text-primary truncate"
                       title={publicacion.contactoEmail}
                     >
                       {publicacion.contactoEmail}
@@ -269,19 +273,19 @@ export function PublicacionCard({
                 </>
               ) : (
                 /* Contacto normal (sin tránsito) */
-                <div className="space-y-0.5 rounded-lg bg-secondary/50 p-3 overflow-hidden">
+                <div className="space-y-0.5 rounded-lg bg-transparent p-3 overflow-hidden">
                   <p className="text-sm font-medium text-foreground">
                     {publicacion.contactoNombre}
                   </p>
                   <a
                     href={`tel:${publicacion.contactoTelefono.replace(/\s/g, '')}`}
-                    className="block text-sm text-muted-foreground hover:text-primary hover:underline"
+                    className="block text-sm text-muted-foreground hover:text-primary"
                   >
                     {publicacion.contactoTelefono}
                   </a>
                   <a
                     href={`mailto:${publicacion.contactoEmail}`}
-                    className="block text-sm text-muted-foreground hover:text-primary hover:underline truncate"
+                    className="block text-sm text-muted-foreground hover:text-primary truncate"
                     title={publicacion.contactoEmail}
                   >
                     {publicacion.contactoEmail}
@@ -289,20 +293,21 @@ export function PublicacionCard({
                 </div>
               )}
             </div>
-          ) : (
-            <div className="rounded-lg border border-dashed border-border bg-muted/30 p-3">
+            ) : (
+              <div className="rounded-lg bg-[#FF8A65]/10 p-3 min-h-[84px]">
               <div className="flex items-center gap-2 text-sm text-foreground/70">
                 <Lock className="h-4 w-4 shrink-0" />
-                <span>
+                <div className="flex flex-col leading-tight">
                   <button
                     type="button"
                     onClick={handleLoginClick}
-                    className="text-primary hover:underline font-medium whitespace-nowrap"
+                      className="text-[#FF8A65] font-medium whitespace-nowrap"
                   >
-                    Inicia sesion o registrate
+                    Iniciá sesión o regístrate
                   </button>
-                  {" "}para ver los datos de contacto
-                </span>
+                  <span className="text-sm text-foreground/70">para ver los datos</span>
+                  <span className="text-sm text-foreground/70">de contacto</span>
+                </div>
               </div>
             </div>
           )}

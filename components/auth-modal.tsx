@@ -55,7 +55,7 @@ export function AuthModal({
         callbackURL: window.location.pathname,
       })
     } catch {
-      setError("Error al iniciar sesion con Google")
+      setError("Error al iniciar sesión con Google")
       setIsLoading(false)
     }
   }
@@ -77,7 +77,7 @@ export function AuthModal({
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email: loginEmail, password: loginPassword }),
           })
-          if (res.ok) {
+            if (res.ok) {
             // Demo login succeeded on server; reload so client picks up demo session/cookies
             try {
               window.location.reload()
@@ -85,8 +85,8 @@ export function AuthModal({
               onAuthSuccess?.()
               onClose()
             }
-          } else {
-            setError("Credenciales demo invalidas")
+            } else {
+            setError("Credenciales demo inválidas")
           }
         } catch (e) {
           setError("Error conectando al servidor de demo")
@@ -109,7 +109,7 @@ export function AuthModal({
         onClose()
       }
     } catch {
-      setError("Error de conexion. Intenta de nuevo.")
+      setError("Error de conexión. Intentá de nuevo.")
     } finally {
       setIsLoading(false)
     }
@@ -120,7 +120,7 @@ export function AuthModal({
     setError(null)
 
     if (registerPassword !== registerConfirmPassword) {
-      setError("Las contrasenas no coinciden")
+      setError("Las contraseñas no coinciden")
       return
     }
 
@@ -130,12 +130,12 @@ export function AuthModal({
     }
 
     if (!/[A-Z]/.test(registerPassword)) {
-      setError("La contraseña debe incluir al menos una mayuscula")
+      setError("La contraseña debe incluir al menos una mayúscula")
       return
     }
 
     if (!/[0-9]/.test(registerPassword)) {
-      setError("La contraseña debe incluir al menos un numero")
+      setError("La contraseña debe incluir al menos un número")
       return
     }
 
@@ -173,7 +173,7 @@ export function AuthModal({
         onClose()
       }
     } catch {
-      setError("Error de conexion. Intenta de nuevo.")
+      setError("Error de conexión. Intentá de nuevo.")
     } finally {
       setIsLoading(false)
     }
@@ -199,7 +199,7 @@ export function AuthModal({
       <DialogContent className="bg-background sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {view === "login" ? "Iniciar sesion" : "Registrarse"}
+            {view === "login" ? "Iniciar sesión" : "Registrarse"}
           </DialogTitle>
         </DialogHeader>
 
@@ -258,13 +258,13 @@ export function AuthModal({
             </Button>
 
             <p className="text-center text-sm text-muted-foreground">
-              No tenes cuenta?{" "}
+              ¿No tenés cuenta?{" "}
               <button
                 type="button"
                 onClick={() => setView("register")}
-                className="text-primary underline-offset-4 hover:underline"
+                className="text-primary underline-offset-4"
               >
-                Registrate
+                  Regístrate
               </button>
             </p>
           </form>
@@ -343,13 +343,13 @@ export function AuthModal({
             </Button>
 
             <p className="text-center text-sm text-muted-foreground">
-              Ya tenes cuenta?{" "}
+              ¿Ya tenés cuenta?{" "}
               <button
                 type="button"
                 onClick={() => setView("login")}
-                className="text-primary underline-offset-4 hover:underline"
+                className="text-primary underline-offset-4"
               >
-                Inicia sesion
+                Inicia sesión
               </button>
             </p>
           </form>

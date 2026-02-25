@@ -108,17 +108,17 @@ export function PerfilModal({
     }
 
     if (!/[A-Z]/.test(newPassword)) {
-      setPasswordError("La contraseña debe incluir al menos una mayuscula")
+      setPasswordError("La contraseña debe incluir al menos una mayúscula")
       return
     }
 
     if (!/[0-9]/.test(newPassword)) {
-      setPasswordError("La contraseña debe incluir al menos un numero")
+      setPasswordError("La contraseña debe incluir al menos un número")
       return
     }
 
     if (newPassword !== confirmNewPassword) {
-      setPasswordError("Las contrasenas no coinciden")
+      setPasswordError("Las contraseñas no coinciden")
       return
     }
 
@@ -141,7 +141,7 @@ export function PerfilModal({
         setTimeout(() => setPasswordSuccess(false), 3000)
       }
     } catch {
-      setPasswordError("Error de conexion. Intenta de nuevo.")
+      setPasswordError("Error de conexión. Intentá de nuevo.")
     } finally {
       setIsLoading(false)
     }
@@ -186,7 +186,7 @@ export function PerfilModal({
             <p className="text-xs text-muted-foreground">{currentUser.email}</p>
           </div>
           <Button variant="outline" size="sm" onClick={handleLogout}>
-            Cerrar sesion
+            Cerrar sesión
           </Button>
         </div>
 
@@ -236,7 +236,7 @@ export function PerfilModal({
                         <SelectItem value="transitada">
                           <div className="flex items-center gap-2">
                             <PawPrint className="h-4 w-4" />
-                            Mascota tránsitada a nuevo cuidador
+                            Mascota transitada a nuevo cuidador
                           </div>
                         </SelectItem>
                       </SelectContent>
@@ -284,13 +284,13 @@ export function PerfilModal({
                   disabled={!selectedPublicacion || !closeReason || isLoading || (closeReason === "transitada" && (!transitoNombre.trim() || !transitoTelefono.trim() || !transitoEmail.trim()))}
                   className="w-full"
                 >
-                  {isLoading ? "Cerrando..." : closeReason === "transitada" ? "Dar tránsito" : "Cerrar publicacion"}
+                  {isLoading ? "Cerrando..." : closeReason === "transitada" ? "Dar tránsito" : "Cerrar publicación"}
                 </Button>
               </div>
             ) : (
               <div className="text-center py-6 text-muted-foreground">
                 <PawPrint className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">No tenes publicaciones activas</p>
+                <p className="text-sm">No tenés publicaciones activas</p>
               </div>
             )}
           </TabsContent>

@@ -33,7 +33,15 @@ export function PublicacionesProvider({ children }: { children: ReactNode }) {
   // Intentar cargar desde la API (DB) al montar
   const fetchPublicaciones = useCallback(async () => {
     try {
-      const res = await fetch("/api/publicaciones")
+      // Si estamos en la ruta /reunidas, solicitamos también las publicaciones cerradas
+      let url = "/api/publicaciones"
+      try {
+        if (typeof window !== "undefined" && window.location.pathname === "/reunidas") {
+          url = "/api/publicaciones?soloActivas=false"
+        }
+      } catch {}
+
+      const res = await fetch(url)
       if (res.ok) {
         const data = await res.json()
         if (data.publicaciones) {

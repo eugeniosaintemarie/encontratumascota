@@ -24,7 +24,7 @@ const siteUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: 'Encontra Tu Mascota',
-  description: 'Plataforma colaborativa para reunir mascotas perdidas con sus familias',
+  description: 'Plataforma colaborativa para reunir mascotas con sus familias',
   generator: '',
   manifest: '/manifest.json',
   appleWebApp: {

@@ -1,12 +1,14 @@
 "use client"
 
 import { useState, useMemo } from "react"
+import { useEffect } from "react"
 import { PublicacionCard } from "@/components/publicacion-card"
 import { FiltrosPublicaciones } from "@/components/filtros-publicaciones"
 import { PawPrint, ChevronLeft, ChevronRight } from "lucide-react"
 import { usePublicaciones } from "@/lib/publicaciones-context"
 import { Button } from "@/components/ui/button"
 import type { Especie, Sexo, TipoPublicacion } from "@/lib/types"
+import { useItemsPerPage } from "@/hooks/use-items-per-page"
 
 interface ListadoPublicacionesProps {
   isAuthenticated?: boolean
@@ -25,7 +27,7 @@ export function ListadoPublicaciones({
   const [fechaDesde, setFechaDesde] = useState<string | undefined>(undefined)
   const [transitoUrgente, setTransitoUrgente] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
-  const ITEMS_PER_PAGE = 10
+  const itemsPerPage = useItemsPerPage()
 
   const { publicaciones } = usePublicaciones()
 
@@ -56,11 +58,11 @@ export function ListadoPublicaciones({
     })
   }, [tipoPublicacion, especie, raza, sexo, ubicacion, transitoUrgente, publicaciones])
 
-  const totalPages = Math.ceil(publicacionesFiltradas.length / ITEMS_PER_PAGE)
+  const totalPages = Math.ceil(publicacionesFiltradas.length / itemsPerPage)
   const paginatedPublicaciones = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
-    return publicacionesFiltradas.slice(startIndex, startIndex + ITEMS_PER_PAGE)
-  }, [publicacionesFiltradas, currentPage])
+    const startIndex = (currentPage - 1) * itemsPerPage
+    return publicacionesFiltradas.slice(startIndex, startIndex + itemsPerPage)
+  }, [publicacionesFiltradas, currentPage, itemsPerPage])
 
   const hasActiveFilters =
     especie !== "todos" || raza !== "todos" || sexo !== "todos" || ubicacion !== "" || transitoUrgente || !!fechaDesde
@@ -74,6 +76,11 @@ export function ListadoPublicaciones({
     setTransitoUrgente(false)
     setCurrentPage(1)
   }
+
+  // Reset page when itemsPerPage changes (responsive)
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [itemsPerPage])
 
   const handleSearch = () => {
     // La busqueda ya es reactiva, este handler es para el boton de lupa

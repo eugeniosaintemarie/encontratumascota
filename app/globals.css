@@ -38,6 +38,15 @@
   --sidebar-accent-foreground: oklch(0.25 0.04 34);
   --sidebar-border: oklch(0.88 0.01 90);
   --sidebar-ring: oklch(0.63 0.22 34);
+  /* Link color (light theme) */
+  --color-link: #FF7E70;
+  /* Custom brand colors */
+  --salmon: #FF7E70;
+  --salmon-10: rgba(255,126,112,0.1);
+  --salmon-50: rgba(255,126,112,0.5);
+  --pink: #FFB5C0;
+  --pink-10: rgba(255,181,192,0.1);
+  --pink-50: rgba(255,181,192,0.5);
 }
 
 .dark {
@@ -74,6 +83,15 @@
   --sidebar-accent-foreground: oklch(0.85 0.06 34);
   --sidebar-border: oklch(0.32 0.01 285);
   --sidebar-ring: oklch(0.73 0.17 34);
+  /* Link color (dark theme) - keep existing accent in dark */
+  --color-link: var(--salmon);
+  /* Dark equivalents for brand colors */
+  --salmon: #61302B;
+  --salmon-10: rgba(97,48,43,0.1);
+  --salmon-50: rgba(97,48,43,0.5);
+  --pink: #330F14;
+  --pink-10: rgba(51,15,20,0.1);
+  --pink-50: rgba(51,15,20,0.5);
 }
 
 @theme inline {
@@ -123,6 +141,29 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  a {
+    color: var(--color-link);
+  }
+  /* Disable underline on hover/focus/active for all links across the site
+     We force with !important to override utility classes like `hover:underline`. */
+  /* Enforce no underline for any link or its children in any state.
+     Use !important to override Tailwind utility classes like `hover:underline`. */
+  a,
+  a:link,
+  a:visited,
+  a:hover,
+  a:focus,
+  a:active,
+  a *,
+  a:hover *,
+  a:focus *,
+  a:active * {
+    text-decoration: none !important;
+  }
+  a {
+    color: var(--color-link);
+    outline: none;
   }
 }
 

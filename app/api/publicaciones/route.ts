@@ -13,6 +13,8 @@ export async function GET(request: Request) {
     const ubicacion = searchParams.get("ubicacion") || undefined
     const transitoUrgente = searchParams.get("transitoUrgente") === "true"
     const soloEnTransito = searchParams.get("soloEnTransito") === "true"
+    const soloActivasParam = searchParams.get("soloActivas")
+    const soloActivas = soloActivasParam === null ? undefined : soloActivasParam === "true"
 
     const publicaciones = await getPublicaciones({
       especie: especie as any,
@@ -20,6 +22,7 @@ export async function GET(request: Request) {
       ubicacion,
       transitoUrgente: transitoUrgente || undefined,
       soloEnTransito: soloEnTransito || undefined,
+      soloActivas: soloActivas,
     }, { forceDemo: isDemoRequest(request) })
 
     return NextResponse.json({ publicaciones })

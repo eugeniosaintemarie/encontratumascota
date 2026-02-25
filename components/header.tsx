@@ -21,7 +21,6 @@ interface HeaderProps {
   isAuthenticated?: boolean
   onPerfilClick?: () => void
   onLogout?: () => void
-  showBackButton?: boolean
 }
 
 export function Header({
@@ -30,7 +29,6 @@ export function Header({
   isAuthenticated = false,
   onPerfilClick,
   onLogout,
-  showBackButton = false,
 }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const { setTheme, resolvedTheme } = useTheme()
@@ -55,9 +53,9 @@ export function Header({
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2 no-underline hover:no-underline focus:no-underline active:no-underline">
           <Image src="/logo.png" alt="Encontra Tu Mascota" width={36} height={36} className="h-9 w-9 rounded-lg" />
-          <span className="text-lg font-semibold !text-white">
+          <span className="text-lg font-semibold text-[#D66528] dark:text-foreground">
             Encontra Tu Mascota
           </span>
         </Link>
@@ -71,14 +69,6 @@ export function Header({
                 Demo
               </Button>
             </a>
-          )}
-          {showBackButton && (
-            <Link href="/">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="mr-1.5 h-4 w-4" />
-                Volver al inicio
-              </Button>
-            </Link>
           )}
           <Button variant="outline" size="sm" onClick={() => (isAuthenticated ? onPublicarClick() : onAccederClick())}>
             <Plus className="mr-1.5 h-4 w-4" />
@@ -117,17 +107,6 @@ export function Header({
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
-              {showBackButton && (
-                <>
-                  <DropdownMenuItem asChild>
-                    <Link href="/">
-                      <ArrowLeft className="mr-2 h-4 w-4" />
-                      Volver al inicio
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                </>
-              )}
               <DropdownMenuItem
                 onClick={() => {
                   setMenuOpen(false)
@@ -155,7 +134,7 @@ export function Header({
                     }}
                   >
                     <LogOut className="mr-2 h-4 w-4" />
-                    Cerrar sesion
+                    Cerrar sesión
                   </DropdownMenuItem>
                 </>
               ) : (

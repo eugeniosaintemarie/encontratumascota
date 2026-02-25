@@ -193,10 +193,10 @@ export function PublicarModal({
 
       resetForm()
       onClose()
-      toast.success("Publicacion creada exitosamente!")
+      toast.success("¡Publicación creada exitosamente!")
     } catch (error) {
       console.error("Error creando publicacion:", error)
-      toast.error(error instanceof Error ? error.message : "Error al crear la publicacion")
+      toast.error(error instanceof Error ? error.message : "Error al crear la publicación")
     } finally {
       setIsLoading(false)
     }
@@ -247,7 +247,7 @@ export function PublicarModal({
               onRequireAuth()
             }}
           >
-            Iniciar sesion
+            Iniciar sesión
           </Button>
         </DialogContent>
       </Dialog>
@@ -281,7 +281,7 @@ export function PublicarModal({
                 <div className="text-center">
                   <h4 className="font-semibold text-lg">Perdida</h4>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Encontraste una mascota que creeés que tiene familia y está perdida
+                    Encontraste una mascota que creés que tiene familia y está perdida
                   </p>
                 </div>
               </button>
@@ -357,7 +357,7 @@ export function PublicarModal({
               <div className="space-y-2 sm:col-span-1">
                 <Select value={sexo} onValueChange={(v) => setSexo(v as Sexo)}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Genero" />
+                    <SelectValue placeholder="Género" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="macho">Macho</SelectItem>
@@ -373,7 +373,7 @@ export function PublicarModal({
                   type="text"
                   value={color}
                   onChange={(e) => setColor(e.target.value)}
-                  placeholder="Color - Ejemplo: Marron con manchas blancas"
+                  placeholder="Color - Ejemplo: Marrón con manchas blancas"
                   required
                   className="w-full"
                 />
@@ -385,7 +385,7 @@ export function PublicarModal({
                 id="descripcion"
                 value={descripcion}
                 onChange={(e) => setDescripcion(e.target.value)}
-                placeholder="Descripcion lo más detallada posible"
+                placeholder="Descripción lo más detallada posible"
                 rows={3}
                 required
               />
@@ -402,6 +402,7 @@ export function PublicarModal({
                   onChange={(v) => setUbicacion(v)}
                   onSelect={(place) => setUbicacion(place.address)}
                   placeholder="Ejemplo: Almagro, CABA"
+                  className="!bg-transparent dark:!bg-transparent placeholder:text-muted-foreground text-foreground"
                 />
               </div>
 

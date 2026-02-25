@@ -18,15 +18,15 @@ export function Footer() {
       <div className="bg-[#FF8A65]/10 py-4">
         <div className="mx-auto max-w-7xl px-4 flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12">
           <p className="text-sm text-foreground flex items-center gap-2">
-            <span className="text-2xl font-bold text-[#FF8A65] leading-none">
+            <span className="text-2xl font-bold text-[#d66528] leading-none">
               {reunidas !== null ? reunidas : "..."}
             </span>
-            <span>mascotas reunidas con sus familias</span>
+            <span className="text-foreground/90">mascotas reunidas con sus familias</span>
           </p>
           <p className="text-sm text-foreground text-center sm:text-left">
-            No encontras a tu mascota perdida?{" "}
-            <Link href="/transitadas" className="text-[#FF8A65] hover:underline font-medium">
-              Busca si cedieron el tránsito con otra persona
+            ¿No encontrás a tu mascota perdida?{" "}
+            <Link href="/reunidas" className="text-[#FF8A65] font-medium">
+              Fijate si fue ubicada con una familia
             </Link>
           </p>
         </div>
@@ -34,21 +34,19 @@ export function Footer() {
       <div className="py-6 bg-background">
         <div className="mx-auto max-w-7xl px-4 text-center text-sm text-foreground/60">
           <p>
-            Encontra Tu Mascota |{" "}
             <a
               href="https://docs.google.com/forms/d/e/1FAIpQLSeL7DnKWx8JigHW6-PIbsvAN7SbXmKwKROYLjAHnmdt0e-J7A/viewform"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:underline italic"
+              className="italic"
             >
               Feedback
             </a>
-            {" "}|{" "}
+            {" "}|{" "}Encontra Tu Mascota |{" "}
             <a
               href="https://eugeniosaintemarie.github.io?ref=encontratumascota"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:underline"
             >
               ∃ugenio © {new Date().getFullYear()}
             </a>

@@ -38,7 +38,7 @@ export function DatePicker({ value, onChange, placeholder = 'dd/mm/aaaa', classN
           })() : ''}
           placeholder={placeholder}
           onClick={() => inputRef.current?.showPicker?.() || inputRef.current?.focus()}
-          className="bg-white/10 !text-white border-white/30 placeholder:text-white/70"
+          className="bg-[var(--salmon)] !text-white border-white/30 placeholder:text-white dark:bg-[var(--salmon-10)]"
         />
         {/* calendar icon removed to match compact header styling */}
       </div>
