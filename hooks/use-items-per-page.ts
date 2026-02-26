@@ -22,8 +22,16 @@ export function useItemsPerPage() {
       else if (w >= 400) cols = 2
       else cols = 1
 
-      // Rows: keep a reasonable number so pages aren't huge
-      const rows = cols === 1 ? 6 : 2
+      // Desired layout:
+      // - cols = 1 -> 5 rows (5 items)
+      // - cols = 2 -> 3 rows (6 items)
+      // - cols = 3 -> 2 rows (6 items)
+      // - cols = 4 -> 2 rows (8 items)
+      // - cols = 5 -> 2 rows (10 items)
+      let rows = 2
+      if (cols === 1) rows = 5
+      else if (cols === 2) rows = 3
+
       setColumns(cols)
       setItemsPerPage(cols * rows)
     }
