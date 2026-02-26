@@ -27,7 +27,7 @@ export function ListadoPublicaciones({
   const [fechaDesde, setFechaDesde] = useState<string | undefined>(undefined)
   const [transitoUrgente, setTransitoUrgente] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = useItemsPerPage()
+  const { itemsPerPage, columns } = useItemsPerPage()
 
   const { publicaciones } = usePublicaciones()
 
@@ -131,7 +131,7 @@ export function ListadoPublicaciones({
       {/* Renderizado de Publicaciones */}
       {paginatedPublicaciones.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          <div className="responsive-cols">
             {paginatedPublicaciones.map((publicacion) => (
               <div key={publicacion.id} className="fade-in">
                 <PublicacionCard
@@ -141,6 +141,17 @@ export function ListadoPublicaciones({
                 />
               </div>
             ))}
+
+            {/* Placeholders to fill last row so the grid always appears complete */}
+            {(() => {
+              const remainder = paginatedPublicaciones.length % (columns || 1)
+              const toFill = remainder === 0 ? 0 : (columns || 1) - remainder
+              return Array.from({ length: toFill }).map((_, i) => (
+                <div key={`placeholder-${i}`} className="fade-in invisible" aria-hidden>
+                  <div className="group flex flex-col h-full" />
+                </div>
+              ))
+            })()}
           </div>
           {/* Paginación */}
           {totalPages > 1 && (

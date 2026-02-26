@@ -33,7 +33,7 @@ export default function ReunidasPage() {
   const currentUser = session?.user ? mapNeonUser(session.user) : demoUser ? mapNeonUser(demoUser) : null
 
   const { publicaciones } = usePublicaciones()
-  const itemsPerPage = useItemsPerPage()
+  const { itemsPerPage, columns } = useItemsPerPage()
 
   const publicacionesReunidas = useMemo(() => {
     return publicaciones.filter((pub) => {
@@ -116,7 +116,7 @@ export default function ReunidasPage() {
           />
 
           {publicacionesReunidas.length > 0 ? (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+            <div className="responsive-cols">
               {publicacionesReunidas.slice(0, itemsPerPage).map((publicacion) => (
                 <PublicacionCard
                   key={publicacion.id}
@@ -125,6 +125,18 @@ export default function ReunidasPage() {
                   onRequireAuth={() => setIsAuthModalOpen(true)}
                 />
               ))}
+
+              {/* Fill last row with invisible placeholders so layout looks full */}
+              {(() => {
+                const shown = publicacionesReunidas.slice(0, itemsPerPage)
+                const remainder = shown.length % (columns || 1)
+                const toFill = remainder === 0 ? 0 : (columns || 1) - remainder
+                return Array.from({ length: toFill }).map((_, i) => (
+                  <div key={`placeholder-reunidas-${i}`} className="invisible" aria-hidden>
+                    <div className="group flex flex-col h-full" />
+                  </div>
+                ))
+              })()}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 py-16">

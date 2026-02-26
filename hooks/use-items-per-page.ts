@@ -9,17 +9,22 @@ import { useEffect, useState } from "react"
 // - 1 column  -> 6 rows => 6 items
 export function useItemsPerPage() {
   const [itemsPerPage, setItemsPerPage] = useState<number>(9)
+  const [columns, setColumns] = useState<number>(3)
 
   useEffect(() => {
     function calc() {
       const w = window.innerWidth
-      // Tailwind defaults used in this project: sm = 640, lg = 1024
+      // Match the breakpoints defined in app/responsive-columns.css
       let cols = 1
-      if (w >= 1024) cols = 3
-      else if (w >= 640) cols = 2
+      if (w >= 950) cols = 5
+      else if (w >= 800) cols = 4
+      else if (w >= 650) cols = 3
+      else if (w >= 400) cols = 2
       else cols = 1
 
-      const rows = cols === 1 ? 6 : 3
+      // Rows: keep a reasonable number so pages aren't huge
+      const rows = cols === 1 ? 6 : 2
+      setColumns(cols)
       setItemsPerPage(cols * rows)
     }
 
@@ -28,5 +33,5 @@ export function useItemsPerPage() {
     return () => window.removeEventListener("resize", calc)
   }, [])
 
-  return itemsPerPage
+  return { itemsPerPage, columns }
 }
