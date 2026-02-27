@@ -14,25 +14,7 @@ import LocationAutocomplete from "@/components/location-autocomplete"
 import DatePicker from "@/components/ui/date-picker"
 import { Search, X } from "lucide-react"
 import type { Especie, Sexo, TipoPublicacion, Raza } from "@/lib/types"
-
-const razasPorEspecie: Record<string, { value: string; label: string }[]> = {
-  perro: [
-    { value: "labrador", label: "Labrador" },
-    { value: "golden", label: "Golden Retriever" },
-    { value: "bulldog", label: "Bulldog" },
-    { value: "pastor_aleman", label: "Pastor Aleman" },
-    { value: "caniche", label: "Caniche" },
-    { value: "mestizo_perro", label: "Mestizo" },
-    { value: "otro_perro", label: "Otro" },
-  ],
-  gato: [
-    { value: "siames", label: "Siames" },
-    { value: "persa", label: "Persa" },
-    { value: "maine_coon", label: "Maine Coon" },
-    { value: "mestizo_gato", label: "Mestizo" },
-    { value: "otro_gato", label: "Otro" },
-  ],
-}
+import { razasPorEspecie } from "@/lib/labels"
 
 interface FiltrosPublicacionesProps {
   tipoPublicacion: TipoPublicacion | undefined
@@ -82,6 +64,7 @@ export function FiltrosPublicaciones({
     switch (field) {
       case 'especie':
         onEspecieChange('todos')
+        onRazaChange('todos')
         break
       case 'raza':
         onRazaChange('todos')
@@ -113,7 +96,7 @@ export function FiltrosPublicaciones({
           onClick={() => onTipoPublicacionChange(tipoPublicacion === "perdida" ? undefined : "perdida")}
           aria-pressed={tipoPublicacion === "perdida"}
         >
-          Mascotas perdidas, que esperan ser encontradas por sus dueños
+          Ver <b>mascotas perdidas</b>, que esperan ser encontradas por sus dueños
         </button>
         <button
           className={`px-4 py-2 text-sm font-medium flex-1 text-center rounded-lg transform-gpu transition-all duration-150 active:scale-95 active:translate-y-0.5 focus:outline-none cursor-pointer select-none ${tipoPublicacion === "adopcion"
@@ -123,62 +106,66 @@ export function FiltrosPublicaciones({
           onClick={() => onTipoPublicacionChange(tipoPublicacion === "adopcion" ? undefined : "adopcion")}
           aria-pressed={tipoPublicacion === "adopcion"}
         >
-          Mascotas en adopción, que buscan su primer familia
+          Ver <b>mascotas en adopción</b>, que buscan su primer familia
         </button>
       </div>
       )}
 
       {tipoPublicacion !== undefined ? (
         <div className="rounded-xl bg-[var(--salmon)] p-4 shadow-sm w-full">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div className="relative flex-1">
+          {/* Main container - column on mobile, row on lg (1024px+) */}
+          <div className="flex flex-col lg:flex-row lg:items-center gap-3">
+            {/* Location - full width on mobile, 1/3 on large screens */}
+            <div className="relative w-full lg:w-1/3">
               <LocationAutocomplete
                 value={ubicacion}
                 onChange={(v) => onUbicacionChange(v)}
                 onSelect={(place) => onUbicacionChange(place.address)}
                 placeholder="Buscar por ubicación..."
                 showDropdown={false}
-                className="bg-[var(--salmon)] placeholder:text-white text-white"
+                className="bg-[var(--salmon)] placeholder:text-white text-white !text-base placeholder:!text-base"
               />
             </div>
 
-            <div className="flex flex-wrap gap-3">
+            {/* Filters grid - 2 columns on tablet, row on lg (1024px+) - takes 2/3 */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_auto] gap-3 w-full lg:w-2/3">
+              {/* Tipo */}
               <Select
-                value={especie}
+                value={especie === "todos" ? "" : especie}
                 onValueChange={(v) => {
-                  onEspecieChange(v as Especie | "todos")
+                  const newValue = v || "todos"
+                  onEspecieChange(newValue as Especie | "todos")
                   onRazaChange("todos")
                 }}
               >
                 <SelectTrigger
                   onFocus={() => setActiveClearField('especie')}
                   onBlur={() => setActiveClearField(null)}
-                  className="w-full sm:w-[140px] !bg-[var(--salmon)] !text-white border-white/30 [&_svg]:!text-white/70"
+                  className="w-full !bg-[var(--salmon)] !text-white border-white/30 [&_svg]:!text-white/70"
                 >
                   <SelectValue placeholder="Tipo" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="todos">Tipo</SelectItem>
                   <SelectItem value="perro">Perro</SelectItem>
                   <SelectItem value="gato">Gato</SelectItem>
                   <SelectItem value="otro">Otro</SelectItem>
                 </SelectContent>
               </Select>
 
+              {/* Raza */}
               <Select
-                value={raza}
-                onValueChange={(v) => onRazaChange(v)}
+                value={raza === "todos" ? "" : raza}
+                onValueChange={(v) => onRazaChange(v || "todos")}
                 disabled={especie === "todos" || especie === "otro"}
               >
                 <SelectTrigger
                   onFocus={() => setActiveClearField('raza')}
                   onBlur={() => setActiveClearField(null)}
-                  className="w-full sm:w-[140px] !bg-[var(--salmon)] !text-white border-white/30 [&_svg]:!text-white/70"
+                  className="w-full !bg-[var(--salmon)] !text-white border-white/30 [&_svg]:!text-white/70"
                 >
                   <SelectValue placeholder="Raza" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="todos">Raza</SelectItem>
                   {especie !== "todos" && especie !== "otro" && razasPorEspecie[especie]?.map((r) => (
                     <SelectItem key={r.value} value={r.value}>
                       {r.label}
@@ -187,27 +174,28 @@ export function FiltrosPublicaciones({
                 </SelectContent>
               </Select>
 
+              {/* Género */}
               <Select
-                value={sexo}
-                onValueChange={(v) => onSexoChange(v as Sexo | "todos")}
+                value={sexo === "todos" ? "" : sexo}
+                onValueChange={(v) => onSexoChange((v || "todos") as Sexo | "todos")}
               >
                 <SelectTrigger
                   onFocus={() => setActiveClearField('sexo')}
                   onBlur={() => setActiveClearField(null)}
-                  className="w-[140px] !bg-[var(--salmon)] !text-white border-white/30 [&_svg]:!text-white/70"
+                  className="w-full !bg-[var(--salmon)] !text-white border-white/30 [&_svg]:!text-white/70"
                 >
                   <SelectValue placeholder="Género" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="todos">Género</SelectItem>
                   <SelectItem value="macho">Macho</SelectItem>
                   <SelectItem value="hembra">Hembra</SelectItem>
                   <SelectItem value="desconocido">Desconocido</SelectItem>
                 </SelectContent>
               </Select>
 
+              {/* Fecha */}
               {tipoPublicacion !== 'adopcion' && (
-                <div className="w-full sm:w-[140px]">
+                <div className="w-full !text-base">
                   <DatePicker
                     id="fecha-buscador"
                     value={fechaDesde}
@@ -219,16 +207,13 @@ export function FiltrosPublicaciones({
                 </div>
               )}
 
-              {/* Fecha no tiene botón X propio; la X global limpia todos los filtros incluyendo la fecha */}
-
-              {/* Search button removed: results filter as user types */}
-
+              {/* X button - centered on mobile/tablet, inline on lg */}
               {hasActiveFilters && (
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={onClearFilters}
-                  className="shrink-0 hover:bg-white/20"
+                  className="shrink-0 hover:bg-white/20 mx-auto lg:mx-0 lg:self-center col-span-full sm:col-span-2 lg:col-span-1"
                 >
                   <X className="h-4 w-4 text-white" />
                   <span className="sr-only">Limpiar filtros</span>

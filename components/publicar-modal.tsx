@@ -25,6 +25,7 @@ import LocationAutocomplete from "@/components/location-autocomplete"
 import { Upload, X, Heart, Search } from "lucide-react"
 
 import type { Especie, Sexo, Raza, TipoPublicacion } from "@/lib/types"
+import { razasPorEspecie } from "@/lib/labels"
 import { usePublicaciones } from "@/lib/publicaciones-context"
 import { authClient } from "@/lib/auth/client"
 import { useImageUpload } from "@/hooks/use-image-upload"
@@ -95,28 +96,6 @@ export function PublicarModal({
     const d = new Date(iso)
     if (Number.isNaN(d.getTime())) return ""
     return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`
-  }
-
-  const razasPorEspecie: Record<Especie, { value: Raza; label: string }[]> = {
-    perro: [
-      { value: "labrador", label: "Labrador" },
-      { value: "golden", label: "Golden Retriever" },
-      { value: "bulldog", label: "Bulldog" },
-      { value: "pastor_aleman", label: "Pastor Aleman" },
-      { value: "caniche", label: "Caniche" },
-      { value: "mestizo_perro", label: "Mestizo" },
-      { value: "otro_perro", label: "Otro" },
-    ],
-    gato: [
-      { value: "siames", label: "Siames" },
-      { value: "persa", label: "Persa" },
-      { value: "maine_coon", label: "Maine Coon" },
-      { value: "mestizo_gato", label: "Mestizo" },
-      { value: "otro_gato", label: "Otro" },
-    ],
-    otro: [
-      { value: "otro_animal", label: "Otro animal" },
-    ],
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

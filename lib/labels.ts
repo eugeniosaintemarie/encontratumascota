@@ -1,5 +1,30 @@
 import type { Raza, Especie, Sexo } from "./types"
 
+// Lista centralizada de razas por especie
+export const razasPorEspecie: Record<Especie, { value: Raza; label: string }[]> = {
+  perro: [
+    { value: "beagle", label: "Beagle" },
+    { value: "bulldog", label: "Bulldog" },
+    { value: "caniche", label: "Caniche" },
+    { value: "golden", label: "Golden Retriever" },
+    { value: "labrador", label: "Labrador" },
+    { value: "mestizo_perro", label: "Mestizo" },
+    { value: "otro_perro", label: "Otro" },
+    { value: "pastor_aleman", label: "Pastor Alemán" },
+  ],
+  gato: [
+    { value: "comun_europeo", label: "Común Europeo" },
+    { value: "maine_coon", label: "Maine Coon" },
+    { value: "mestizo_gato", label: "Mestizo" },
+    { value: "otro_gato", label: "Otro" },
+    { value: "persa", label: "Persa" },
+    { value: "siames", label: "Siamés" },
+  ],
+  otro: [
+    { value: "otro_animal", label: "Otro animal" },
+  ],
+}
+
 export const razasLabels: Record<Raza, string> = {
   mestizo: "Mestizo",
   mestizo_perro: "Mestizo",
