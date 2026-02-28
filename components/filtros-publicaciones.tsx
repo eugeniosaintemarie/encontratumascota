@@ -92,9 +92,9 @@ export function FiltrosPublicaciones({
       {!hideTipoSelector && (
         <Link
           href="/buscadas"
-          className="flex w-full items-center justify-center px-4 py-2 text-sm font-medium text-center rounded-lg transform-gpu transition-all duration-150 active:scale-95 active:translate-y-0.5 focus:outline-none cursor-pointer select-none text-foreground dark:!text-white hover:bg-muted/50 bg-muted/30 border"
+          className="flex w-full items-center justify-center px-4 py-2 text-sm font-medium text-center rounded-lg transform-gpu transition-all duration-150 active:scale-95 active:translate-y-0.5 focus:outline-none cursor-pointer select-none text-foreground dark:!text-white hover:bg-muted/50 bg-muted/30 border whitespace-nowrap"
         >
-          Ver&nbsp;<b>mascotas perdidas</b>, buscadas por sus familias ▶️
+          Ver <b>mascotas perdidas</b>, buscadas por sus familias ▶️
         </Link>
       )}
 
