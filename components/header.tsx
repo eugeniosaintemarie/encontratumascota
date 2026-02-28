@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Plus, LogIn, Menu, Moon, Sun, User, LogOut, ArrowLeft, ExternalLink } from "lucide-react"
+import { Plus, LogIn, Menu, Moon, Sun, User, LogOut, ArrowLeft, ExternalLink, Search } from "lucide-react"
 import Image from "next/image"
 import { useTheme } from "next-themes"
 
@@ -53,15 +53,13 @@ export function Header({
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2 no-underline hover:no-underline focus:no-underline active:no-underline">
-          <Image src="/logo.png" alt="Encontra Tu Mascota" width={36} height={36} className="h-9 w-9 rounded-lg" />
-          <span className="text-lg font-semibold text-[#D66528] dark:text-foreground">
-            Encontra Tu Mascota
-          </span>
-        </Link>
-
-        {/* Desktop navigation */}
-        <nav className="hidden sm:flex items-center gap-2">
+        <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2 no-underline hover:no-underline focus:no-underline active:no-underline">
+            <Image src="/logo.png" alt="Encontra Tu Mascota" width={36} height={36} className="h-9 w-9 rounded-lg" />
+            <span className="text-lg font-semibold text-[#D66528] dark:text-foreground">
+              Encontra Tu Mascota
+            </span>
+          </Link>
           {!isDemoEnv && (
             <a href="https://demo.encontratumascota.ar/" target="_blank" rel="noopener noreferrer">
               <Button variant="ghost" size="sm">
@@ -70,6 +68,16 @@ export function Header({
               </Button>
             </a>
           )}
+        </div>
+
+        {/* Desktop navigation */}
+        <nav className="hidden sm:flex items-center gap-2">
+          <Link href="/buscadas">
+            <Button variant="ghost" size="sm" className="text-[#D66528] hover:text-[#D66528] hover:bg-[#D66528]/10">
+              <Search className="mr-1.5 h-4 w-4" />
+              Buscadas
+            </Button>
+          </Link>
           <Button variant="outline" size="sm" onClick={() => (isAuthenticated ? onPublicarClick() : onAccederClick())}>
             <Plus className="mr-1.5 h-4 w-4" />
             Publicar
@@ -98,6 +106,12 @@ export function Header({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem asChild>
+                <Link href="/buscadas" onClick={() => setMenuOpen(false)} className="text-[#D66528]">
+                  <Search className="mr-2 h-4 w-4" />
+                  Buscadas
+                </Link>
+              </DropdownMenuItem>
               {!isDemoEnv && (
                 <DropdownMenuItem asChild>
                   <a href="https://demo.encontratumascota.ar/" target="_blank" rel="noopener noreferrer">

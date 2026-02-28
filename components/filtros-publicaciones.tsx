@@ -25,6 +25,7 @@ interface FiltrosPublicacionesProps {
   fechaDesde?: string
   transitoUrgente: boolean
   hideTipoSelector?: boolean
+  wideUbicacion?: boolean
   onTipoPublicacionChange: (value: TipoPublicacion | undefined) => void
   onEspecieChange: (value: Especie | "todos") => void
   onRazaChange: (value: string | "todos") => void
@@ -56,6 +57,7 @@ export function FiltrosPublicaciones({
   onSearch,
   hasActiveFilters,
   hideTipoSelector = false,
+  wideUbicacion = false,
 }: FiltrosPublicacionesProps) {
   // Hint animation removed: buttons are static now
   const [activeClearField, setActiveClearField] = useState<string | null>(null)
@@ -115,8 +117,8 @@ export function FiltrosPublicaciones({
         <div className="rounded-xl bg-[var(--salmon)] p-4 shadow-sm w-full">
           {/* Main container - column on mobile, row on lg (1024px+) */}
           <div className="flex flex-col lg:flex-row lg:items-center gap-3">
-            {/* Location - full width on mobile, 1/3 on large screens */}
-            <div className="relative w-full lg:w-1/3">
+            {/* Location - full width on mobile, 1/3 on large screens (or 1/2 if wideUbicacion) */}
+            <div className={`relative w-full ${wideUbicacion ? 'lg:w-1/2' : 'lg:w-1/3'}`}>
               <LocationAutocomplete
                 value={ubicacion}
                 onChange={(v) => onUbicacionChange(v)}
@@ -127,8 +129,8 @@ export function FiltrosPublicaciones({
               />
             </div>
 
-            {/* Filters grid - 2 columns on tablet, row on lg (1024px+) - takes 2/3 */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_auto] gap-3 w-full lg:w-2/3">
+            {/* Filters grid - 2 columns on tablet, row on lg (1024px+) - takes 2/3 (or 1/2 if wideUbicacion) */}
+            <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 w-full ${wideUbicacion ? 'lg:grid-cols-[1fr_1fr_1fr_auto] lg:w-1/2' : 'lg:grid-cols-[1fr_1fr_1fr_1fr_auto] lg:w-2/3'}`}>
               {/* Tipo */}
               <Select
                 value={especie === "todos" ? "" : especie}

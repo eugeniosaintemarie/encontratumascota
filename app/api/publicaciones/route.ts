@@ -45,7 +45,7 @@ export async function POST(request: Request) {
 
     // Usar el usuarioId de la sesion, NO del body (previene suplantacion)
     const publicacion = await crearPublicacion({
-      tipoPublicacion: body.tipoPublicacion,
+      tipoPublicacion: body.tipoPublicacion as "perdida" | "adopcion" | "buscada",
       especie: body.especie,
       raza: body.raza,
       sexo: body.sexo,

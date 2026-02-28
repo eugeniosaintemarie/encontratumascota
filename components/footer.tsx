@@ -21,7 +21,9 @@ export function Footer() {
             <span className="text-2xl font-bold text-[#d66528] leading-none">
               {reunidas !== null ? reunidas : "..."}
             </span>
-            <span className="text-foreground/90">mascotas reunidas con sus familias</span>
+            <Link href="/reunidas" className="text-[#FF8A65] font-medium hover:underline">
+              mascotas reunidas con sus familias
+            </Link>
           </p>
           <p className="text-sm text-foreground text-center sm:text-left">
             ¿No encontrás a tu mascota perdida?{" "}

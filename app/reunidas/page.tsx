@@ -99,6 +99,7 @@ export default function ReunidasPage() {
             transitoUrgente={false}
             onTipoPublicacionChange={() => { /* noop: fixed to adopcion */ }}
             hideTipoSelector={true}
+            wideUbicacion={true}
             onEspecieChange={(v) => setEspecie(v)}
             onRazaChange={(v) => setRaza(v)}
             onSexoChange={(v) => setSexo(v)}

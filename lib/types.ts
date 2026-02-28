@@ -36,7 +36,7 @@ export interface Mascota {
   imagenUrl: string
 }
 
-export type TipoPublicacion = "perdida" | "adopcion"
+export type TipoPublicacion = "perdida" | "adopcion" | "buscada"
 
 export interface Publicacion {
   id: string

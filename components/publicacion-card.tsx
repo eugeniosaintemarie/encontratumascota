@@ -45,7 +45,12 @@ export function PublicacionCard({
     setIsSharing(true)
 
     const url = `${window.location.origin}/publicacion/${publicacion.id}`
-    const title = `${especieLabels[mascota.especie]} ${generoLabels[mascota.sexo].toLowerCase()} ${razasLabels[mascota.raza]} encontrado en ${publicacion.ubicacion}`
+    const tipoTexto = publicacion.tipoPublicacion === "buscada" 
+      ? "buscado" 
+      : publicacion.tipoPublicacion === "adopcion"
+      ? "en adopción"
+      : "encontrado"
+    const title = `${especieLabels[mascota.especie]} ${generoLabels[mascota.sexo].toLowerCase()} ${razasLabels[mascota.raza]} ${tipoTexto} en ${publicacion.ubicacion}`
     const transitoTag = publicacion.transitoUrgente ? " ¡Tránsito urgente!" : ""
     const shareText = `${title}${transitoTag}\n\n${mascota.descripcion}\n\n${url}`
 
@@ -142,7 +147,7 @@ export function PublicacionCard({
       <div className="relative aspect-square overflow-hidden bg-muted">
         <img
           src={mascota.imagenUrl || "/placeholder.svg"}
-          alt={`${especieLabels[mascota.especie]} encontrado`}
+          alt={`${especieLabels[mascota.especie]} ${publicacion.tipoPublicacion === "buscada" ? "buscado" : "encontrado"}`}
           className="object-cover object-top transition-transform duration-300 group-hover:scale-105 h-full w-full"
         />
 

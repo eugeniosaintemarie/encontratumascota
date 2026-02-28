@@ -33,6 +33,8 @@ export function ListadoPublicaciones({
 
   const publicacionesFiltradas = useMemo(() => {
     return publicaciones.filter((pub) => {
+      // Excluir publicaciones "buscadas" del home (tienen su propia página)
+      if (pub.tipoPublicacion === "buscada") return false
       if (tipoPublicacion !== undefined && pub.tipoPublicacion !== tipoPublicacion) return false
       if (especie !== "todos" && pub.mascota.especie !== especie) return false
       if (raza !== "todos" && pub.mascota.raza !== raza) return false
@@ -96,6 +98,7 @@ export function ListadoPublicaciones({
         ubicacion={ubicacion}
         fechaDesde={fechaDesde}
         transitoUrgente={transitoUrgente}
+        wideUbicacion={tipoPublicacion === "adopcion"}
         onTipoPublicacionChange={(v) => {
           setTipoPublicacion(v)
           setCurrentPage(1)

@@ -27,7 +27,7 @@ export const publicaciones = pgTable("publicaciones", {
   imagenUrl: text("imagen_url").default(""),
 
   // Datos de la publicacion
-  tipoPublicacion: text("tipo_publicacion").default("perdida").notNull(), // "perdida" | "adopcion"
+  tipoPublicacion: text("tipo_publicacion").default("perdida").notNull(), // "perdida" | "adopcion" | "buscada"
   ubicacion: text("ubicacion").notNull(),
   fechaPublicacion: timestamp("fecha_publicacion", { withTimezone: true }).defaultNow().notNull(),
   fechaEncuentro: timestamp("fecha_encuentro", { withTimezone: true }), // Solo para perdida

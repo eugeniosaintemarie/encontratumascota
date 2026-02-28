@@ -22,7 +22,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 import { ImageCropEditor } from "@/components/image-crop-editor"
 import LocationAutocomplete from "@/components/location-autocomplete"
-import { Upload, X, Heart, Search } from "lucide-react"
+import { Upload, X, Heart, Search, HandHeart } from "lucide-react"
 
 import type { Especie, Sexo, Raza, TipoPublicacion } from "@/lib/types"
 import { razasPorEspecie } from "@/lib/labels"
@@ -160,7 +160,7 @@ export function PublicarModal({
           imagenUrl: finalImagenUrl,
         },
         ubicacion,
-        fechaEncuentro: tipoPublicacion === "perdida" ? new Date(fechaEncuentro) : undefined,
+        fechaEncuentro: tipoPublicacion === "perdida" || tipoPublicacion === "buscada" ? new Date(fechaEncuentro) : undefined,
         contactoNombre,
         contactoTelefono,
         contactoEmail,
@@ -244,7 +244,28 @@ export function PublicarModal({
 
         {paso === 1 && (
           <div className="flex flex-col gap-4">
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-3">
+
+              <button
+                type="button"
+                onClick={() => {
+                  setTipoPublicacion("buscada")
+                  setPaso(2)
+                }}
+                className="flex flex-col items-center justify-center p-6 gap-4 rounded-xl border-2 border-border hover:border-primary hover:bg-primary/5 transform-gpu transition-transform duration-150 active:scale-95 active:translate-y-0.5 focus:outline-none cursor-pointer select-none"
+                aria-pressed={tipoPublicacion === "buscada"}
+              >
+                <div className="p-4 rounded-full bg-primary/10 text-primary">
+                  <Search className="h-8 w-8" />
+                </div>
+                <div className="text-center">
+                  <h4 className="font-semibold text-lg">Que se busca</h4>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Perdiste tu mascota y la estás buscando
+                  </p>
+                </div>
+              </button>
+
               <button
                 type="button"
                 onClick={() => {
@@ -255,12 +276,12 @@ export function PublicarModal({
                 aria-pressed={tipoPublicacion === "perdida"}
               >
                 <div className="p-4 rounded-full bg-primary/10 text-primary">
-                  <Search className="h-8 w-8" />
+                  <HandHeart className="h-8 w-8" />
                 </div>
                 <div className="text-center">
                   <h4 className="font-semibold text-lg">Perdida</h4>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Encontraste una mascota que creés que tiene familia y está perdida
+                    Encontraste una mascota que creés tiene familia y está perdida
                   </p>
                 </div>
               </button>
@@ -278,9 +299,9 @@ export function PublicarModal({
                   <Heart className="h-8 w-8" />
                 </div>
                 <div className="text-center">
-                  <h4 className="font-semibold text-lg">En Adopción</h4>
+                  <h4 className="font-semibold text-lg">En adopción</h4>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Tenés o estás cuidando una mascota y le estás buscando su primer familia
+                    Estás cuidando una mascota, buscandole su primer familia
                   </p>
                 </div>
               </button>
@@ -373,7 +394,11 @@ export function PublicarModal({
             <div className="grid gap-2 sm:grid-cols-2 mt-[25px] mb-2">
                 <div className="space-y-2">
                 <Label htmlFor="ubicacion">
-                  {tipoPublicacion === "perdida" ? "Ubicación donde fue encontrada" : "Ubicación donde está alojada"}
+                  {tipoPublicacion === "perdida" 
+                    ? "Ubicación donde fue encontrada" 
+                    : tipoPublicacion === "buscada"
+                    ? "Última ubicación donde se la vio"
+                    : "Ubicación donde está alojada"}
                 </Label>
                 {/* Location autocomplete */}
                 <LocationAutocomplete
@@ -385,9 +410,11 @@ export function PublicarModal({
                 />
               </div>
 
-              {tipoPublicacion === "perdida" ? (
+              {tipoPublicacion === "perdida" || tipoPublicacion === "buscada" ? (
                 <div className="space-y-2">
-                  <Label htmlFor="fecha">Fecha de cuando fue encontrada</Label>
+                  <Label htmlFor="fecha">
+                    {tipoPublicacion === "perdida" ? "Fecha de cuando fue encontrada" : "Fecha de cuando se perdió"}
+                  </Label>
                   <div className="relative">
                     <input
                       ref={dateInputRef}

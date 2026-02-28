@@ -10,7 +10,7 @@ const isDemoEnv = isDemoHost(undefined)
 
 // ─── Tipos para las queries ─────────────────────────────────
 interface FiltrosPublicaciones {
-  tipoPublicacion?: "perdida" | "adopcion"
+  tipoPublicacion?: "perdida" | "adopcion" | "buscada"
   especie?: Especie | "todos"
   raza?: string | "todos"
   sexo?: Sexo | "todos"
@@ -139,7 +139,7 @@ export async function getPublicacionById(id: string, opts?: { forceDemo?: boolea
 
 // ─── INSERT: Crear publicacion ──────────────────────────────
 export async function crearPublicacion(data: {
-  tipoPublicacion: "perdida" | "adopcion"
+  tipoPublicacion: "perdida" | "adopcion" | "buscada"
   especie: string
   raza: string
   sexo: string
