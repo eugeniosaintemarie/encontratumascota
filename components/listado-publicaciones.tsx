@@ -199,8 +199,8 @@ export function ListadoPublicaciones({
           <h3 className="text-lg font-medium text-foreground">
             Todavía no hay mascotas perdidas
           </h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Las publicaciones de masctotas perdidas aparecerán aquí
+          <p className="mt-1 text-sm text-muted-foreground text-center">
+            Las publicaciones de mascotas perdidas aparecerán aquí
           </p>
         </div>
       )}
