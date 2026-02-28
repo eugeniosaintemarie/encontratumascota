@@ -109,7 +109,7 @@ export function FiltrosPublicaciones({
           onClick={() => onTipoPublicacionChange(tipoPublicacion === "perdida" ? undefined : "perdida")}
           aria-pressed={tipoPublicacion === "perdida"}
         >
-          Ver <b>mascotas perdidas</b>, que esperan ser encontradas por sus dueños 🔽
+          Ver <b>mascotas perdidas</b>, esperando ser encontradas por sus dueños 🔽
         </button>
         <button
           className={`px-4 py-2 text-sm font-medium flex-1 text-center rounded-lg transform-gpu transition-all duration-150 active:scale-95 active:translate-y-0.5 focus:outline-none cursor-pointer select-none ${tipoPublicacion === "adopcion"
@@ -119,7 +119,7 @@ export function FiltrosPublicaciones({
           onClick={() => onTipoPublicacionChange(tipoPublicacion === "adopcion" ? undefined : "adopcion")}
           aria-pressed={tipoPublicacion === "adopcion"}
         >
-          Ver <b>mascotas en adopción</b>, que buscan su primer familia 🔽
+          Ver <b>mascotas en adopción</b>, buscando su primer familia 🔽
         </button>
       </div>
       )}
