@@ -5,11 +5,12 @@ import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MapPin, Lock, Share2, Check, Loader2, AlertTriangle, UserPlus, User, Download } from "lucide-react"
+import { MapPin, Lock, Share2, Check, Loader2, AlertTriangle, UserPlus, User, Download, ZoomIn } from "lucide-react"
 import type { Publicacion } from "@/lib/types"
 import { razasLabels, especieLabels, generoLabels } from "@/lib/labels"
 import { generateShareImage } from "@/lib/generate-share-image"
 import { toast } from "sonner"
+import { ImageViewerModal } from "@/components/image-viewer-modal"
 
 interface PublicacionCardProps {
   publicacion: Publicacion
@@ -33,6 +34,7 @@ export function PublicacionCard({
 
   const [isSharing, setIsSharing] = useState(false)
   const [isCopied, setIsCopied] = useState(false)
+  const [isImageViewerOpen, setIsImageViewerOpen] = useState(false)
 
   const handleLoginClick = () => {
     if (onRequireAuth) {
@@ -144,12 +146,19 @@ export function PublicacionCard({
       id={`publicacion-${publicacion.id}`}
       className="group flex flex-col overflow-hidden transition-all hover:shadow-lg p-0 gap-0"
     >
-      <div className="relative aspect-square overflow-hidden bg-muted">
+      <div className="relative aspect-square overflow-hidden bg-muted cursor-pointer" onClick={() => setIsImageViewerOpen(true)}>
         <img
           src={mascota.imagenUrl || "/placeholder.svg"}
           alt={`${especieLabels[mascota.especie]} ${publicacion.tipoPublicacion === "buscada" ? "buscado" : "encontrado"}`}
           className="object-cover object-top transition-transform duration-300 group-hover:scale-105 h-full w-full"
         />
+
+        {/* Zoom indicator overlay */}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+          <div className="bg-white/90 dark:bg-black/70 rounded-full p-2 shadow-lg backdrop-blur-sm">
+            <ZoomIn className="h-5 w-5 text-foreground" />
+          </div>
+        </div>
 
         {/* imagen renderizada */}
 
@@ -318,6 +327,14 @@ export function PublicacionCard({
           )}
         </div>
       </CardContent>
+
+      {/* Image Viewer Modal */}
+      <ImageViewerModal
+        isOpen={isImageViewerOpen}
+        onClose={() => setIsImageViewerOpen(false)}
+        imageUrl={mascota.imagenUrl || "/placeholder.svg"}
+        alt={`${especieLabels[mascota.especie]} ${publicacion.tipoPublicacion === "buscada" ? "buscado" : "encontrado"}`}
+      />
     </Card>
   )
 }
