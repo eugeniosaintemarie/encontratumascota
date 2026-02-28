@@ -197,10 +197,10 @@ export function ListadoPublicaciones({
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 py-16">
           <PawPrint className="mb-4 h-12 w-12 text-muted-foreground/50" />
           <h3 className="text-lg font-medium text-foreground">
-            No se encontraron mascotas
+            Todavía no hay mascotas perdidas
           </h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Intenta ajustar los filtros de busqueda
+            Las publicaciones de masctotas perdidas aparecerán aquí
           </p>
         </div>
       )}

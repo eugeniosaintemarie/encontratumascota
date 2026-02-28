@@ -94,7 +94,7 @@ export function FiltrosPublicaciones({
           href="/buscadas"
           className="flex w-full items-center justify-center px-4 py-2 text-sm font-medium text-center rounded-lg transform-gpu transition-all duration-150 active:scale-95 active:translate-y-0.5 focus:outline-none cursor-pointer select-none text-foreground dark:!text-white hover:bg-muted/50 bg-muted/30 border whitespace-nowrap"
         >
-          Ver <b>mascotas perdidas</b>, buscadas por sus familias ▶️
+          Ver{"\u00A0"}<b>mascotas perdidas</b>, buscadas por sus familias ▶️
         </Link>
       )}
 
