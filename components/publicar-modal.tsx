@@ -22,7 +22,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 import { ImageCropEditor } from "@/components/image-crop-editor"
 import LocationAutocomplete from "@/components/location-autocomplete"
-import { Upload, X, Heart, Search, HandHeart } from "lucide-react"
+import { Upload, X, Search, MapPin, Heart } from "lucide-react"
 
 import type { Especie, Sexo, Raza, TipoPublicacion } from "@/lib/types"
 import { razasPorEspecie } from "@/lib/labels"
@@ -259,10 +259,7 @@ export function PublicarModal({
                   <Search className="h-8 w-8" />
                 </div>
                 <div className="text-center">
-                  <h4 className="font-semibold text-lg">Que se busca</h4>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Perdiste tu mascota y la estás buscando
-                  </p>
+                  <h4 className="font-semibold text-lg">perdida</h4>
                 </div>
               </button>
 
@@ -276,13 +273,10 @@ export function PublicarModal({
                 aria-pressed={tipoPublicacion === "perdida"}
               >
                 <div className="p-4 rounded-full bg-primary/10 text-primary">
-                  <HandHeart className="h-8 w-8" />
+                  <MapPin className="h-8 w-8" />
                 </div>
                 <div className="text-center">
-                  <h4 className="font-semibold text-lg">Perdida</h4>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Encontraste una mascota que creés tiene familia y está perdida
-                  </p>
+                  <h4 className="font-semibold text-lg">encontrada</h4>
                 </div>
               </button>
 
@@ -299,10 +293,7 @@ export function PublicarModal({
                   <Heart className="h-8 w-8" />
                 </div>
                 <div className="text-center">
-                  <h4 className="font-semibold text-lg">En adopción</h4>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Estás cuidando una mascota, buscandole su primer familia
-                  </p>
+                  <h4 className="font-semibold text-lg">en adopción</h4>
                 </div>
               </button>
             </div>

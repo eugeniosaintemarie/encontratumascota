@@ -95,7 +95,7 @@ export function FiltrosPublicaciones({
             href="/buscadas"
             className="flex w-full sm:flex-1 items-center justify-center px-4 py-2 text-sm font-medium text-center rounded-lg transform-gpu transition-all duration-150 active:scale-95 active:translate-y-0.5 focus:outline-none cursor-pointer select-none text-foreground dark:!text-white hover:bg-muted/50 bg-muted/30 whitespace-nowrap"
           >
-            Ver mascotas{"\u00A0"}<b> buscadas</b>
+            Ver mascotas{"\u00A0"}<b> perdidas</b>
           </Link>
           <button
             className={`px-4 py-2 text-sm font-medium w-full sm:flex-1 text-center rounded-lg transform-gpu transition-all duration-150 active:scale-95 active:translate-y-0.5 focus:outline-none cursor-pointer select-none ${tipoPublicacion === "perdida"
@@ -105,7 +105,7 @@ export function FiltrosPublicaciones({
             onClick={() => onTipoPublicacionChange(tipoPublicacion === "perdida" ? undefined : "perdida")}
             aria-pressed={tipoPublicacion === "perdida"}
           >
-            Ver mascotas <b>perdidas</b>
+            Ver mascotas <b>encontradas</b>
           </button>
           <button
             className={`px-4 py-2 text-sm font-medium w-full sm:flex-1 text-center rounded-lg transform-gpu transition-all duration-150 active:scale-95 active:translate-y-0.5 focus:outline-none cursor-pointer select-none ${tipoPublicacion === "adopcion"
@@ -233,7 +233,7 @@ export function FiltrosPublicaciones({
         </div>
       ) : (
         <div className="rounded-xl bg-[var(--salmon)] p-6 text-center text-sm text-white">
-          Selecciona <b>perdidas</b> o en <b>adopción</b> para activar los filtros de búsqueda
+          Selecciona <b>encontradas</b> o en <b>adopción</b> para activar los filtros de búsqueda
         </div>
       )}
     </div>
