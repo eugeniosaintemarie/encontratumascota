@@ -88,40 +88,36 @@ export function FiltrosPublicaciones({
   }
   return (
     <div className="flex flex-col gap-4">
-      {/* Link to buscadas page */}
-      {!hideTipoSelector && (
-        <Link
-          href="/buscadas"
-          className="flex w-full items-center justify-center px-4 py-2 text-sm font-medium text-center rounded-lg transform-gpu transition-all duration-150 active:scale-95 active:translate-y-0.5 focus:outline-none cursor-pointer select-none text-foreground dark:!text-white hover:bg-muted/50 bg-muted/30 border whitespace-nowrap"
-        >
-          Ver{"\u00A0"}<b>mascotas perdidas</b>, buscadas por sus familias ▶️
-        </Link>
-      )}
-
       {/* Tabs Type Selector */}
       {!hideTipoSelector && (
-        <div className="flex w-full items-center justify-between gap-2 p-1 bg-muted/30 rounded-xl border">
-        <button
-          className={`px-4 py-2 text-sm font-medium flex-1 text-center rounded-lg transform-gpu transition-all duration-150 active:scale-95 active:translate-y-0.5 focus:outline-none cursor-pointer select-none ${tipoPublicacion === "perdida"
-            ? "!bg-[var(--salmon)] !text-white shadow-sm dark:!bg-[var(--salmon)] dark:!text-white"
-            : "text-foreground dark:!text-white hover:bg-muted/50"
-            }`}
-          onClick={() => onTipoPublicacionChange(tipoPublicacion === "perdida" ? undefined : "perdida")}
-          aria-pressed={tipoPublicacion === "perdida"}
-        >
-          Ver <b>mascotas perdidas</b>, esperando ser encontradas por sus dueños 🔽
-        </button>
-        <button
-          className={`px-4 py-2 text-sm font-medium flex-1 text-center rounded-lg transform-gpu transition-all duration-150 active:scale-95 active:translate-y-0.5 focus:outline-none cursor-pointer select-none ${tipoPublicacion === "adopcion"
-            ? "!bg-[var(--salmon)] !text-white shadow-sm dark:!bg-[var(--salmon)] dark:!text-white"
-            : "text-foreground dark:!text-white hover:bg-muted/50"
-            }`}
-          onClick={() => onTipoPublicacionChange(tipoPublicacion === "adopcion" ? undefined : "adopcion")}
-          aria-pressed={tipoPublicacion === "adopcion"}
-        >
-          Ver <b>mascotas en adopción</b>, buscando su primer familia 🔽
-        </button>
-      </div>
+        <div className="flex flex-col sm:flex-row w-full items-stretch sm:items-center gap-2 p-1 bg-muted/30 rounded-xl border">
+          <Link
+            href="/buscadas"
+            className="flex w-full sm:flex-1 items-center justify-center px-4 py-2 text-sm font-medium text-center rounded-lg transform-gpu transition-all duration-150 active:scale-95 active:translate-y-0.5 focus:outline-none cursor-pointer select-none text-foreground dark:!text-white hover:bg-muted/50 bg-muted/30 whitespace-nowrap"
+          >
+            Ver mascotas{"\u00A0"}<b> buscadas</b>
+          </Link>
+          <button
+            className={`px-4 py-2 text-sm font-medium w-full sm:flex-1 text-center rounded-lg transform-gpu transition-all duration-150 active:scale-95 active:translate-y-0.5 focus:outline-none cursor-pointer select-none ${tipoPublicacion === "perdida"
+              ? "!bg-[var(--salmon)] !text-white shadow-sm dark:!bg-[var(--salmon)] dark:!text-white"
+              : "text-foreground dark:!text-white hover:bg-muted/50"
+              }`}
+            onClick={() => onTipoPublicacionChange(tipoPublicacion === "perdida" ? undefined : "perdida")}
+            aria-pressed={tipoPublicacion === "perdida"}
+          >
+            Ver mascotas <b>perdidas</b>
+          </button>
+          <button
+            className={`px-4 py-2 text-sm font-medium w-full sm:flex-1 text-center rounded-lg transform-gpu transition-all duration-150 active:scale-95 active:translate-y-0.5 focus:outline-none cursor-pointer select-none ${tipoPublicacion === "adopcion"
+              ? "!bg-[var(--salmon)] !text-white shadow-sm dark:!bg-[var(--salmon)] dark:!text-white"
+              : "text-foreground dark:!text-white hover:bg-muted/50"
+              }`}
+            onClick={() => onTipoPublicacionChange(tipoPublicacion === "adopcion" ? undefined : "adopcion")}
+            aria-pressed={tipoPublicacion === "adopcion"}
+          >
+            Ver mascotas en <b>adopción</b>
+          </button>
+        </div>
       )}
 
       {tipoPublicacion !== undefined ? (
@@ -237,7 +233,7 @@ export function FiltrosPublicaciones({
         </div>
       ) : (
         <div className="rounded-xl bg-[var(--salmon)] p-6 text-center text-sm text-white">
-          Selecciona arriba el tipo de mascota que estás buscando para activar los filtros de búsqueda
+          Selecciona <b>perdidas</b> o en <b>adopción</b> para activar los filtros de búsqueda
         </div>
       )}
     </div>
