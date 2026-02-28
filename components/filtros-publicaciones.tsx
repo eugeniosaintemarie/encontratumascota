@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
   Select,
@@ -87,6 +88,16 @@ export function FiltrosPublicaciones({
   }
   return (
     <div className="flex flex-col gap-4">
+      {/* Link to buscadas page */}
+      {!hideTipoSelector && (
+        <Link
+          href="/buscadas"
+          className="flex w-full items-center justify-center px-4 py-2 text-sm font-medium text-center rounded-lg transform-gpu transition-all duration-150 active:scale-95 active:translate-y-0.5 focus:outline-none cursor-pointer select-none text-foreground dark:!text-white hover:bg-muted/50 bg-muted/30 border"
+        >
+          Ver&nbsp;<b>mascotas perdidas</b>, buscadas por sus familias ▶️
+        </Link>
+      )}
+
       {/* Tabs Type Selector */}
       {!hideTipoSelector && (
         <div className="flex w-full items-center justify-between gap-2 p-1 bg-muted/30 rounded-xl border">
@@ -98,7 +109,7 @@ export function FiltrosPublicaciones({
           onClick={() => onTipoPublicacionChange(tipoPublicacion === "perdida" ? undefined : "perdida")}
           aria-pressed={tipoPublicacion === "perdida"}
         >
-          Ver <b>mascotas perdidas</b>, que esperan ser encontradas por sus dueños
+          Ver <b>mascotas perdidas</b>, que esperan ser encontradas por sus dueños 🔽
         </button>
         <button
           className={`px-4 py-2 text-sm font-medium flex-1 text-center rounded-lg transform-gpu transition-all duration-150 active:scale-95 active:translate-y-0.5 focus:outline-none cursor-pointer select-none ${tipoPublicacion === "adopcion"
@@ -108,7 +119,7 @@ export function FiltrosPublicaciones({
           onClick={() => onTipoPublicacionChange(tipoPublicacion === "adopcion" ? undefined : "adopcion")}
           aria-pressed={tipoPublicacion === "adopcion"}
         >
-          Ver <b>mascotas en adopción</b>, que buscan su primer familia
+          Ver <b>mascotas en adopción</b>, que buscan su primer familia 🔽
         </button>
       </div>
       )}

@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Plus, LogIn, Menu, Moon, Sun, User, LogOut, ArrowLeft, ExternalLink, Search } from "lucide-react"
+import { Plus, LogIn, Menu, Moon, Sun, User, LogOut, ArrowLeft, ExternalLink } from "lucide-react"
 import Image from "next/image"
 import { useTheme } from "next-themes"
 
@@ -72,12 +72,6 @@ export function Header({
 
         {/* Desktop navigation */}
         <nav className="hidden sm:flex items-center gap-2">
-          <Link href="/buscadas">
-            <Button variant="ghost" size="sm" className="text-[#D66528] hover:text-[#D66528] hover:bg-[#D66528]/10">
-              <Search className="mr-1.5 h-4 w-4" />
-              Buscadas
-            </Button>
-          </Link>
           <Button variant="outline" size="sm" onClick={() => (isAuthenticated ? onPublicarClick() : onAccederClick())}>
             <Plus className="mr-1.5 h-4 w-4" />
             Publicar
@@ -106,21 +100,6 @@ export function Header({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem asChild>
-                <Link href="/buscadas" onClick={() => setMenuOpen(false)} className="text-[#D66528]">
-                  <Search className="mr-2 h-4 w-4" />
-                  Buscadas
-                </Link>
-              </DropdownMenuItem>
-              {!isDemoEnv && (
-                <DropdownMenuItem asChild>
-                  <a href="https://demo.encontratumascota.ar/" target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="mr-2 h-4 w-4" />
-                    Demo
-                  </a>
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => {
                   setMenuOpen(false)
