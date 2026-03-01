@@ -30,6 +30,7 @@ import { usePublicaciones } from "@/lib/publicaciones-context"
 import { authClient } from "@/lib/auth/client"
 import { useImageUpload } from "@/hooks/use-image-upload"
 import { toast } from "sonner"
+import { sanitizeText, sanitizeRichText, sanitizeEmail, sanitizePhone } from "@/lib/sanitize"
 
 interface PublicarModalProps {
   isOpen: boolean
@@ -147,6 +148,7 @@ export function PublicarModal({
         throw new Error("Error al subir la imagen. Intenta nuevamente.")
       }
 
+      // Sanitizar todos los inputs de texto antes de enviar
       await agregarPublicacion({
         tipoPublicacion,
         mascota: {
@@ -154,16 +156,16 @@ export function PublicarModal({
           especie: especie as Especie,
           raza: raza as Raza,
           sexo: sexo as Sexo,
-          color,
-          descripcion,
-          edad: tipoPublicacion === "adopcion" ? edad : undefined,
+          color: sanitizeText(color),
+          descripcion: sanitizeRichText(descripcion),
+          edad: tipoPublicacion === "adopcion" ? sanitizeText(edad) : undefined,
           imagenUrl: finalImagenUrl,
         },
-        ubicacion,
+        ubicacion: sanitizeText(ubicacion),
         fechaEncuentro: tipoPublicacion === "perdida" || tipoPublicacion === "buscada" ? new Date(fechaEncuentro) : undefined,
-        contactoNombre,
-        contactoTelefono,
-        contactoEmail,
+        contactoNombre: sanitizeText(contactoNombre),
+        contactoTelefono: sanitizePhone(contactoTelefono),
+        contactoEmail: sanitizeEmail(contactoEmail),
         mostrarContactoPublico,
         usuarioId: session?.user?.id || demoUser?.id || "",
         activa: true,

@@ -1,22 +1,22 @@
 import { put } from "@vercel/blob"
 import { NextResponse } from "next/server"
-
-// Usuarios restringidos que no pueden subir archivos
-const RESTRICTED_USERS = new Set(["demo", "admin"])
+import { getServerSession } from "@/lib/auth/server"
 
 export async function POST(request: Request) {
     try {
+        // Verificar sesión y permisos de escritura
+        const session = await getServerSession(request)
+        if (!session?.user) {
+            return NextResponse.json({ error: "No autorizado" }, { status: 401 })
+        }
+
+        // Bloquear usuarios demo (modo solo lectura)
+        if ((session.user as any).isReadOnly) {
+            return NextResponse.json({ error: "Modo demo solo permite visualización" }, { status: 403 })
+        }
+
         const formData = await request.formData()
         const file = formData.get("file") as File | null
-        const usuarioId = formData.get("usuarioId") as string | null
-
-        // Blindaje: bloquear uploads de usuarios demo/admin
-        if (usuarioId && RESTRICTED_USERS.has(usuarioId)) {
-            return NextResponse.json(
-                { error: "Acción no permitida para este usuario" },
-                { status: 403 }
-            )
-        }
 
         if (!file) {
             return NextResponse.json(

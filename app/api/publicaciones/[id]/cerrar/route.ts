@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "@/lib/auth/server"
+import { sanitizeText, sanitizePhone, sanitizeEmail } from "@/lib/sanitize-server"
 
 type RouteParams = { params: Promise<{ id: string }> }
 
@@ -11,6 +12,11 @@ export async function POST(request: Request, { params }: RouteParams) {
     const session = await getServerSession(request)
     if (!session?.user) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 })
+    }
+
+    // Bloquear usuarios demo (modo solo lectura)
+    if ((session.user as any).isReadOnly) {
+      return NextResponse.json({ error: "Modo demo solo permite visualización" }, { status: 403 })
     }
 
     const { getPublicacionById, cerrarPublicacionDB } = await import("@/lib/actions/publicaciones")
@@ -26,7 +32,17 @@ export async function POST(request: Request, { params }: RouteParams) {
     }
 
     const { motivo, transitoContacto } = await request.json()
-    const publicacion = await cerrarPublicacionDB(id, motivo, transitoContacto)
+    
+    // Sanitizar datos de contacto de transito si existen
+    const transitoContactoSanitizado = transitoContacto
+      ? {
+          nombre: sanitizeText(transitoContacto.nombre),
+          telefono: sanitizePhone(transitoContacto.telefono),
+          email: sanitizeEmail(transitoContacto.email),
+        }
+      : undefined
+    
+    const publicacion = await cerrarPublicacionDB(id, motivo, transitoContactoSanitizado)
 
     if (!publicacion) {
       return NextResponse.json({ error: "Publicacion no encontrada" }, { status: 404 })

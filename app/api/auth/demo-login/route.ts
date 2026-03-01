@@ -14,16 +14,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing credentials" }, { status: 400 })
     }
 
-    const valid = (email === "demo" && password === "demo") || (email === "admin" && password === "admin")
+    // Solo permite login demo (no admin) - modo solo lectura
+    const valid = email === "demo" && password === "demo"
     if (!valid) {
       return NextResponse.json({ error: "Credenciales invalidas" }, { status: 401 })
     }
 
     const user = {
-      id: email === "admin" ? "demo-admin" : "demo-user",
-      name: email === "admin" ? "Admin user" : "Demo user",
-      email,
+      id: "demo-user",
+      name: "Usuario Demo",
+      email: "demo@ejemplo.com",
       createdAt: new Date().toISOString(),
+      isReadOnly: true, // Flag para indicar modo solo lectura
     }
 
     const payload = { user }

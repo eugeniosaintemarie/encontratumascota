@@ -24,6 +24,7 @@ import { usePublicaciones } from "@/lib/publicaciones-context"
 import { especieLabels, generoLabels, razasLabels } from "@/lib/labels"
 import { authClient, logout } from "@/lib/auth/client"
 import type { Usuario } from "@/lib/types"
+import { sanitizeText, sanitizePhone, sanitizeEmail } from "@/lib/sanitize"
 
 interface PerfilModalProps {
   isOpen: boolean
@@ -79,10 +80,14 @@ export function PerfilModal({
     
     // Mapear motivo al formato del context
     const motivo = closeReason === "transitada" ? "en_transito" : "encontrado_dueno"
-    const transitoContacto = closeReason === "transitada" 
-      ? { nombre: transitoNombre.trim(), telefono: transitoTelefono.trim(), email: transitoEmail.trim() }
+    const transitoContacto = closeReason === "transitada"
+      ? { 
+          nombre: sanitizeText(transitoNombre), 
+          telefono: sanitizePhone(transitoTelefono), 
+          email: sanitizeEmail(transitoEmail) 
+        }
       : undefined
-    
+
     await cerrarPublicacion(selectedPublicacion, motivo, transitoContacto)
     
     setIsLoading(false)
@@ -208,20 +213,34 @@ export function PerfilModal({
 
             {userPublicaciones.length > 0 ? (
               <div className="space-y-4">
-                <Select value={selectedPublicacion} onValueChange={setSelectedPublicacion}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Elegir publicacion..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {userPublicaciones.map((pub) => (
-                      <SelectItem key={pub.id} value={pub.id}>
-                        {especieLabels[pub.mascota.especie]} - {generoLabels[pub.mascota.sexo]} - {razasLabels[pub.mascota.raza]} / {pub.ubicacion} ({pub.fechaEncuentro.toLocaleDateString()})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {/* Modo solo lectura: mostrar lista sin opción de cerrar */}
+                {currentUser?.isReadOnly ? (
+                  <div className="rounded-lg border border-border bg-muted/30 p-4">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                      <AlertCircle className="h-4 w-4" />
+                      Modo demo - Solo visualización
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Estás viendo {userPublicaciones.length} publicación{userPublicaciones.length !== 1 ? 'es' : ''} de ejemplo.
+                      En el modo demo no podés cerrar publicaciones.
+                    </p>
+                  </div>
+                ) : (
+                  <Select value={selectedPublicacion} onValueChange={setSelectedPublicacion}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Elegir publicacion..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {userPublicaciones.map((pub) => (
+                        <SelectItem key={pub.id} value={pub.id}>
+                          {especieLabels[pub.mascota.especie]} - {generoLabels[pub.mascota.sexo]} - {razasLabels[pub.mascota.raza]} / {pub.ubicacion} ({pub.fechaEncuentro.toLocaleDateString()})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
 
-                {selectedPublicacion && (
+                {!currentUser?.isReadOnly && selectedPublicacion && (
                   <Select value={closeReason} onValueChange={(v) => setCloseReason(v as "ubicada" | "transitada")}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Seleccionar motivo de cierre..." />
@@ -279,13 +298,15 @@ export function PerfilModal({
                   </div>
                 )}
 
-                <Button
-                  onClick={handleClosePublicacion}
-                  disabled={!selectedPublicacion || !closeReason || isLoading || (closeReason === "transitada" && (!transitoNombre.trim() || !transitoTelefono.trim() || !transitoEmail.trim()))}
-                  className="w-full"
-                >
-                  {isLoading ? "Cerrando..." : closeReason === "transitada" ? "Dar tránsito" : "Cerrar publicación"}
-                </Button>
+                {!currentUser?.isReadOnly && (
+                  <Button
+                    onClick={handleClosePublicacion}
+                    disabled={!selectedPublicacion || !closeReason || isLoading || (closeReason === "transitada" && (!transitoNombre.trim() || !transitoTelefono.trim() || !transitoEmail.trim()))}
+                    className="w-full"
+                  >
+                    {isLoading ? "Cerrando..." : closeReason === "transitada" ? "Dar tránsito" : "Cerrar publicación"}
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="text-center py-6 text-muted-foreground">

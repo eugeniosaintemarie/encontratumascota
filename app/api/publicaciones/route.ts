@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "@/lib/auth/server"
 import { isDemoRequest } from "@/lib/env"
+import { sanitizeObject } from "@/lib/sanitize-server"
 
 // GET /api/publicaciones - Listar publicaciones (publico)
 export async function GET(request: Request) {
@@ -40,8 +41,24 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 })
     }
 
+    // Bloquear usuarios demo (modo solo lectura)
+    if ((session.user as any).isReadOnly) {
+      return NextResponse.json({ error: "Modo demo solo permite visualización" }, { status: 403 })
+    }
+
     const { crearPublicacion } = await import("@/lib/actions/publicaciones")
     const body = await request.json()
+
+    // Sanitizar inputs de texto para prevenir XSS
+    const datosSanitizados = sanitizeObject({
+      color: body.color,
+      descripcion: body.descripcion,
+      edad: body.edad,
+      ubicacion: body.ubicacion,
+      contactoNombre: body.contactoNombre,
+      contactoTelefono: body.contactoTelefono,
+      contactoEmail: body.contactoEmail,
+    })
 
     // Usar el usuarioId de la sesion, NO del body (previene suplantacion)
     const publicacion = await crearPublicacion({
@@ -49,15 +66,15 @@ export async function POST(request: Request) {
       especie: body.especie,
       raza: body.raza,
       sexo: body.sexo,
-      color: body.color,
-      descripcion: body.descripcion,
-      edad: body.edad,
+      color: datosSanitizados.color,
+      descripcion: datosSanitizados.descripcion,
+      edad: datosSanitizados.edad,
       imagenUrl: body.imagenUrl || "",
-      ubicacion: body.ubicacion,
+      ubicacion: datosSanitizados.ubicacion,
       fechaEncuentro: body.fechaEncuentro ? new Date(body.fechaEncuentro) : undefined,
-      contactoNombre: body.contactoNombre,
-      contactoTelefono: body.contactoTelefono,
-      contactoEmail: body.contactoEmail,
+      contactoNombre: datosSanitizados.contactoNombre,
+      contactoTelefono: datosSanitizados.contactoTelefono,
+      contactoEmail: datosSanitizados.contactoEmail,
       mostrarContactoPublico: !!body.mostrarContactoPublico,
       usuarioId: session.user.id,
       transitoUrgente: !!body.transitoUrgente,

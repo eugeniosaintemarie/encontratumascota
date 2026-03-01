@@ -85,6 +85,7 @@ export default function ReunidasPage() {
         isAuthenticated={isAuthenticated}
         onPerfilClick={() => setIsPerfilModalOpen(true)}
         onLogout={handleLogout}
+        isReadOnly={currentUser?.isReadOnly ?? false}
       />
 
       <main className="mx-auto max-w-7xl px-4 pt-4 pb-8 flex-1 w-full">

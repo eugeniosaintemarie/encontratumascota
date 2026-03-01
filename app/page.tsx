@@ -101,6 +101,7 @@ export default function HomePage() {
         isAuthenticated={isAuthenticated}
         onPerfilClick={handlePerfilClick}
         onLogout={handleLogout}
+        isReadOnly={currentUser?.isReadOnly ?? false}
       />
       <main className="mx-auto max-w-7xl px-4 pt-4 pb-8">
         <ListadoPublicaciones 

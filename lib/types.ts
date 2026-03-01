@@ -65,4 +65,5 @@ export interface Usuario {
   nombreUsuario: string
   email: string
   fechaRegistro: Date
+  isReadOnly?: boolean // true para usuarios demo (modo solo lectura)
 }

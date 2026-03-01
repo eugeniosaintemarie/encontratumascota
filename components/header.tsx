@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Plus, LogIn, Menu, Moon, Sun, User, LogOut, ArrowLeft, ExternalLink } from "lucide-react"
+import { Plus, LogIn, Menu, Moon, Sun, User, LogOut, ArrowLeft, ExternalLink, Eye } from "lucide-react"
 import Image from "next/image"
 import { useTheme } from "next-themes"
 
@@ -21,6 +21,7 @@ interface HeaderProps {
   isAuthenticated?: boolean
   onPerfilClick?: () => void
   onLogout?: () => void
+  isReadOnly?: boolean
 }
 
 export function Header({
@@ -29,6 +30,7 @@ export function Header({
   isAuthenticated = false,
   onPerfilClick,
   onLogout,
+  isReadOnly = false,
 }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const { setTheme, resolvedTheme } = useTheme()
@@ -72,10 +74,17 @@ export function Header({
 
         {/* Desktop navigation */}
         <nav className="hidden sm:flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => (isAuthenticated ? onPublicarClick() : onAccederClick())}>
-            <Plus className="mr-1.5 h-4 w-4" />
-            Publicar
-          </Button>
+          {isReadOnly ? (
+            <Button variant="outline" size="sm" disabled className="opacity-60">
+              <Eye className="mr-1.5 h-4 w-4" />
+              Solo lectura
+            </Button>
+          ) : (
+            <Button variant="outline" size="sm" onClick={() => (isAuthenticated ? onPublicarClick() : onAccederClick())}>
+              <Plus className="mr-1.5 h-4 w-4" />
+              Publicar
+            </Button>
+          )}
           {isAuthenticated ? (
             <Button variant="ghost" size="sm" onClick={onPerfilClick}>
               <User className="mr-1.5 h-4 w-4" />
@@ -100,15 +109,22 @@ export function Header({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem
-                onClick={() => {
-                  setMenuOpen(false)
-                  isAuthenticated ? onPublicarClick() : onAccederClick()
-                }}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Publicar
-              </DropdownMenuItem>
+              {isReadOnly ? (
+                <DropdownMenuItem disabled className="opacity-60">
+                  <Eye className="mr-2 h-4 w-4" />
+                  Solo lectura
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem
+                  onClick={() => {
+                    setMenuOpen(false)
+                    isAuthenticated ? onPublicarClick() : onAccederClick()
+                  }}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Publicar
+                </DropdownMenuItem>
+              )}
               {isAuthenticated ? (
                 <>
                   <DropdownMenuItem

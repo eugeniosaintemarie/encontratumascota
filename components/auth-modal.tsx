@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, ShieldCheck } from "lucide-react"
 import { authClient } from "@/lib/auth/client"
 import { useRecaptcha } from "@/hooks/use-recaptcha"
+import { sanitizeText, sanitizeEmail } from "@/lib/sanitize"
 
 
 type AuthView = "login" | "register"
@@ -98,7 +99,7 @@ export function AuthModal({
 
     try {
       const result = await authClient.signIn.email({
-        email: loginEmail,
+        email: sanitizeEmail(loginEmail),
         password: loginPassword,
       })
 
@@ -161,9 +162,9 @@ export function AuthModal({
 
       // Registrar via Neon Auth (pasa por el catch-all handler)
       const result = await authClient.signUp.email({
-        email: registerEmail,
-        name: registerNombre,
-        password: registerPassword,
+        email: sanitizeEmail(registerEmail),
+        name: sanitizeText(registerNombre),
+        password: registerPassword, // Password no se sanitiza para preservar caracteres especiales
       })
 
       if (result.error) {
