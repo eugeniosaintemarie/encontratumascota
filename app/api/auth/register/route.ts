@@ -33,7 +33,13 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ verified: true })
   } catch (error) {
-    console.error("Error verificando CAPTCHA:", error)
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    const errorStack = error instanceof Error ? error.stack : undefined
+    console.error("[API /auth/register] Error verificando CAPTCHA:", {
+      message: errorMessage,
+      stack: errorStack,
+      timestamp: new Date().toISOString(),
+    })
     return NextResponse.json({ error: "Error interno" }, { status: 500 })
   }
 }

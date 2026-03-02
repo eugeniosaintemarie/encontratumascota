@@ -6,6 +6,7 @@ import Script from 'next/script'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
 import { PublicacionesProvider } from '@/lib/publicaciones-context'
+import { AuthProvider } from '@/lib/auth-context'
 import { ServiceWorkerRegistration } from '@/components/sw-registration'
 import './globals.css'
 
@@ -66,7 +67,9 @@ export default function RootLayout({
           storageKey="encontratumascota-theme"
         >
           <PublicacionesProvider>
-            {children}
+            <AuthProvider>
+              {children}
+            </AuthProvider>
           </PublicacionesProvider>
           <Toaster />
           <ServiceWorkerRegistration />

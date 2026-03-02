@@ -79,13 +79,10 @@ export function AuthModal({
             body: JSON.stringify({ email: loginEmail, password: loginPassword }),
           })
             if (res.ok) {
-            // Demo login succeeded on server; reload so client picks up demo session/cookies
-            try {
-              window.location.reload()
-            } catch {
-              onAuthSuccess?.()
-              onClose()
-            }
+            // Demo login succeeded on server; notify components to refresh demo session
+            window.dispatchEvent(new CustomEvent("demo-session-updated"))
+            onAuthSuccess?.()
+            onClose()
             } else {
             setError("Credenciales demo inválidas")
           }

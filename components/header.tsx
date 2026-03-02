@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, memo } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -14,24 +14,20 @@ import {
 import { Plus, LogIn, Menu, Moon, Sun, User, LogOut, ArrowLeft, ExternalLink, Eye } from "lucide-react"
 import Image from "next/image"
 import { useTheme } from "next-themes"
+import { useAuth } from "@/lib/auth-context"
 
 interface HeaderProps {
-  onPublicarClick: () => void
-  onAccederClick: () => void
-  isAuthenticated?: boolean
-  onPerfilClick?: () => void
-  onLogout?: () => void
   isReadOnly?: boolean
 }
 
-export function Header({
-  onPublicarClick,
-  onAccederClick,
-  isAuthenticated = false,
-  onPerfilClick,
-  onLogout,
-  isReadOnly = false,
-}: HeaderProps) {
+export const Header = memo(function Header({ isReadOnly = false }: HeaderProps) {
+  const {
+    isAuthenticated,
+    openPublicarModal,
+    openAuthModal,
+    openPerfilModal,
+    logout,
+  } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
   const { setTheme, resolvedTheme } = useTheme()
   const isDark = resolvedTheme === "dark"
@@ -80,18 +76,18 @@ export function Header({
               Solo lectura
             </Button>
           ) : (
-            <Button variant="outline" size="sm" onClick={() => (isAuthenticated ? onPublicarClick() : onAccederClick())}>
+            <Button variant="outline" size="sm" onClick={() => (isAuthenticated ? openPublicarModal() : openAuthModal())}>
               <Plus className="mr-1.5 h-4 w-4" />
               Publicar
             </Button>
           )}
           {isAuthenticated ? (
-            <Button variant="ghost" size="sm" onClick={onPerfilClick}>
+            <Button variant="ghost" size="sm" onClick={openPerfilModal}>
               <User className="mr-1.5 h-4 w-4" />
               Mi perfil
             </Button>
           ) : (
-            <Button variant="ghost" size="sm" onClick={onAccederClick}>
+            <Button variant="ghost" size="sm" onClick={() => openAuthModal()}>
               <LogIn className="mr-1.5 h-4 w-4" />
               Acceder
             </Button>
@@ -118,7 +114,7 @@ export function Header({
                 <DropdownMenuItem
                   onClick={() => {
                     setMenuOpen(false)
-                    isAuthenticated ? onPublicarClick() : onAccederClick()
+                    isAuthenticated ? openPublicarModal() : openAuthModal()
                   }}
                 >
                   <Plus className="mr-2 h-4 w-4" />
@@ -130,7 +126,7 @@ export function Header({
                   <DropdownMenuItem
                     onClick={() => {
                       setMenuOpen(false)
-                      onPerfilClick?.()
+                      openPerfilModal()
                     }}
                   >
                     <User className="mr-2 h-4 w-4" />
@@ -139,7 +135,7 @@ export function Header({
                   <DropdownMenuItem
                     onClick={() => {
                       setMenuOpen(false)
-                      onLogout?.()
+                      logout()
                     }}
                   >
                     <LogOut className="mr-2 h-4 w-4" />
@@ -150,7 +146,7 @@ export function Header({
                 <DropdownMenuItem
                   onClick={() => {
                     setMenuOpen(false)
-                    onAccederClick()
+                    openAuthModal()
                   }}
                 >
                   <LogIn className="mr-2 h-4 w-4" />
@@ -177,4 +173,4 @@ export function Header({
       </div>
     </header>
   )
-}
+})

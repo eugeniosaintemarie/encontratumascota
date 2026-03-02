@@ -28,7 +28,12 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ publicaciones })
   } catch (error) {
-    console.error("Error fetching publicaciones:", error)
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    console.error("[API /publicaciones GET] Error fetching publicaciones:", {
+      message: errorMessage,
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString(),
+    })
     return NextResponse.json({ publicaciones: null }, { status: 500 })
   }
 }
@@ -83,7 +88,12 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ publicacion }, { status: 201 })
   } catch (error) {
-    console.error("Error creating publicacion:", error)
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    console.error("[API /publicaciones POST] Error creating publicacion:", {
+      message: errorMessage,
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString(),
+    })
     return NextResponse.json({ error: "Error al crear publicacion" }, { status: 500 })
   }
 }

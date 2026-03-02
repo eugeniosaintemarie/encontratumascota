@@ -1,6 +1,7 @@
 "use client"
 
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react"
+import { createContext, useContext, useState, useCallback, useEffect, useRef, type ReactNode } from "react"
+import { toast } from "sonner"
 import type { Publicacion } from "./types"
 
 interface PublicacionesContextType {
@@ -17,6 +18,7 @@ const PublicacionesContext = createContext<PublicacionesContextType | null>(null
 export function PublicacionesProvider({ children }: { children: ReactNode }) {
   const [publicaciones, setPublicaciones] = useState<Publicacion[]>([])
   const [loading, setLoading] = useState(true)
+  const isInitialLoadRef = useRef(true)
 
   // Mezcla in-place segura (Fisher-Yates) sobre una copia
   const shuffleArray = <T,>(arr: T[]) => {
@@ -31,7 +33,7 @@ export function PublicacionesProvider({ children }: { children: ReactNode }) {
   }
 
   // Intentar cargar desde la API (DB) al montar
-  const fetchPublicaciones = useCallback(async () => {
+  const fetchPublicaciones = useCallback(async (options?: { skipShuffle?: boolean }) => {
     try {
       // Si estamos en la ruta /reunidas, solicitamos también las publicaciones cerradas
       let url = "/api/publicaciones"
@@ -39,7 +41,9 @@ export function PublicacionesProvider({ children }: { children: ReactNode }) {
         if (typeof window !== "undefined" && window.location.pathname === "/reunidas") {
           url = "/api/publicaciones?soloActivas=false"
         }
-      } catch {}
+      } catch {
+        // Fallback to default URL if window is not available
+      }
 
       const res = await fetch(url)
       if (res.ok) {
@@ -50,12 +54,17 @@ export function PublicacionesProvider({ children }: { children: ReactNode }) {
             fechaPublicacion: new Date(p.fechaPublicacion),
             fechaEncuentro: new Date(p.fechaEncuentro),
           }))
-          // Mostrar en orden aleatorio en cada carga para dar visibilidad a todas
-          setPublicaciones(shuffleArray(pubs))
+          // Solo mezclar en la carga inicial para dar visibilidad a todas
+          // En actualizaciones posteriores mantener el orden estable
+          const shouldShuffle = isInitialLoadRef.current && !options?.skipShuffle
+          setPublicaciones(shouldShuffle ? shuffleArray(pubs) : pubs)
+          isInitialLoadRef.current = false
         }
       }
     } catch (e) {
+      const message = e instanceof Error ? e.message : "Error desconocido"
       console.error("Error cargando publicaciones:", e)
+      toast.error(`Error al cargar las publicaciones: ${message}`)
     } finally {
       setLoading(false)
     }
@@ -73,10 +82,16 @@ export function PublicacionesProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ motivo, transitoContacto }),
       })
       if (res.ok) {
-        await fetchPublicaciones()
+        await fetchPublicaciones({ skipShuffle: true })
+        toast.success("Publicación cerrada exitosamente")
+      } else {
+        const data = await res.json().catch(() => ({}))
+        toast.error(data.error || "Error al cerrar la publicación")
       }
-    } catch {
-      console.error("Error cerrando publicacion")
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Error de conexión"
+      console.error("Error cerrando publicacion:", e)
+      toast.error(`Error al cerrar la publicación: ${message}`)
     }
   }, [fetchPublicaciones])
 
@@ -102,10 +117,17 @@ export function PublicacionesProvider({ children }: { children: ReactNode }) {
         }),
       })
       if (res.ok) {
-        await fetchPublicaciones()
+        await fetchPublicaciones({ skipShuffle: true })
+      } else {
+        const data = await res.json().catch(() => ({}))
+        toast.error(data.error || "Error al crear la publicación")
+        throw new Error(data.error || "Error al crear la publicación")
       }
-    } catch {
-      console.error("Error creando publicacion")
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Error de conexión"
+      console.error("Error creando publicacion:", e)
+      toast.error(`Error al crear la publicación: ${message}`)
+      throw e
     }
   }, [fetchPublicaciones])
 
@@ -117,10 +139,18 @@ export function PublicacionesProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify(datos),
       })
       if (res.ok) {
-        await fetchPublicaciones()
+        await fetchPublicaciones({ skipShuffle: true })
+        toast.success("Publicación actualizada exitosamente")
+      } else {
+        const data = await res.json().catch(() => ({}))
+        toast.error(data.error || "Error al actualizar la publicación")
+        throw new Error(data.error || "Error al actualizar la publicación")
       }
-    } catch {
-      console.error("Error actualizando publicacion")
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Error de conexión"
+      console.error("Error actualizando publicacion:", e)
+      toast.error(`Error al actualizar la publicación: ${message}`)
+      throw e
     }
   }, [fetchPublicaciones])
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, memo } from "react"
 import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -25,7 +25,7 @@ function formatDate(date: Date): string {
   return `${day}/${month}/${year}`
 }
 
-export function PublicacionCard({
+export const PublicacionCard = memo(function PublicacionCard({
   publicacion,
   isAuthenticated = false,
   onRequireAuth,
@@ -147,10 +147,12 @@ export function PublicacionCard({
       className="group flex flex-col overflow-hidden transition-all hover:shadow-lg p-0 gap-0"
     >
       <div className="relative aspect-square overflow-hidden bg-muted cursor-pointer" onClick={() => setIsImageViewerOpen(true)}>
-        <img
+        <Image
           src={mascota.imagenUrl || "/placeholder.svg"}
           alt={`${especieLabels[mascota.especie]} ${publicacion.tipoPublicacion === "buscada" ? "buscado" : "encontrado"}`}
-          className="object-cover object-top transition-transform duration-300 group-hover:scale-105 h-full w-full"
+          fill
+          className="object-cover object-top transition-transform duration-300 group-hover:scale-105"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 20vw"
         />
 
         {/* Zoom indicator overlay */}
@@ -337,4 +339,4 @@ export function PublicacionCard({
       />
     </Card>
   )
-}
+})

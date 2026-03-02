@@ -1,55 +1,36 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { useCallback } from "react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { ListadoPublicaciones } from "@/components/listado-publicaciones"
 import { AuthModal } from "@/components/auth-modal"
 import { PublicarModal } from "@/components/publicar-modal"
 import { PerfilModal } from "@/components/perfil-modal"
-import { authClient, logout } from "@/lib/auth/client"
+import { useAuth } from "@/lib/auth-context"
+import { useDemoSession } from "@/hooks/use-demo-session"
 import { mapNeonUser } from "@/lib/auth"
 
 export default function HomePage() {
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
-  const [isPublicarModalOpen, setIsPublicarModalOpen] = useState(false)
-  const [isPerfilModalOpen, setIsPerfilModalOpen] = useState(false)
-  const [authInitialView, setAuthInitialView] = useState<"login" | "register">("login")
-  const [pendingPublicacionId, setPendingPublicacionId] = useState<string | null>(null)
-
-  const { data: session } = authClient.useSession()
-  const [demoUser, setDemoUser] = useState<any | null>(null)
-
-  const isAuthenticated = !!session?.user || !!demoUser
-  const currentUser = session?.user ? mapNeonUser(session.user) : demoUser ? mapNeonUser(demoUser) : null
-
-  const handlePublicarClick = useCallback(() => {
-    setIsPublicarModalOpen(true)
-  }, [])
-
-  const handleAccederClick = useCallback(() => {
-    setAuthInitialView("login")
-    setPendingPublicacionId(null)
-    setIsAuthModalOpen(true)
-  }, [])
-
-  const handlePerfilClick = useCallback(() => {
-    setIsPerfilModalOpen(true)
-  }, [])
-
-  const handleLogout = useCallback(() => {
-    logout()
-  }, [])
+  const {
+    isAuthenticated,
+    authModal,
+    closeAuthModal,
+    isPublicarModalOpen,
+    closePublicarModal,
+    isPerfilModalOpen,
+    closePerfilModal,
+    requireAuth,
+    pendingPublicacionId,
+    clearPendingPublicacion,
+    logout,
+  } = useAuth()
+  
+  const { demoUser } = useDemoSession()
+  const currentUser = demoUser ? mapNeonUser(demoUser) : null
 
   const handleAuthSuccess = useCallback(() => {
-    setIsAuthModalOpen(false)
-    // Try fetching server session in case demo login was used (demo_public cookie)
-    void (async () => {
-      try {
-        const user = await (await import("@/lib/auth/client")).fetchServerSession()
-        if (user) setDemoUser(user)
-      } catch {}
-    })()
+    closeAuthModal()
     
     // Si hay una publicacion pendiente, hacer scroll hacia ella
     if (pendingPublicacionId !== null) {
@@ -62,74 +43,41 @@ export default function HomePage() {
             element.classList.remove("ring-2", "ring-primary", "ring-offset-2")
           }, 2000)
         }
-        setPendingPublicacionId(null)
+        clearPendingPublicacion()
       }, 100)
     }
-  }, [pendingPublicacionId])
-
-  const handleRequireAuthFromCard = useCallback((publicacionId: string) => {
-    setPendingPublicacionId(publicacionId)
-    setAuthInitialView("login")
-    setIsAuthModalOpen(true)
-  }, [])
-
-  // On mount, if there's no neon session but demo_public cookie exists, fetch server session
-  useEffect(() => {
-    if (!session?.user) {
-      const cookies = typeof document !== 'undefined' ? document.cookie : ''
-      if (cookies.includes('demo_public=1')) {
-        void (async () => {
-          try {
-            const user = await (await import("@/lib/auth/client")).fetchServerSession()
-            if (user) setDemoUser(user)
-          } catch {}
-        })()
-      }
-    }
-  }, [session])
-
-  const handleRequireAuth = useCallback(() => {
-    setAuthInitialView("login")
-    setIsAuthModalOpen(true)
-  }, [])
+  }, [closeAuthModal, pendingPublicacionId, clearPendingPublicacion])
 
   return (
     <div className="min-h-screen bg-background">
-      <Header 
-        onPublicarClick={handlePublicarClick} 
-        onAccederClick={handleAccederClick}
-        isAuthenticated={isAuthenticated}
-        onPerfilClick={handlePerfilClick}
-        onLogout={handleLogout}
-        isReadOnly={currentUser?.isReadOnly ?? false}
-      />
+      <Header />
       <main className="mx-auto max-w-7xl px-4 pt-4 pb-8">
         <ListadoPublicaciones 
           isAuthenticated={isAuthenticated} 
-          onRequireAuth={handleRequireAuthFromCard}
+          onRequireAuth={requireAuth}
         />
       </main>
       <Footer />
 
       <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        initialView={authInitialView}
+        isOpen={authModal.isOpen}
+        onClose={closeAuthModal}
+        initialView={authModal.initialView}
         onAuthSuccess={handleAuthSuccess}
       />
 
       <PublicarModal
         isOpen={isPublicarModalOpen}
-        onClose={() => setIsPublicarModalOpen(false)}
+        onClose={closePublicarModal}
         isAuthenticated={isAuthenticated}
-        onRequireAuth={handleRequireAuth}
+        onRequireAuth={() => requireAuth()}
       />
 
       <PerfilModal
         isOpen={isPerfilModalOpen}
-        onClose={() => setIsPerfilModalOpen(false)}
+        onClose={closePerfilModal}
         currentUser={currentUser}
-        onLogout={handleLogout}
+        onLogout={logout}
       />
     </div>
   )

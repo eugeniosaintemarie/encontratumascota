@@ -56,14 +56,24 @@ export async function POST(request: Request) {
 
             return NextResponse.json({ url: blob.url })
         } catch (uploadError) {
-            console.error("Vercel Blob put error:", uploadError)
+            const errorMessage = uploadError instanceof Error ? uploadError.message : String(uploadError)
+            console.error("[API /upload] Vercel Blob put error:", {
+              message: errorMessage,
+              stack: uploadError instanceof Error ? uploadError.stack : undefined,
+              timestamp: new Date().toISOString(),
+            })
             return NextResponse.json(
                 { error: "Error interno al guardar la imagen en la nube" },
                 { status: 502 }
             )
         }
     } catch (error) {
-        console.error("Unexpected error handling upload request:", error)
+        const errorMessage = error instanceof Error ? error.message : String(error)
+        console.error("[API /upload] Unexpected error handling upload request:", {
+          message: errorMessage,
+          stack: error instanceof Error ? error.stack : undefined,
+          timestamp: new Date().toISOString(),
+        })
         return NextResponse.json(
             { error: "Error inesperado al procesar la subida" },
             { status: 500 }

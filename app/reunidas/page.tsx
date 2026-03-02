@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useCallback, useEffect } from "react"
+import { useState, useMemo, useCallback } from "react"
 import { useItemsPerPage } from "@/hooks/use-items-per-page"
 import { PublicacionCard } from "@/components/publicacion-card"
 import { FiltrosPublicaciones } from "@/components/filtros-publicaciones"
@@ -11,8 +11,9 @@ import { PerfilModal } from "@/components/perfil-modal"
 import { PawPrint } from "lucide-react"
 import { Footer } from "@/components/footer"
 import { usePublicaciones } from "@/lib/publicaciones-context"
-import { authClient, logout } from "@/lib/auth/client"
+import { logout } from "@/lib/auth/client"
 import { mapNeonUser } from "@/lib/auth"
+import { useDemoSession } from "@/hooks/use-demo-session"
 import type { Especie, Sexo } from "@/lib/types"
 
 export default function ReunidasPage() {
@@ -26,11 +27,9 @@ export default function ReunidasPage() {
   const [isPublicarModalOpen, setIsPublicarModalOpen] = useState(false)
   const [isPerfilModalOpen, setIsPerfilModalOpen] = useState(false)
 
-  const { data: session } = authClient.useSession()
-  const [demoUser, setDemoUser] = useState<any | null>(null)
+  const { demoUser, isAuthenticated } = useDemoSession()
 
-  const isAuthenticated = !!session?.user || !!demoUser
-  const currentUser = session?.user ? mapNeonUser(session.user) : demoUser ? mapNeonUser(demoUser) : null
+  const currentUser = demoUser ? mapNeonUser(demoUser) : null
 
   const { publicaciones } = usePublicaciones()
   const { itemsPerPage, columns } = useItemsPerPage()
@@ -58,35 +57,13 @@ export default function ReunidasPage() {
     }
   }, [isAuthenticated])
 
-  // On mount, if neon session missing but demo_public cookie set, fetch server session
-  useEffect(() => {
-    if (!session?.user) {
-      const cookies = typeof document !== 'undefined' ? document.cookie : ''
-      if (cookies.includes('demo_public=1')) {
-        void (async () => {
-          try {
-            const user = await (await import("@/lib/auth/client")).fetchServerSession()
-            if (user) setDemoUser(user)
-          } catch {}
-        })()
-      }
-    }
-  }, [session])
-
   const handleLogout = useCallback(() => {
     logout()
   }, [])
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <Header
-        onPublicarClick={handlePublicarClick}
-        onAccederClick={() => setIsAuthModalOpen(true)}
-        isAuthenticated={isAuthenticated}
-        onPerfilClick={() => setIsPerfilModalOpen(true)}
-        onLogout={handleLogout}
-        isReadOnly={currentUser?.isReadOnly ?? false}
-      />
+      <Header />
 
       <main className="mx-auto max-w-7xl px-4 pt-4 pb-8 flex-1 w-full">
         <div className="space-y-4">

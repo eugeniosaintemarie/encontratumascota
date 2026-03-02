@@ -1,11 +1,12 @@
 import { dirname } from "path"
 import { fileURLToPath } from "url"
+import withBundleAnalyzer from "@next/bundle-analyzer"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
 /** @type {import('next').NextConfig} */
 
-const nextConfig = {
+const baseConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -62,4 +63,8 @@ const nextConfig = {
   },
 }
 
-export default nextConfig
+const withBundleAnalyzerConfig = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+})
+
+export default withBundleAnalyzerConfig(baseConfig)

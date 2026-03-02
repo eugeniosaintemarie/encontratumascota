@@ -27,10 +27,11 @@ import { Upload, X, Search, MapPin, Heart } from "lucide-react"
 import type { Especie, Sexo, Raza, TipoPublicacion } from "@/lib/types"
 import { razasPorEspecie } from "@/lib/labels"
 import { usePublicaciones } from "@/lib/publicaciones-context"
-import { authClient } from "@/lib/auth/client"
+import { authClient, fetchServerSession } from "@/lib/auth/client"
 import { useImageUpload } from "@/hooks/use-image-upload"
 import { toast } from "sonner"
 import { sanitizeText, sanitizeRichText, sanitizeEmail, sanitizePhone } from "@/lib/sanitize"
+import { parsePhoneNumberFromString } from "libphonenumber-js"
 
 interface PublicarModalProps {
   isOpen: boolean
@@ -58,7 +59,7 @@ export function PublicarModal({
       if (cookies.includes('demo_public=1')) {
         void (async () => {
           try {
-            const user = await (await import('@/lib/auth/client')).fetchServerSession()
+            const user = await fetchServerSession()
             if (user) setDemoUser(user)
           } catch (e) {
             // ignore
@@ -120,15 +121,8 @@ export function PublicarModal({
     // Validar teléfono argentino (si existe)
     const telefono = contactoTelefono?.trim()
     if (telefono) {
-      const digits = telefono.replace(/\D/g, "")
-      const isArg = (() => {
-        if (digits.length < 8) return false
-        if (digits.startsWith('54')) return true // +54 country code
-        if (digits.startsWith('0')) return true // national with trunk
-        // Allow common local lengths (e.g., 10-13 digits after various formats)
-        return digits.length >= 10 && digits.length <= 13
-      })()
-      if (!isArg) {
+      const phoneNumber = parsePhoneNumberFromString(telefono, "AR")
+      if (!phoneNumber || !phoneNumber.isValid()) {
         toast.error("El teléfono no parece ser un número argentino válido.")
         return
       }

@@ -6,6 +6,9 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "eslint .",
+    "lint:strict": "eslint . --max-warnings=0",
+    "typecheck": "tsc --noEmit",
+    "analyze": "cross-env ANALYZE=true next build",
     "start": "next start",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
@@ -56,6 +59,7 @@
     "drizzle-orm": "^0.45.1",
     "embla-carousel-react": "8.5.1",
     "input-otp": "1.4.1",
+    "libphonenumber-js": "^1.12.38",
     "lucide-react": "^0.454.0",
     "nanoid": "5",
     "next": "16.0.10",
@@ -73,18 +77,28 @@
     "zod": "3.25.76"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.4",
+    "@eslint/js": "^10.0.1",
+    "@next/bundle-analyzer": "^16.1.6",
+    "@next/eslint-plugin-next": "^16.1.6",
     "@tailwindcss/postcss": "^4.1.9",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@typescript-eslint/eslint-plugin": "^8.56.1",
+    "@typescript-eslint/parser": "^8.56.1",
+    "cross-env": "^10.1.0",
     "dotenv": "^17.2.4",
     "drizzle-kit": "^0.31.8",
+    "eslint": "^10.0.2",
+    "globals": "^17.4.0",
     "postcss": "^8.5",
     "sharp": "^0.34.5",
     "tailwindcss": "^4.1.9",
     "tsx": "^4.21.0",
     "tw-animate-css": "1.3.3",
-    "typescript": "^5"
+    "typescript": "^5",
+    "typescript-eslint": "^8.56.1"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

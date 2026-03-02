@@ -1,9 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useEffect, useState, memo } from "react"
 
-export function Footer() {
+export const Footer = memo(function Footer() {
   const [reunidas, setReunidas] = useState<number | null>(null)
 
   useEffect(() => {
@@ -57,4 +57,4 @@ export function Footer() {
       </div>
     </footer>
   )
-}
+})
