@@ -128,6 +128,28 @@ export function PublicarModal({
       }
     }
 
+    // Validar fecha de encuentro/perdida para publicaciones "perdida" y "buscada"
+    if ((tipoPublicacion === "perdida" || tipoPublicacion === "buscada") && fechaEncuentro) {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      const sevenDaysAgo = new Date(today)
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+
+      const fecha = new Date(fechaEncuentro)
+      fecha.setHours(0, 0, 0, 0)
+
+      if (fecha > today) {
+        toast.error("La fecha no puede ser posterior a hoy.")
+        return
+      }
+
+      if (fecha < sevenDaysAgo) {
+        toast.error("La fecha no puede ser anterior a hace 7 días.")
+        return
+      }
+    }
+
     setIsLoading(true)
 
     try {

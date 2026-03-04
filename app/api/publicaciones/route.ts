@@ -65,6 +65,27 @@ export async function POST(request: Request) {
       contactoEmail: body.contactoEmail,
     })
 
+    // Validar fecha de encuentro/perdida para publicaciones "perdida" y "buscada"
+    const tipoPublicacion = body.tipoPublicacion as "perdida" | "adopcion" | "buscada"
+    if ((tipoPublicacion === "perdida" || tipoPublicacion === "buscada") && body.fechaEncuentro) {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      const sevenDaysAgo = new Date(today)
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+
+      const fecha = new Date(body.fechaEncuentro)
+      fecha.setHours(0, 0, 0, 0)
+
+      if (fecha > today) {
+        return NextResponse.json({ error: "La fecha no puede ser posterior a hoy." }, { status: 400 })
+      }
+
+      if (fecha < sevenDaysAgo) {
+        return NextResponse.json({ error: "La fecha no puede ser anterior a hace 7 días." }, { status: 400 })
+      }
+    }
+
     // Usar el usuarioId de la sesion, NO del body (previene suplantacion)
     const publicacion = await crearPublicacion({
       tipoPublicacion: body.tipoPublicacion as "perdida" | "adopcion" | "buscada",
