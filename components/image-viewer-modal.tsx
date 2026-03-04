@@ -44,7 +44,7 @@ export function ImageViewerModal({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
-        className="max-w-[95vw] max-h-[95vh] w-auto h-auto p-0 bg-transparent border-0 shadow-none"
+        className="max-w-[95vw] max-h-[95vh] w-auto h-auto p-0 bg-transparent border-0 shadow-none top-[50%] translate-y-[-50%]"
         showCloseButton={false}
       >
         <DialogTitle className="sr-only">{alt}</DialogTitle>
