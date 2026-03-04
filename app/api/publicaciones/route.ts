@@ -65,8 +65,30 @@ export async function POST(request: Request) {
       contactoEmail: body.contactoEmail,
     })
 
-    // Validar fecha de encuentro/perdida para publicaciones "perdida" y "buscada"
+    // Validar campos obligatorios
     const tipoPublicacion = body.tipoPublicacion as "perdida" | "adopcion" | "buscada"
+
+    if (!body.especie) {
+      return NextResponse.json({ error: "El tipo de mascota es obligatorio" }, { status: 400 })
+    }
+
+    if (!body.raza) {
+      return NextResponse.json({ error: "La raza es obligatoria" }, { status: 400 })
+    }
+
+    if (!body.sexo) {
+      return NextResponse.json({ error: "El género es obligatorio" }, { status: 400 })
+    }
+
+    if (!datosSanitizados.ubicacion?.trim()) {
+      return NextResponse.json({ error: "La ubicación es obligatoria" }, { status: 400 })
+    }
+
+    if ((tipoPublicacion === "perdida" || tipoPublicacion === "buscada") && !body.fechaEncuentro) {
+      return NextResponse.json({ error: "La fecha es obligatoria" }, { status: 400 })
+    }
+
+    // Validar fecha de encuentro/perdida para publicaciones "perdida" y "buscada"
     if ((tipoPublicacion === "perdida" || tipoPublicacion === "buscada") && body.fechaEncuentro) {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
@@ -78,11 +100,11 @@ export async function POST(request: Request) {
       fecha.setHours(0, 0, 0, 0)
 
       if (fecha > today) {
-        return NextResponse.json({ error: "La fecha no puede ser posterior a hoy." }, { status: 400 })
+        return NextResponse.json({ error: "La fecha no puede ser posterior a hoy" }, { status: 400 })
       }
 
       if (fecha < sevenDaysAgo) {
-        return NextResponse.json({ error: "La fecha no puede ser anterior a hace 7 días." }, { status: 400 })
+        return NextResponse.json({ error: "La fecha no puede ser anterior a hace 7 días" }, { status: 400 })
       }
     }
 

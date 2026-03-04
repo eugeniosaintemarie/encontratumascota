@@ -104,9 +104,35 @@ export function PublicarModal({
     e.preventDefault()
     if (!tipoPublicacion) return
 
+    // Validar campos obligatorios
+    if (!especie) {
+      toast.error("Por favor, seleccioná el tipo de mascota")
+      return
+    }
+
+    if (!raza) {
+      toast.error("Por favor, seleccioná la raza")
+      return
+    }
+
+    if (!sexo) {
+      toast.error("Por favor, seleccioná el género")
+      return
+    }
+
+    if (!ubicacion.trim()) {
+      toast.error("Por favor, ingresá la ubicación")
+      return
+    }
+
+    if ((tipoPublicacion === "perdida" || tipoPublicacion === "buscada") && !fechaEncuentro) {
+      toast.error("Por favor, seleccioná la fecha.")
+      return
+    }
+
     // Validar imagen
     if (!croppedBlob) {
-      toast.error("Por favor, subí una foto de la mascota obligatoriamente.")
+      toast.error("Por favor, subí una foto de la mascota obligatoriamente")
       return
     }
 
@@ -114,7 +140,7 @@ export function PublicarModal({
     const email = contactoEmail?.trim()
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (email && !emailRegex.test(email)) {
-      toast.error("El email de contacto no tiene un formato válido.")
+      toast.error("El email de contacto no tiene un formato válido")
       return
     }
 
@@ -123,7 +149,7 @@ export function PublicarModal({
     if (telefono) {
       const phoneNumber = parsePhoneNumberFromString(telefono, "AR")
       if (!phoneNumber || !phoneNumber.isValid()) {
-        toast.error("El teléfono no parece ser un número argentino válido.")
+        toast.error("El teléfono no parece ser un número argentino válido")
         return
       }
     }

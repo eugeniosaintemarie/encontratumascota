@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     const verifyData = await verifyRes.json()
 
     if (!verifyData.success || (verifyData.score != null && verifyData.score < 0.5)) {
-      return NextResponse.json({ error: "Verificacion CAPTCHA fallida. Intenta de nuevo." }, { status: 403 })
+      return NextResponse.json({ error: "Verificacion CAPTCHA fallida. Intenta de nuevo" }, { status: 403 })
     }
 
     return NextResponse.json({ verified: true })
