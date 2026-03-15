@@ -1,0 +1,17 @@
+# Robots.txt - SEO crawling optimization
+User-agent: *
+Allow: /
+
+# Disallow private/api areas from public search
+Disallow: /api/
+Disallow: /admin/
+
+# Allow resources needed for rendering
+Allow: /_next/static/
+Allow: /images/
+
+# Sitemap
+Sitemap: https://encontratumascota.vercel.app/sitemap.xml
+
+# Crawl-delay (optional, for respectful crawling)
+Crawl-delay: 1

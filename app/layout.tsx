@@ -24,10 +24,40 @@ const siteUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: 'Encontra Tu Mascota',
-  description: 'Plataforma colaborativa para reunir mascotas con sus familias',
-  generator: '',
+  title: 'Encontra Tu Mascota - Reunir Perros y Gatos Perdidos',
+  description: 'Plataforma colaborativa para reunir mascotas perdidas y encontradas. Publica, busca y ayuda a reunir perros, gatos y otras mascotas con sus familias.',
+  keywords: ['mascotas perdidas', 'perros encontrados', 'gatos perdidos', 'reunir mascotas', 'mascotas', 'Argentina'],
+  generator: 'Next.js',
   manifest: '/manifest.json',
+  robots: {
+    index: true,
+    follow: true,
+    'max-snippet': -1,
+    'max-image-preview': 'large',
+    'max-video-preview': -1,
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'es_AR',
+    url: siteUrl,
+    siteName: 'Encontra Tu Mascota',
+    title: 'Encontra Tu Mascota - Reunir Mascotas Perdidas',
+    description: 'Plataforma colaborativa para reunir mascotas perdidas con sus familias en Argentina',
+    images: [
+      {
+        url: `${siteUrl}/logo.png`,
+        width: 1200,
+        height: 630,
+        alt: 'Encontra Tu Mascota Logo',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Encontra Tu Mascota - Reunir Mascotas Perdidas',
+    description: 'Plataforma colaborativa para reunir mascotas perdidas con sus familias',
+    images: [`${siteUrl}/logo.png`],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -48,10 +78,40 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" suppressHydrationWarning>
+    <html lang="es" suppressHydrationWarning dir="ltr">
       <head>
+        {/* SEO Meta Tags */}
+        <meta name="theme-color" content="#FF5722" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <link rel="canonical" href={siteUrl} />
         {/* Preload logo for LCP optimization */}
         <link rel="preload" href="/logo.png" as="image" fetchpriority="high" />
+        {/* Organization Schema */}
+        <Script
+          id="organization-schema"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Organization',
+              'name': 'Encontra Tu Mascota',
+              'url': siteUrl,
+              'logo': `${siteUrl}/logo.png`,
+              'description': 'Plataforma colaborativa para reunir mascotas perdidas y encontradas con sus familias',
+              'sameAs': [
+                'https://www.facebook.com/encontratumascota',
+                'https://twitter.com/encontratumascota',
+                'https://instagram.com/encontratumascota',
+              ],
+              'contactPoint': {
+                '@type': 'ContactPoint',
+                'contactType': 'Customer Support',
+                'email': 'contacto@encontratumascota.ar',
+              },
+            }),
+          }}
+        />
+        {/* Analytics */}
         <Script async src="https://www.googletagmanager.com/gtag/js?id=G-LNQ47VG50M" strategy="afterInteractive" />
         <Script id="gtag-init" strategy="afterInteractive">
           {`window.dataLayer = window.dataLayer || [];
