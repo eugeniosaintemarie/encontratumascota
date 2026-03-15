@@ -39,10 +39,12 @@ const baseConfig = {
   },
   async headers() {
     const isDev = process.env.NODE_ENV === 'development'
-    // Allow analytics / external scripts in development for easier debugging
+    // Next.js app router needs inline bootstrap scripts to hydrate client components.
     const scriptSrc = isDev
-      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://va.vercel-scripts.com"
-      : "script-src 'self' https://www.googletagmanager.com"
+      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://va.vercel-scripts.com https://vercel.live https://static.cloudflareinsights.com"
+      : "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://va.vercel-scripts.com https://vercel.live https://static.cloudflareinsights.com"
+    const scriptSrcElem = "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://va.vercel-scripts.com https://vercel.live https://static.cloudflareinsights.com"
+    const connectSrc = "connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://va.vercel-scripts.com https://vercel.live"
 
     return [
       {
@@ -50,7 +52,7 @@ const baseConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: `default-src 'self'; img-src 'self' https: data: blob:; media-src *; ${scriptSrc}; style-src 'self' 'unsafe-inline';`
+            value: `default-src 'self'; base-uri 'self'; frame-ancestors 'self'; object-src 'none'; img-src 'self' https: data: blob:; media-src *; ${scriptSrc}; ${scriptSrcElem}; ${connectSrc}; style-src 'self' 'unsafe-inline'; font-src 'self' data: https:;`
           },
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
