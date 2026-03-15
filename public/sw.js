@@ -1,10 +1,9 @@
-const CACHE_NAME = 'encontratumascota-v1'
+const CACHE_NAME = 'encontratumascota-v2'
 
 const PRECACHE_URLS = [
-  '/',
-  '/reunidas',
   '/favicon.svg',
   '/apple-icon.png',
+  '/manifest.json',
 ]
 
 // Install: precache shell
@@ -35,8 +34,14 @@ self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url)
     if (url.origin !== self.location.origin) return
 
-    // NUNCA cachear endpoints de autenticacion
-    if (url.pathname.startsWith('/api/auth')) return
+    // Nunca cachear endpoints API
+    if (url.pathname.startsWith('/api/')) return
+
+    // No cachear navegaciones/documentos para evitar HTML/JS desfasado
+    if (event.request.mode === 'navigate') return
+
+    // No cachear chunks/scripts de Next para evitar hydration mismatch
+    if (url.pathname.startsWith('/_next/')) return
   } catch (e) {
     return
   }
