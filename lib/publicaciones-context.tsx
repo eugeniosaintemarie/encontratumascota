@@ -46,7 +46,30 @@ export function PublicacionesProvider({ children }: { children: ReactNode }) {
       }
 
       const res = await fetch(url)
-      if (res.ok) {
+      if (!res.ok) {
+        const errorText = await res.text()
+        console.warn(
+          `[Publicaciones Context] API returned ${res.status}:`,
+          errorText
+        )
+        // Even on error, try to get JSON data (it might contain publicaciones)
+        try {
+          const data = JSON.parse(errorText)
+          if (data.publicaciones && Array.isArray(data.publicaciones)) {
+            const pubs = data.publicaciones.map((p: any) => ({
+              ...p,
+              fechaPublicacion: new Date(p.fechaPublicacion),
+              fechaEncuentro: new Date(p.fechaEncuentro),
+            }))
+            const shouldShuffle = isInitialLoadRef.current && !options?.skipShuffle
+            setPublicaciones(shouldShuffle ? shuffleArray(pubs) : pubs)
+            isInitialLoadRef.current = false
+          }
+        } catch {
+          // JSON parse failed, set empty state
+          setPublicaciones([])
+        }
+      } else {
         const data = await res.json()
         if (data.publicaciones) {
           const pubs = data.publicaciones.map((p: any) => ({
