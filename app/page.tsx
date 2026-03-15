@@ -1,7 +1,6 @@
 "use client"
 
 import { useCallback } from "react"
-import Script from 'next/script'
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { ListadoPublicaciones } from "@/components/listado-publicaciones"
@@ -49,28 +48,8 @@ export default function HomePage() {
     }
   }, [closeAuthModal, pendingPublicacionId, clearPendingPublicacion])
 
-  const jsonLdHomepage = {
-    '@context': 'https://schema.org',
-    '@type': 'WebApplication',
-    'name': 'Encontra Tu Mascota',
-    'description': 'Plataforma colaborativa para reunir mascotas perdidas y encontradas',
-    'url': typeof window !== 'undefined' ? window.location.origin : 'https://encontratumascota.vercel.app',
-    'applicationCategory': 'UtilitiesApplication',
-    'offers': {
-      '@type': 'Offer',
-      'price': '0',
-      'priceCurrency': 'ARS',
-    },
-  }
-
   return (
-    <>
-      <Script
-        id="homepage-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdHomepage) }}
-      />
-      <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background">
         <Header />
         <main id="main" className="mx-auto max-w-7xl px-4 pt-4 pb-8" tabIndex={-1}>
           <ListadoPublicaciones 
@@ -101,6 +80,6 @@ export default function HomePage() {
           onLogout={logout}
         />
       </div>
-    </>
-  )
-}
+    )
+  }
+
