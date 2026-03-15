@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, ShieldCheck } from "lucide-react"
 import { authClient } from "@/lib/auth/client"
@@ -204,28 +205,38 @@ export function AuthModal({
         {view === "login" ? (
           <form onSubmit={handleLogin} className="space-y-4">
             {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
+              <Alert variant="destructive" id="login-error" role="alert">
+                <AlertCircle className="h-4 w-4" aria-hidden="true" />
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            <Input
-              id="login-email"
-              type="text"
-              inputMode="email"
-              value={loginEmail}
-              onChange={(e) => setLoginEmail(e.target.value)}
-              placeholder="Correo electrónico (demo)"
-              required
-            />
-            <Input
-              id="login-password"
-              type="password"
-              value={loginPassword}
-              onChange={(e) => setLoginPassword(e.target.value)}
-              placeholder="Contraseña (demo)"
-              required
-            />
+            <div className="space-y-2">
+              <Label htmlFor="login-email">Correo electrónico</Label>
+              <Input
+                id="login-email"
+                type="text"
+                inputMode="email"
+                value={loginEmail}
+                onChange={(e) => setLoginEmail(e.target.value)}
+                placeholder="ejemplo@correo.com"
+                required
+                aria-invalid={!!error}
+                aria-describedby={error ? "login-error" : undefined}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="login-password">Contraseña</Label>
+              <Input
+                id="login-password"
+                type="password"
+                value={loginPassword}
+                onChange={(e) => setLoginPassword(e.target.value)}
+                placeholder="Tu contraseña"
+                required
+                aria-invalid={!!error}
+                aria-describedby={error ? "login-error" : undefined}
+              />
+            </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Ingresando..." : "Ingresar"}
             </Button>
@@ -269,48 +280,66 @@ export function AuthModal({
         ) : (
           <form onSubmit={handleRegister} className="space-y-4">
             {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
+              <Alert variant="destructive" id="register-error" role="alert">
+                <AlertCircle className="h-4 w-4" aria-hidden="true" />
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            <Input
-              id="register-nombre"
-              type="text"
-              value={registerNombre}
-              onChange={(e) => setRegisterNombre(e.target.value)}
-              placeholder="Nombre completo"
-              required
-            />
-            <Input
-              id="register-email"
-              type="email"
-              value={registerEmail}
-              onChange={(e) => setRegisterEmail(e.target.value)}
-              placeholder="Email"
-              required
-            />
-            <div className="space-y-1">
+            <div className="space-y-2">
+              <Label htmlFor="register-nombre">Nombre completo</Label>
+              <Input
+                id="register-nombre"
+                type="text"
+                value={registerNombre}
+                onChange={(e) => setRegisterNombre(e.target.value)}
+                placeholder="Tu nombre"
+                required
+                aria-invalid={!!error}
+                aria-describedby={error ? "register-error" : undefined}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="register-email">Correo electrónico</Label>
+              <Input
+                id="register-email"
+                type="email"
+                value={registerEmail}
+                onChange={(e) => setRegisterEmail(e.target.value)}
+                placeholder="ejemplo@correo.com"
+                required
+                aria-invalid={!!error}
+                aria-describedby={error ? "register-error" : undefined}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="register-password">Contraseña</Label>
               <Input
                 id="register-password"
                 type="password"
                 value={registerPassword}
                 onChange={(e) => setRegisterPassword(e.target.value)}
-                placeholder="Contraseña"
+                placeholder="Mínimo 8 caracteres"
                 required
+                aria-invalid={!!error}
+                aria-describedby={error ? "register-error" : undefined}
               />
               <p className="text-xs text-muted-foreground">
                 Mínimo 8 caracteres, incluyendo una mayúscula y un número
               </p>
             </div>
-            <Input
-              id="register-confirm"
-              type="password"
-              value={registerConfirmPassword}
-              onChange={(e) => setRegisterConfirmPassword(e.target.value)}
-              placeholder="Confirmar contraseña"
-              required
-            />
+            <div className="space-y-2">
+              <Label htmlFor="register-confirm">Confirmar contraseña</Label>
+              <Input
+                id="register-confirm"
+                type="password"
+                value={registerConfirmPassword}
+                onChange={(e) => setRegisterConfirmPassword(e.target.value)}
+                placeholder="Repite tu contraseña"
+                required
+                aria-invalid={!!error}
+                aria-describedby={error ? "register-error" : undefined}
+              />
+            </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Registrando..." : "Registrarse"}
             </Button>

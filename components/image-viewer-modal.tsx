@@ -55,8 +55,9 @@ export function ImageViewerModal({
             size="icon"
             className="absolute -top-12 right-0 z-50 rounded-full bg-black/50 hover:bg-black/70 text-white border-0 h-10 w-10"
             onClick={onClose}
+            aria-label="Cerrar vista de imagen"
           >
-            <X className="h-5 w-5" />
+            <X className="h-5 w-5" aria-hidden="true" />
           </Button>
 
           {/* Image container */}

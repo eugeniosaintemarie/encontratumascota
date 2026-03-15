@@ -16,7 +16,7 @@ export function ThemeToggle() {
   if (!mounted) {
     return (
       <Button variant="ghost" size="icon" className="h-9 w-9">
-        <Sun className="h-5 w-5" />
+        <Sun className="h-5 w-5" aria-hidden="true" />
         <span className="sr-only">Cambiar tema</span>
       </Button>
     )
@@ -32,9 +32,9 @@ export function ThemeToggle() {
       className="h-9 w-9"
     >
       {isDark ? (
-        <Sun className="h-5 w-5" />
+        <Sun className="h-5 w-5" aria-hidden="true" />
       ) : (
-        <Moon className="h-5 w-5" />
+        <Moon className="h-5 w-5" aria-hidden="true" />
       )}
       <span className="sr-only">Cambiar tema</span>
     </Button>

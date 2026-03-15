@@ -31,7 +31,7 @@ export const Footer = memo(function Footer() {
         <div className="mx-auto max-w-7xl px-4 flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12">
           <p className="text-sm text-foreground flex items-center gap-2 min-h-[2.5rem] flex-wrap justify-center">
             {/* Reserve space for stat counter (CLS prevention) */}
-            <span className="text-2xl font-bold text-[#d66528] leading-none min-w-[60px] text-center">
+            <span className="text-2xl font-bold text-[#d66528] leading-none min-w-[60px] text-center" aria-live="polite" aria-atomic="true">
               {!isLoading && reunidas !== null ? reunidas : isLoading ? "..." : "0"}
             </span>
             <Link href="/reunidas" className="text-[#FF8A65] font-medium hover:underline">

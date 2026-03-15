@@ -51,7 +51,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="mx-auto max-w-7xl px-4 pt-4 pb-8">
+      <main id="main" className="mx-auto max-w-7xl px-4 pt-4 pb-8" tabIndex={-1}>
         <ListadoPublicaciones 
           isAuthenticated={isAuthenticated} 
           onRequireAuth={requireAuth}

@@ -223,8 +223,9 @@ export function FiltrosPublicaciones({
                   size="icon"
                   onClick={onClearFilters}
                   className="shrink-0 hover:bg-white/20 mx-auto lg:mx-0 lg:self-center col-span-full sm:col-span-2 lg:col-span-1"
+                  aria-label="Limpiar filtros"
                 >
-                  <X className="h-4 w-4 text-white" />
+                  <X className="h-4 w-4 text-white" aria-hidden="true" />
                   <span className="sr-only">Limpiar filtros</span>
                 </Button>
               )}

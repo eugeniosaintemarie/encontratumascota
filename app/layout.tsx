@@ -61,6 +61,10 @@ export default function RootLayout({
         </Script>
       </head>
       <body className={`${inter.className} font-sans antialiased`}>
+        {/* Skip link for keyboard navigation */}
+        <a href="#main" className="sr-only focus:not-sr-only focus:bg-primary focus:text-primary-foreground focus:p-4 focus:fixed focus:top-0 focus:left-0 focus:z-50">
+          Ir al contenido principal
+        </a>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

@@ -100,7 +100,7 @@ export const Header = memo(function Header({ isReadOnly = false }: HeaderProps) 
           <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
               <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-9 w-9">
-                <Menu className="h-5 w-5" />
+                <Menu className="h-5 w-5" aria-hidden="true" />
                 <span className="sr-only">Menu</span>
               </Button>
             </DropdownMenuTrigger>

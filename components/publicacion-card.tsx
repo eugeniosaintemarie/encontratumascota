@@ -177,14 +177,14 @@ export const PublicacionCard = memo(function PublicacionCard({
               handleShare()
             }}
             disabled={isSharing}
-            title="Compartir publicación"
+            aria-label="Compartir publicación"
           >
             {isSharing ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
             ) : isCopied ? (
-              <Check className="h-4 w-4 text-green-600" />
+              <Check className="h-4 w-4 text-green-600" aria-hidden="true" />
             ) : (
-              <Share2 className="h-4 w-4" />
+              <Share2 className="h-4 w-4" aria-hidden="true" />
             )}
           </Button>
         </div>

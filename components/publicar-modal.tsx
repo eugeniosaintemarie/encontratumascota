@@ -403,19 +403,22 @@ export function PublicarModal({
               </div>
 
               <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="color">Color</Label>
                 <Input
                   id="color"
                   type="text"
                   value={color}
                   onChange={(e) => setColor(e.target.value)}
-                  placeholder="Color - Ejemplo: Marrón con manchas blancas"
+                  placeholder="Ej: Marrón con manchas blancas"
                   required
+                  aria-required="true"
                   className="w-full"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="descripcion">Descripción</Label>
               <Textarea
                 id="descripcion"
                 value={descripcion}
@@ -423,6 +426,7 @@ export function PublicarModal({
                 placeholder="Descripción lo más detallada posible"
                 rows={3}
                 required
+                aria-required="true"
               />
             </div>
 
@@ -593,33 +597,39 @@ export function PublicarModal({
             <div className="mt-6 border-t border-primary pb-6">
               <div className="mt-[25px] grid gap-4 sm:grid-cols-3">
                 <div className="space-y-2 sm:col-span-2">
+                  <Label htmlFor="contacto-nombre">Nombre de contacto</Label>
                   <Input
                     id="contacto-nombre"
                     type="text"
                     value={contactoNombre}
                     onChange={(e) => setContactoNombre(e.target.value)}
-                    placeholder="Nombre"
+                    placeholder="Tu nombre"
                     required
+                    aria-required="true"
                   />
                 </div>
                 <div className="space-y-2 sm:col-span-1">
+                  <Label htmlFor="contacto-telefono">Teléfono</Label>
                   <Input
                     id="contacto-telefono"
                     type="tel"
                     value={contactoTelefono}
                     onChange={(e) => setContactoTelefono(e.target.value)}
-                    placeholder="Teléfono"
+                    placeholder="+54 9 11 ..."
                     required
+                    aria-required="true"
                   />
                 </div>
                 <div className="space-y-2 sm:col-span-3 mt-[8px]">
+                  <Label htmlFor="contacto-email">Correo electrónico</Label>
                   <Input
                     id="contacto-email"
                     type="email"
                     value={contactoEmail}
                     onChange={(e) => setContactoEmail(e.target.value)}
-                    placeholder="Email"
+                    placeholder="ejemplo@correo.com"
                     required
+                    aria-required="true"
                   />
                 </div>
               </div>
