@@ -8,7 +8,7 @@ import { AuthModal } from "@/components/auth-modal"
 import { PublicarModal } from "@/components/publicar-modal"
 import { PerfilModal } from "@/components/perfil-modal"
 import { Footer } from "@/components/footer"
-import { authClient, logout } from "@/lib/auth/client"
+import { fetchServerSession, logout } from "@/lib/auth/client"
 import { mapNeonUser } from "@/lib/auth"
 import type { Publicacion } from "@/lib/types"
 import { ArrowLeft } from "lucide-react"
@@ -23,26 +23,22 @@ export function PublicacionDetail({ publicacion }: PublicacionDetailProps) {
   const [isPublicarModalOpen, setIsPublicarModalOpen] = useState(false)
   const [isPerfilModalOpen, setIsPerfilModalOpen] = useState(false)
 
-  const { data: session } = authClient.useSession()
-  const [demoUser, setDemoUser] = useState<any | null>(null)
+  const [currentUserRaw, setCurrentUserRaw] = useState<any | null>(null)
 
-  const isAuthenticated = !!session?.user || !!demoUser
-  const currentUser = session?.user ? mapNeonUser(session.user) : demoUser ? mapNeonUser(demoUser) : null
+  const isAuthenticated = !!currentUserRaw
+  const currentUser = currentUserRaw ? mapNeonUser(currentUserRaw) : null
 
-  // On mount detect demo_public cookie and fetch server session if needed
+  // Resolve auth from server cookie-based session.
   useEffect(() => {
-    if (!session?.user) {
-      const cookies = typeof document !== 'undefined' ? document.cookie : ''
-      if (cookies.includes('demo_public=1')) {
-        void (async () => {
-          try {
-            const user = await (await import("@/lib/auth/client")).fetchServerSession()
-            if (user) setDemoUser(user)
-          } catch {}
-        })()
+    void (async () => {
+      try {
+        const user = await fetchServerSession()
+        setCurrentUserRaw(user)
+      } catch {
+        setCurrentUserRaw(null)
       }
-    }
-  }, [session])
+    })()
+  }, [])
 
   const handleLogout = useCallback(() => {
     logout()

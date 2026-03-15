@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { authClient } from "@/lib/auth/client"
 
 export interface UseDemoSessionReturn {
   /** Demo user object if demo session is active */
@@ -22,23 +21,34 @@ export interface UseDemoSessionReturn {
  * when no real Neon auth session exists.
  */
 export function useDemoSession(): UseDemoSessionReturn {
-  const { data: session } = authClient.useSession()
+  const [sessionUser, setSessionUser] = useState<any | null>(null)
   const [demoUser, setDemoUser] = useState<any | null>(null)
 
   const refreshDemoSession = useCallback(async () => {
-    if (session?.user) return
-
-    const cookies = typeof document !== "undefined" ? document.cookie : ""
-    if (!cookies.includes("demo_public=1")) return
-
     try {
       const { fetchServerSession } = await import("@/lib/auth/client")
       const user = await fetchServerSession()
-      if (user) setDemoUser(user)
+
+      if (!user) {
+        setSessionUser(null)
+        setDemoUser(null)
+        return
+      }
+
+      const cookies = typeof document !== "undefined" ? document.cookie : ""
+      const isDemo = cookies.includes("demo_public=1") || Boolean((user as any)?.isReadOnly)
+
+      if (isDemo) {
+        setDemoUser(user)
+        setSessionUser(null)
+      } else {
+        setSessionUser(user)
+        setDemoUser(null)
+      }
     } catch {
       // Ignore errors - demo session will simply not be set
     }
-  }, [session])
+  }, [])
 
   useEffect(() => {
     void refreshDemoSession()
@@ -53,8 +63,8 @@ export function useDemoSession(): UseDemoSessionReturn {
     return () => window.removeEventListener("demo-session-updated", handleDemoSessionUpdate)
   }, [refreshDemoSession])
 
-  const isAuthenticated = !!session?.user || !!demoUser
-  const userId = session?.user?.id ?? demoUser?.id
+  const isAuthenticated = !!sessionUser || !!demoUser
+  const userId = sessionUser?.id ?? demoUser?.id
 
   return {
     demoUser,

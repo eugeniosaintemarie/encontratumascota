@@ -27,7 +27,7 @@ import { Upload, X, Search, MapPin, Heart } from "lucide-react"
 import type { Especie, Sexo, Raza, TipoPublicacion } from "@/lib/types"
 import { razasPorEspecie } from "@/lib/labels"
 import { usePublicaciones } from "@/lib/publicaciones-context"
-import { authClient, fetchServerSession } from "@/lib/auth/client"
+import { fetchServerSession } from "@/lib/auth/client"
 import { useImageUpload } from "@/hooks/use-image-upload"
 import { toast } from "sonner"
 import { sanitizeText, sanitizeRichText, sanitizeEmail, sanitizePhone } from "@/lib/sanitize"
@@ -48,26 +48,20 @@ export function PublicarModal({
 }: PublicarModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { agregarPublicacion } = usePublicaciones()
-  const { data: session } = authClient.useSession()
   const { uploadImage, isUploading: isUploadingImage } = useImageUpload()
-  const [demoUser, setDemoUser] = useState<any | null>(null)
+  const [currentUser, setCurrentUser] = useState<any | null>(null)
 
-  // If neon session is missing but demo_public cookie exists, fetch server session
+  // Always resolve auth from server cookie-based session.
   useEffect(() => {
-    if (!session?.user) {
-      const cookies = typeof document !== 'undefined' ? document.cookie : ''
-      if (cookies.includes('demo_public=1')) {
-        void (async () => {
-          try {
-            const user = await fetchServerSession()
-            if (user) setDemoUser(user)
-          } catch (e) {
-            // ignore
-          }
-        })()
+    void (async () => {
+      try {
+        const user = await fetchServerSession()
+        setCurrentUser(user)
+      } catch {
+        setCurrentUser(null)
       }
-    }
-  }, [session])
+    })()
+  }, [])
 
   // Form state
   const [paso, setPaso] = useState<1 | 2>(1)
@@ -183,7 +177,7 @@ export function PublicarModal({
 
       // Subir imagen a Vercel Blob
       try {
-        const url = await uploadImage(croppedBlob, session?.user?.id || demoUser?.id || undefined)
+        const url = await uploadImage(croppedBlob, currentUser?.id || undefined)
         finalImagenUrl = url
       } catch (error) {
         console.error("Error subiendo imagen:", error)
@@ -209,7 +203,7 @@ export function PublicarModal({
         contactoTelefono: sanitizePhone(contactoTelefono),
         contactoEmail: sanitizeEmail(contactoEmail),
         mostrarContactoPublico,
-        usuarioId: session?.user?.id || demoUser?.id || "",
+        usuarioId: currentUser?.id || "",
         activa: true,
         transitoUrgente: tipoPublicacion === "perdida" ? transitoUrgente : false,
       })
