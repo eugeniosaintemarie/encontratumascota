@@ -105,7 +105,7 @@ export function FiltrosPublicaciones({
             onClick={() => onTipoPublicacionChange(tipoPublicacion === "perdida" ? undefined : "perdida")}
             aria-pressed={tipoPublicacion === "perdida"}
           >
-            Ver mascotas <b>encontradas</b>
+            Ver mascotas{"\u00A0"}<b> encontradas</b>
           </button>
           <button
             className={`px-4 py-2 text-sm font-medium w-full sm:flex-1 text-center rounded-lg transform-gpu transition-all duration-150 active:scale-95 active:translate-y-0.5 focus:outline-none cursor-pointer select-none ${tipoPublicacion === "adopcion"
@@ -115,7 +115,7 @@ export function FiltrosPublicaciones({
             onClick={() => onTipoPublicacionChange(tipoPublicacion === "adopcion" ? undefined : "adopcion")}
             aria-pressed={tipoPublicacion === "adopcion"}
           >
-            Ver mascotas en <b>adopción</b>
+            Ver mascotas en{"\u00A0"}<b> adopción</b>
           </button>
         </div>
       )}
