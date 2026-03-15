@@ -3,6 +3,12 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Optimize font loading to prevent layout shift */
+@font-face {
+  font-family: 'Inter';
+  font-display: swap;
+}
+
 :root {
   /* Material Design 3 - Light Theme */
   --background: oklch(0.985 0.002 90);

@@ -50,6 +50,8 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
+        {/* Preload logo for LCP optimization */}
+        <link rel="preload" href="/logo.png" as="image" fetchpriority="high" />
         <Script async src="https://www.googletagmanager.com/gtag/js?id=G-LNQ47VG50M" strategy="afterInteractive" />
         <Script id="gtag-init" strategy="afterInteractive">
           {`window.dataLayer = window.dataLayer || [];
