@@ -149,8 +149,9 @@ export const PublicacionCard = memo(function PublicacionCard({
       <div className="relative aspect-square overflow-hidden bg-muted cursor-pointer" onClick={() => setIsImageViewerOpen(true)}>
         <Image
           src={mascota.imagenUrl || "/placeholder.svg"}
-          alt={`${especieLabels[mascota.especie]} ${publicacion.tipoPublicacion === "buscada" ? "buscado" : "encontrado"}`}
+          alt={`${especieLabels[mascota.especie]} ${mascota.raza} ${publicacion.tipoPublicacion === "buscada" ? "buscado" : publicacion.tipoPublicacion === "adopcion" ? "en adopción" : "encontrado"} en ${publicacion.ubicacion}`}
           fill
+          loading="lazy"
           className="object-cover object-top transition-transform duration-300 group-hover:scale-105"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 20vw"
         />

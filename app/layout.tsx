@@ -10,7 +10,7 @@ import { AuthProvider } from '@/lib/auth-context'
 import { ServiceWorkerRegistration } from '@/components/sw-registration'
 import './globals.css'
 
-const _inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"] });
 
 export const viewport: Viewport = {
   themeColor: '#FF5722',
@@ -58,7 +58,7 @@ export default function RootLayout({
           gtag('config', 'G-LNQ47VG50M');`}
         </Script>
       </head>
-      <body className={`font-sans antialiased`}>
+      <body className={`${inter.className} font-sans antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

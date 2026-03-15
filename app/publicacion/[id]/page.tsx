@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import Script from "next/script"
 import { especieLabels, generoLabels, razasLabels } from "@/lib/labels"
 import { PublicacionDetail } from "./publicacion-detail"
 import Link from "next/link"
@@ -78,5 +79,51 @@ export default async function PublicacionPage({ params }: Props) {
     )
   }
 
-  return <PublicacionDetail publicacion={publicacion} />
+  // Generate JSON-LD structured data for better SEO
+  const { mascota } = publicacion
+  const tipoTexto = publicacion.tipoPublicacion === "buscada"
+    ? "buscado/a"
+    : publicacion.tipoPublicacion === "adopcion"
+    ? "en adopción"
+    : "encontrado/a"
+  
+  const jsonLd = {
+    "@context": "https://schema.org/",
+    "@type": "Article",
+    "headline": `${especieLabels[mascota.especie as Especie]} ${razasLabels[mascota.raza as Raza]} ${tipoTexto}`,
+    "description": mascota.descripcion,
+    "image": mascota.imagenUrl,
+    "datePublished": publicacion.fechaPublicacion.toISOString(),
+    "author": {
+      "@type": "Organization",
+      "name": "Encontra Tu Mascota"
+    },
+    "mainEntity": {
+      "@type": "Pet",
+      "name": `${especieLabels[mascota.especie as Especie]} ${razasLabels[mascota.raza as Raza]}`,
+      "breed": razasLabels[mascota.raza as Raza],
+      "image": mascota.imagenUrl,
+      "description": mascota.descripcion,
+      "identifier": publicacion.id,
+      "potentialAction": {
+        "@type": "ContactAction",
+        "name": publicacion.tipoPublicacion === "buscada" ? "Reportar ubicación" : "Contactar propietario"
+      }
+    },
+    "spatialCoverage": {
+      "@type": "Place",
+      "name": publicacion.ubicacion
+    }
+  }
+
+  return (
+    <>
+      <Script
+        id={`json-ld-${publicacion.id}`}
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <PublicacionDetail publicacion={publicacion} />
+    </>
+  )
 }

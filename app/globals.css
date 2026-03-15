@@ -49,6 +49,25 @@
   --pink-50: rgba(255,181,192,0.5);
 }
 
+/* Ensure proper focus visible indicators for accessibility */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Remove default outline for mouse users but keep for keyboard */
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible),
+input:focus:not(:focus-visible),
+textarea:focus:not(:focus-visible),
+select:focus:not(:focus-visible) {
+  outline: none;
+}
+
 .dark {
   /* Material Design 3 - Dark Theme */
   --background: oklch(0.14 0.005 285);

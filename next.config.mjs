@@ -11,7 +11,6 @@ const baseConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",
@@ -43,7 +42,7 @@ const baseConfig = {
     // Allow analytics / external scripts in development for easier debugging
     const scriptSrc = isDev
       ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://va.vercel-scripts.com"
-      : "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+      : "script-src 'self' https://www.googletagmanager.com"
 
     return [
       {

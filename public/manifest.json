@@ -1,7 +1,7 @@
 {
   "name": "Encontra Tu Mascota",
   "short_name": "EncontraTuMascota",
-  "description": "s",
+  "description": "Plataforma colaborativa para reunir mascotas perdidas, encontradas y en adopción con sus familias",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
