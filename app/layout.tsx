@@ -80,6 +80,25 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning dir="ltr">
       <head>
+        <Script id="sw-emergency-reset" strategy="beforeInteractive">
+          {`(function () {
+            try {
+              if (!('serviceWorker' in navigator)) return;
+              navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                registrations.forEach(function (registration) {
+                  registration.unregister();
+                });
+              });
+              if ('caches' in window) {
+                caches.keys().then(function (keys) {
+                  keys.forEach(function (key) {
+                    caches.delete(key);
+                  });
+                });
+              }
+            } catch (e) {}
+          })();`}
+        </Script>
         {/* SEO Meta Tags */}
         <meta name="theme-color" content="#FF5722" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
