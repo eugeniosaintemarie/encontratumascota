@@ -44,8 +44,8 @@ export default function ReunidasPage() {
         !pub.ubicacion.toLowerCase().includes(ubicacion.toLowerCase())
       )
         return false
-      // Reunidas = publicacion cerrada (no activa) y no en tránsito
-      return pub.activa === false && pub.enTransito === false
+      // Reunidas = publicacion cerrada (no activa)
+      return pub.activa === false
     })
   }, [especie, raza, sexo, ubicacion, publicaciones])
 

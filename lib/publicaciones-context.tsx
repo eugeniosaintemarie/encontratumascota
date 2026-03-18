@@ -97,12 +97,12 @@ export function PublicacionesProvider({ children }: { children: ReactNode }) {
     fetchPublicaciones()
   }, [fetchPublicaciones])
 
-  const cerrarPublicacion = useCallback(async (id: string, motivo: "encontrado_dueno" | "adoptado" | "en_transito" | "otro", transitoContacto?: { nombre: string; telefono: string; email: string }) => {
+  const cerrarPublicacion = useCallback(async (id: string, motivo: "encontrado_dueno" | "adoptado" | "en_transito" | "otro", transitoContacto?: { nombre: string; telefono: string; email: string }, confirmarTransferenciaMultiple?: boolean) => {
     try {
       const res = await fetch(`/api/publicaciones/${id}/cerrar`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ motivo, transitoContacto }),
+        body: JSON.stringify({ motivo, transitoContacto, confirmarTransferenciaMultiple }),
       })
       if (res.ok) {
         await fetchPublicaciones({ skipShuffle: true })

@@ -54,8 +54,6 @@ export function ListadoPublicaciones({
       }
       // Filtrar por tránsito urgente
       if (tipoPublicacion === "perdida" && transitoUrgente && !pub.transitoUrgente) return false
-      // Excluir las que están en tránsito (van a otra página)
-      if (pub.enTransito) return false
       return pub.activa
     })
   }, [tipoPublicacion, especie, raza, sexo, ubicacion, transitoUrgente, publicaciones])
@@ -158,22 +156,21 @@ export function ListadoPublicaciones({
           </div>
           {/* Paginación */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center space-x-2 pt-4 pb-0">
+            <div className="flex items-center justify-center gap-3 pt-4 pb-0">
               {currentPage > 1 ? (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="min-w-[100px]"
+                  className="w-10 h-10 p-0"
                 >
-                  <ChevronLeft className="h-4 w-4 mr-2" />
-
+                  <ChevronLeft className="h-4 w-4" />
                 </Button>
               ) : (
-                <div className="min-w-[100px]" /> /* Espaciador invisible para mantener el centro */
+                <div className="w-10" /> /* Espaciador invisible para mantener el centro */
               )}
-              <span className="text-sm text-muted-foreground min-w-[100px] text-center">
+              <span className="text-sm text-muted-foreground w-12 text-center">
                 {currentPage} / {totalPages}
               </span>
               {currentPage < totalPages ? (
@@ -182,13 +179,12 @@ export function ListadoPublicaciones({
                   size="sm"
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="min-w-[100px]"
+                  className="w-10 h-10 p-0"
                 >
-
-                  <ChevronRight className="h-4 w-4 ml-2" />
+                  <ChevronRight className="h-4 w-4" />
                 </Button>
               ) : (
-                <div className="min-w-[100px]" /> /* Espaciador invisible para mantener el centro */
+                <div className="w-10" /> /* Espaciador invisible para mantener el centro */
               )}
             </div>
           )}

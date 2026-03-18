@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, uuid } from "drizzle-orm/pg-core"
+import { pgTable, text, timestamp, boolean, uuid, json } from "drizzle-orm/pg-core"
 import { nanoid } from "nanoid"
 
 // Helper: genera un ID corto alfanumérico (10 chars)
@@ -44,7 +44,6 @@ export const publicaciones = pgTable("publicaciones", {
   // Estado
   activa: boolean("activa").default(true).notNull(),
   esPrueba: boolean("es_prueba").default(false).notNull(),
-  enTransito: boolean("en_transito").default(false).notNull(),
   transitoUrgente: boolean("transito_urgente").default(false).notNull(),
   motivoCierre: text("motivo_cierre"), // null = abierta
 
@@ -53,4 +52,13 @@ export const publicaciones = pgTable("publicaciones", {
   transitoContactoNombre: text("transito_contacto_nombre"),
   transitoContactoTelefono: text("transito_contacto_telefono"),
   transitoContactoEmail: text("transito_contacto_email"),
+
+  // Historial de transferencias (JSON array de cuidadores anteriores)
+  // Estructura: [{ nombre: string, telefono: string, email: string, fecha: timestamp }, ...]
+  historialTransferencias: json("historial_transferencias").$type<Array<{
+    nombre: string
+    telefono: string
+    email: string
+    fecha: string // ISO timestamp
+  }>>().default([]),
 })

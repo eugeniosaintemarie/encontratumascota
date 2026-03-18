@@ -31,7 +31,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       return NextResponse.json({ error: "No autorizado" }, { status: 403 })
     }
 
-    const { motivo, transitoContacto } = await request.json()
+    const { motivo, transitoContacto, confirmarTransferenciaMultiple } = await request.json()
     
     // Sanitizar datos de contacto de transito si existen
     const transitoContactoSanitizado = transitoContacto
@@ -42,13 +42,47 @@ export async function POST(request: Request, { params }: RouteParams) {
         }
       : undefined
     
-    const publicacion = await cerrarPublicacionDB(id, motivo, transitoContactoSanitizado)
+    // Si es tránsito, validar si ya tiene historial de transferencias
+    let advertenciaTransferenciaMultiple = false
+    let historialActualizado: Array<{ nombre: string; telefono: string; email: string; fecha: string }> | undefined
+
+    if (motivo === "en_transito" && transitoContactoSanitizado) {
+      const historialActual = (existing.historialTransferencias as any[]) || []
+      
+      // Si ya tiene una transferencia previa, mostrar advertencia
+      if (historialActual.length > 0) {
+        advertenciaTransferenciaMultiple = true
+        
+        // Si no confirma, solo devolver la advertencia sin actualizar
+        if (!confirmarTransferenciaMultiple) {
+          return NextResponse.json(
+            {
+              error: "Esta mascota ya fue transitada previamente",
+              advertenciaTransferenciaMultiple: true,
+              contactoAnterior: historialActual[historialActual.length - 1],
+            },
+            { status: 400 }
+          )
+        }
+      }
+      
+      // Si confirma (o es primera transferencia), agregar contacto actual al historial
+      historialActual.push({
+        nombre: existing.mascota.contactoNombre || existing.contactoNombre,
+        telefono: existing.mascota.contactoTelefono || existing.contactoTelefono,
+        email: existing.mascota.contactoEmail || existing.contactoEmail,
+        fecha: new Date().toISOString(),
+      })
+      historialActualizado = historialActual
+    }
+    
+    const publicacion = await cerrarPublicacionDB(id, motivo, transitoContactoSanitizado, historialActualizado)
 
     if (!publicacion) {
       return NextResponse.json({ error: "Publicacion no encontrada" }, { status: 404 })
     }
 
-    return NextResponse.json({ publicacion })
+    return NextResponse.json({ publicacion, advertenciaTransferenciaMultiple: false })
   } catch (error) {
     console.error("Error cerrando publicacion:", error)
     return NextResponse.json({ error: "Error interno" }, { status: 500 })

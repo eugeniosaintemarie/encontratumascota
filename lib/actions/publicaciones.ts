@@ -17,7 +17,6 @@ interface FiltrosPublicaciones {
   ubicacion?: string
   transitoUrgente?: boolean
   soloActivas?: boolean
-  soloEnTransito?: boolean
 }
 
 // ─── SELECT: Obtener publicaciones ──────────────────────────
@@ -38,16 +37,7 @@ export async function getPublicaciones(filtros?: FiltrosPublicaciones, opts?: { 
     }
 
     if (filtros?.soloActivas !== false) {
-      if (filtros?.soloEnTransito) {
-        conditions.push(eq(publicaciones.enTransito, true))
-      } else {
-        conditions.push(
-          or(
-            eq(publicaciones.activa, true),
-            eq(publicaciones.enTransito, true)
-          )
-        )
-      }
+      conditions.push(eq(publicaciones.activa, true))
     }
 
     if (filtros?.tipoPublicacion) {
@@ -88,8 +78,7 @@ export async function getPublicaciones(filtros?: FiltrosPublicaciones, opts?: { 
   if (isDemo) {
     const mockFiltradas = mockPublicaciones.filter((pub) => {
       if (filtros?.soloActivas !== false) {
-        if (filtros?.soloEnTransito && !pub.enTransito) return false
-        if (!filtros?.soloEnTransito && !pub.activa && !pub.enTransito) return false
+        if (!pub.activa) return false
       }
       if (filtros?.tipoPublicacion && pub.tipoPublicacion !== filtros.tipoPublicacion) return false
       if (filtros?.especie && filtros.especie !== "todos" && pub.mascota.especie !== filtros.especie) return false
@@ -194,11 +183,11 @@ export async function cerrarPublicacionDB(
     nombre: string
     telefono: string
     email: string
-  }
+  },
+  historialActualizado?: Array<{ nombre: string; telefono: string; email: string; fecha: string }>
 ) {
   const updateData: Record<string, unknown> = {
     activa: false,
-    enTransito: motivo === "en_transito",
     motivoCierre: motivo,
   }
 
@@ -207,6 +196,11 @@ export async function cerrarPublicacionDB(
     updateData.transitoContactoNombre = transitoContacto.nombre
     updateData.transitoContactoTelefono = transitoContacto.telefono
     updateData.transitoContactoEmail = transitoContacto.email
+  }
+
+  // Si hay historial actualizado (segunda transferencia), guardarlo
+  if (historialActualizado) {
+    updateData.historialTransferencias = historialActualizado
   }
 
   const { db } = await import("@/lib/db")
@@ -232,7 +226,6 @@ export async function actualizarPublicacionDB(
     contactoEmail: string
     imagenUrl: string
     activa: boolean
-    enTransito: boolean
     transitoUrgente: boolean
     esPrueba: boolean
   }>
@@ -260,7 +253,6 @@ export async function contarMascotasReunidas() {
   const { publicaciones } = await import("@/lib/db/schema")
 
   conditions.push(eq(publicaciones.activa, false))
-  conditions.push(eq(publicaciones.enTransito, false))
 
   // Filtrar publicaciones de prueba si no estamos en modo demo
   if (!isDemoEnv) {
@@ -300,10 +292,10 @@ function mapRowToPublicacion(row: typeof publicaciones.$inferSelect): Publicacio
     usuarioId: row.usuarioId,
     activa: row.activa,
     esPrueba: row.esPrueba,
-    enTransito: row.enTransito,
     transitoUrgente: row.transitoUrgente,
     transitoContactoNombre: row.transitoContactoNombre,
     transitoContactoTelefono: row.transitoContactoTelefono,
     transitoContactoEmail: row.transitoContactoEmail,
+    historialTransferencias: row.historialTransferencias as any,
   }
 }

@@ -18,7 +18,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertCircle, CheckCircle2, Lock, PawPrint, Home, UserPlus } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
+import { AlertCircle, AlertTriangle, CheckCircle2, Lock, PawPrint, Home, UserPlus } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { usePublicaciones } from "@/lib/publicaciones-context"
 import { especieLabels, generoLabels, razasLabels } from "@/lib/labels"
@@ -53,6 +54,11 @@ export function PerfilModal({
   const [transitoTelefono, setTransitoTelefono] = useState("")
   const [transitoEmail, setTransitoEmail] = useState("")
   
+  // Estado para advertencia de transferencia múltiple
+  const [advertenciaTransferenciaMultiple, setAdvertenciaTransferenciaMultiple] = useState(false)
+  const [contactoAnterior, setContactoAnterior] = useState<{ nombre: string; telefono: string; email: string } | null>(null)
+  const [confirmarTransferenciaMultiple, setConfirmarTransferenciaMultiple] = useState(false)
+  
   // Estado para cambio de contraseña
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
@@ -76,29 +82,70 @@ export function PerfilModal({
       if (!transitoNombre.trim() || !transitoTelefono.trim() || !transitoEmail.trim()) return
     }
     
+    // Si ya mostró advertencia y el usuario no confirmó, no avanzar
+    if (advertenciaTransferenciaMultiple && !confirmarTransferenciaMultiple) {
+      return
+    }
+    
     setIsLoading(true)
     
-    // Mapear motivo al formato del context
-    const motivo = closeReason === "transitada" ? "en_transito" : "encontrado_dueno"
-    const transitoContacto = closeReason === "transitada"
-      ? { 
-          nombre: sanitizeText(transitoNombre), 
-          telefono: sanitizePhone(transitoTelefono), 
-          email: sanitizeEmail(transitoEmail) 
-        }
-      : undefined
+    try {
+      // Mapear motivo al formato del context
+      const motivo = closeReason === "transitada" ? "en_transito" : "encontrado_dueno"
+      const transitoContacto = closeReason === "transitada"
+        ? { 
+            nombre: sanitizeText(transitoNombre), 
+            telefono: sanitizePhone(transitoTelefono), 
+            email: sanitizeEmail(transitoEmail) 
+          }
+        : undefined
 
-    await cerrarPublicacion(selectedPublicacion, motivo, transitoContacto)
-    
-    setIsLoading(false)
-    setCloseSuccess(true)
-    setSelectedPublicacion("")
-    setCloseReason("")
-    setTransitoNombre("")
-    setTransitoTelefono("")
-    setTransitoEmail("")
-    
-    setTimeout(() => setCloseSuccess(false), 3000)
+      // Si es tránsito y no mostramos advertencia aún, hacer primera llamada para validar
+      if (motivo === "en_transito" && transitoContacto && !advertenciaTransferenciaMultiple) {
+        const res = await fetch(`/api/publicaciones/${selectedPublicacion}/cerrar`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ motivo, transitoContacto }),
+        })
+        
+        const data = await res.json()
+        
+        // Si hay advertencia de transferencia múltiple, mostrarla
+        if (!res.ok && data.advertenciaTransferenciaMultiple) {
+          setAdvertenciaTransferenciaMultiple(true)
+          setContactoAnterior(data.contactoAnterior || null)
+          setIsLoading(false)
+          return
+        }
+        
+        // Si hay otro error, mostrar toast y salir
+        if (!res.ok) {
+          const message = data.error || "Error al cerrar la publicación"
+          console.error("Error cerrando publicacion:", message)
+          setIsLoading(false)
+          return
+        }
+      }
+
+      // Si llegamos aquí, proceder con el cierre (o es segunda transferencia confirmada)
+      await cerrarPublicacion(selectedPublicacion, motivo, transitoContacto, confirmarTransferenciaMultiple)
+      
+      setIsLoading(false)
+      setCloseSuccess(true)
+      setSelectedPublicacion("")
+      setCloseReason("")
+      setTransitoNombre("")
+      setTransitoTelefono("")
+      setTransitoEmail("")
+      setAdvertenciaTransferenciaMultiple(false)
+      setContactoAnterior(null)
+      setConfirmarTransferenciaMultiple(false)
+      
+      setTimeout(() => setCloseSuccess(false), 3000)
+    } catch (error) {
+      console.error("Error en handleClosePublicacion:", error)
+      setIsLoading(false)
+    }
   }
 
   const handleChangePassword = async (e: React.FormEvent) => {
@@ -264,47 +311,89 @@ export function PerfilModal({
 
                 {/* Formulario de contacto del nuevo cuidador (solo para tránsito) */}
                 {closeReason === "transitada" && (
-                  <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-3">
-                    <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                      <UserPlus className="h-4 w-4 text-primary" />
-                      Datos de contacto del nuevo cuidador
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Tus datos originales se mantienen como respaldo
-                    </p>
-                    <div className="space-y-2">
-                      <Input
-                        type="text"
-                        value={transitoNombre}
-                        onChange={(e) => setTransitoNombre(e.target.value)}
-                        placeholder="Nombre del nuevo cuidador"
-                        required
-                      />
-                      <Input
-                        type="tel"
-                        value={transitoTelefono}
-                        onChange={(e) => setTransitoTelefono(e.target.value)}
-                        placeholder="Teléfono"
-                        required
-                      />
-                      <Input
-                        type="email"
-                        value={transitoEmail}
-                        onChange={(e) => setTransitoEmail(e.target.value)}
-                        placeholder="Email"
-                        required
-                      />
-                    </div>
-                  </div>
+                  <>
+                    {/* Advertencia de transferencia múltiple */}
+                    {advertenciaTransferenciaMultiple && contactoAnterior && (
+                      <div className="space-y-3 rounded-lg border border-orange-500/50 bg-orange-50 dark:bg-orange-950/20 p-3">
+                        <div className="flex items-center gap-2 text-sm font-medium text-orange-900 dark:text-orange-100">
+                          <AlertTriangle className="h-4 w-4" />
+                          Transferencia múltiple detectada
+                        </div>
+                        <p className="text-xs text-orange-800 dark:text-orange-200">
+                          Esta mascota ya fue transitada anteriormente a:
+                        </p>
+                        <div className="rounded-lg bg-white dark:bg-black/30 p-2 space-y-1 text-xs">
+                          <p className="font-medium text-foreground">{contactoAnterior.nombre}</p>
+                          <p className="text-muted-foreground">{contactoAnterior.telefono}</p>
+                          <p className="text-muted-foreground truncate" title={contactoAnterior.email}>{contactoAnterior.email}</p>
+                        </div>
+                        <p className="text-xs text-orange-800 dark:text-orange-200">
+                          Transferencias múltiples pueden complicar el seguimiento. ¿Estás seguro de que querés transferirla nuevamente?
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            id="confirm-transfer"
+                            checked={confirmarTransferenciaMultiple}
+                            onCheckedChange={(checked) => setConfirmarTransferenciaMultiple(!!checked)}
+                          />
+                          <label htmlFor="confirm-transfer" className="text-xs text-orange-800 dark:text-orange-200 cursor-pointer">
+                            Confirmo que deseo transferir esta mascota nuevamente
+                          </label>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Datos del nuevo cuidador (mostrar siempre en transitada, o después de confirmar si hay advertencia) */}
+                    {!advertenciaTransferenciaMultiple || confirmarTransferenciaMultiple ? (
+                      <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-3">
+                        <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                          <UserPlus className="h-4 w-4 text-primary" />
+                          Datos de contacto del nuevo cuidador
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Tus datos originales se mantienen como respaldo
+                        </p>
+                        <div className="space-y-2">
+                          <Input
+                            type="text"
+                            value={transitoNombre}
+                            onChange={(e) => setTransitoNombre(e.target.value)}
+                            placeholder="Nombre del nuevo cuidador"
+                            required
+                          />
+                          <Input
+                            type="tel"
+                            value={transitoTelefono}
+                            onChange={(e) => setTransitoTelefono(e.target.value)}
+                            placeholder="Teléfono"
+                            required
+                          />
+                          <Input
+                            type="email"
+                            value={transitoEmail}
+                            onChange={(e) => setTransitoEmail(e.target.value)}
+                            placeholder="Email"
+                            required
+                          />
+                        </div>
+                      </div>
+                    ) : null}
+                  </>
                 )}
 
                 {!currentUser?.isReadOnly && (
                   <Button
                     onClick={handleClosePublicacion}
-                    disabled={!selectedPublicacion || !closeReason || isLoading || (closeReason === "transitada" && (!transitoNombre.trim() || !transitoTelefono.trim() || !transitoEmail.trim()))}
+                    disabled={
+                      !selectedPublicacion || 
+                      !closeReason || 
+                      isLoading || 
+                      (closeReason === "transitada" && !confirmarTransferenciaMultiple && advertenciaTransferenciaMultiple) ||
+                      (closeReason === "transitada" && (!transitoNombre.trim() || !transitoTelefono.trim() || !transitoEmail.trim()))
+                    }
                     className="w-full"
                   >
-                    {isLoading ? "Cerrando..." : closeReason === "transitada" ? "Dar tránsito" : "Cerrar publicación"}
+                    {isLoading ? "Cerrando..." : advertenciaTransferenciaMultiple ? "Confirmar transferencia" : closeReason === "transitada" ? "Dar tránsito" : "Cerrar publicación"}
                   </Button>
                 )}
               </div>

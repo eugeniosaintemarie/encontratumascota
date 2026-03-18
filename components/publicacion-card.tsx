@@ -5,7 +5,7 @@ import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MapPin, Lock, Share2, Check, Loader2, AlertTriangle, UserPlus, User, Download, ZoomIn } from "lucide-react"
+import { MapPin, Lock, Share2, Check, Loader2, AlertTriangle, UserPlus, User, Download, ZoomIn, History } from "lucide-react"
 import type { Publicacion } from "@/lib/types"
 import { razasLabels, especieLabels, generoLabels } from "@/lib/labels"
 import { generateShareImage } from "@/lib/generate-share-image"
@@ -35,6 +35,12 @@ export const PublicacionCard = memo(function PublicacionCard({
   const [isSharing, setIsSharing] = useState(false)
   const [isCopied, setIsCopied] = useState(false)
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false)
+  const [showHistory, setShowHistory] = useState(false)
+
+  // Obtener el historial anterior (del array historialTransferencias)
+  const historialTransferencias = (publicacion.historialTransferencias as any[]) || []
+  const tieneHistorial = historialTransferencias.length > 0
+  const contactoAnterior = tieneHistorial ? historialTransferencias[historialTransferencias.length - 1] : null
 
   const handleLoginClick = () => {
     if (onRequireAuth) {
@@ -237,60 +243,113 @@ export const PublicacionCard = memo(function PublicacionCard({
             const canSeeContact = isAuthenticated || (publicacion.mostrarContactoPublico && !isCerrada)
             return canSeeContact
           })() ? (
-            <div className="space-y-2 rounded-lg bg-[#FF8A65]/10 min-h-[84px]">
-              {/* Si está en tránsito y tiene contacto de tránsito, mostrar ambos */}
-              {publicacion.enTransito && publicacion.transitoContactoNombre ? (
-                <>
-                  {/* Contacto actual (cuidador de tránsito) */}
-                  <div className="space-y-0.5 rounded-lg bg-transparent p-3 overflow-hidden">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <UserPlus className="h-3.5 w-3.5 text-primary" />
-                      <span className="text-xs font-medium text-primary">Cuidador actual</span>
+            <div className="rounded-lg bg-[#FF8A65]/10 min-h-[84px] relative flex flex-col">
+              {/* Icono flip para ver historial (solo si hay historial) */}
+              {tieneHistorial && (
+                <button
+                  onClick={() => setShowHistory(!showHistory)}
+                  className="absolute top-2 right-2 z-10 p-1.5 rounded-full bg-white dark:bg-black/50 hover:bg-gray-100 dark:hover:bg-black/70 transition-colors"
+                  title={showHistory ? "Ver cuidador actual" : "Ver cuidador anterior"}
+                  aria-label={showHistory ? "Ver cuidador actual" : "Ver cuidador anterior"}
+                >
+                  <History className="h-4 w-4 text-primary" />
+                </button>
+              )}
+
+              {/* Si está en tránsito y tiene contacto de tránsito, mostrar ambos o historial */}
+              {publicacion.transitoContactoNombre ? (
+                <div
+                  style={{
+                    perspective: "1000px",
+                    minHeight: "84px",
+                    flex: 1,
+                  } as any}
+                >
+                  <div
+                    style={{
+                      transition: "transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
+                      transformStyle: "preserve-3d",
+                      transform: showHistory ? "rotateY(180deg)" : "rotateY(0deg)",
+                      minHeight: "inherit",
+                    } as any}
+                  >
+                    {/* FRENTE - Cuidador actual */}
+                    <div
+                      style={{
+                        backfaceVisibility: "hidden",
+                        minHeight: "inherit",
+                      } as any}
+                    >
+                      <div className="space-y-0.5 rounded-lg bg-transparent p-3 overflow-hidden h-full">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <UserPlus className="h-3.5 w-3.5 text-primary" />
+                          <span className="text-xs font-medium text-primary">Cuidador actual</span>
+                        </div>
+                        <p className="text-sm font-medium text-foreground">
+                          {publicacion.transitoContactoNombre}
+                        </p>
+                        <a
+                          href={`tel:${publicacion.transitoContactoTelefono?.replace(/\s/g, '')}`}
+                          className="block text-sm text-muted-foreground hover:text-primary"
+                        >
+                          {publicacion.transitoContactoTelefono}
+                        </a>
+                        <a
+                          href={`mailto:${publicacion.transitoContactoEmail}`}
+                          className="block text-sm text-muted-foreground hover:text-primary truncate"
+                          title={publicacion.transitoContactoEmail ?? ""}
+                        >
+                          {publicacion.transitoContactoEmail}
+                        </a>
+                      </div>
                     </div>
-                    <p className="text-sm font-medium text-foreground">
-                      {publicacion.transitoContactoNombre}
-                    </p>
-                    <a
-                      href={`tel:${publicacion.transitoContactoTelefono?.replace(/\s/g, '')}`}
-                      className="block text-sm text-muted-foreground hover:text-primary"
-                    >
-                      {publicacion.transitoContactoTelefono}
-                    </a>
-                    <a
-                      href={`mailto:${publicacion.transitoContactoEmail}`}
-                      className="block text-sm text-muted-foreground hover:text-primary truncate"
-                      title={publicacion.transitoContactoEmail ?? ""}
-                    >
-                      {publicacion.transitoContactoEmail}
-                    </a>
+
+                    {/* ATRÁS - Cuidador anterior */}
+                    {contactoAnterior && (
+                      <div
+                        style={{
+                          backfaceVisibility: "hidden",
+                          transform: "rotateY(180deg)",
+                          minHeight: "inherit",
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                        } as any}
+                      >
+                        <div className="space-y-0.5 rounded-lg bg-transparent p-3 overflow-hidden h-full">
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <History className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                            <span className="text-xs font-medium text-amber-600 dark:text-amber-400">Cuidador anterior</span>
+                          </div>
+                          <p className="text-sm font-medium text-foreground">
+                            {contactoAnterior.nombre}
+                          </p>
+                          <a
+                            href={`tel:${contactoAnterior.telefono.replace(/\s/g, '')}`}
+                            className="block text-sm text-muted-foreground hover:text-primary"
+                          >
+                            {contactoAnterior.telefono}
+                          </a>
+                          <a
+                            href={`mailto:${contactoAnterior.email}`}
+                            className="block text-sm text-muted-foreground hover:text-primary truncate"
+                            title={contactoAnterior.email}
+                          >
+                            {contactoAnterior.email}
+                          </a>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  {/* Contacto original (quien publicó) */}
-                  <div className="space-y-0.5 rounded-lg bg-transparent p-3 overflow-hidden">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <User className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="text-xs font-medium text-muted-foreground">Quien lo encontró</span>
-                    </div>
-                    <p className="text-sm font-medium text-foreground">
-                      {publicacion.contactoNombre}
-                    </p>
-                    <a
-                      href={`tel:${publicacion.contactoTelefono.replace(/\s/g, '')}`}
-                      className="block text-sm text-muted-foreground hover:text-primary"
-                    >
-                      {publicacion.contactoTelefono}
-                    </a>
-                    <a
-                      href={`mailto:${publicacion.contactoEmail}`}
-                      className="block text-sm text-muted-foreground hover:text-primary truncate"
-                      title={publicacion.contactoEmail}
-                    >
-                      {publicacion.contactoEmail}
-                    </a>
-                  </div>
-                </>
+                </div>
               ) : (
                 /* Contacto normal (sin tránsito) */
-                <div className="space-y-0.5 rounded-lg bg-transparent p-3 overflow-hidden">
+                <div className="space-y-0.5 rounded-lg bg-transparent p-3 overflow-hidden min-h-[84px] flex flex-col flex-1">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <User className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-xs font-medium text-muted-foreground">Contacto</span>
+                  </div>
                   <p className="text-sm font-medium text-foreground">
                     {publicacion.contactoNombre}
                   </p>
@@ -311,22 +370,21 @@ export const PublicacionCard = memo(function PublicacionCard({
               )}
             </div>
             ) : (
-              <div className="rounded-lg bg-[#FF8A65]/10 p-3 min-h-[84px]">
-              <div className="flex items-center gap-2 text-sm text-foreground/70">
-                <Lock className="h-4 w-4 shrink-0" />
-                <div className="flex flex-col leading-tight">
-                  <button
-                    type="button"
-                    onClick={handleLoginClick}
-                      className="text-[#FF8A65] font-medium whitespace-nowrap"
-                  >
-                    Iniciá sesión o regístrate
-                  </button>
-                  <span className="text-sm text-foreground/70">para ver los datos</span>
-                  <span className="text-sm text-foreground/70">de contacto</span>
+              <div className="rounded-lg bg-[#FF8A65]/10 p-3 min-h-[84px] flex flex-col justify-center">
+                <div className="flex items-center gap-2 text-sm text-foreground/70 mb-1">
+                  <Lock className="h-4 w-4 shrink-0" />
+                  <div className="flex flex-col">
+                    <button
+                      type="button"
+                      onClick={handleLoginClick}
+                      className="text-[#FF8A65] font-medium text-left"
+                    >
+                      Iniciá sesión o regístrate
+                    </button>
+                    <span className="text-xs text-foreground/60 mt-0.5">para ver los datos de contacto</span>
+                  </div>
                 </div>
               </div>
-            </div>
           )}
         </div>
       </CardContent>
