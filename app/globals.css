@@ -110,7 +110,7 @@ input[type="reset"],
 input[type="checkbox"] + label,
 input[type="radio"] + label {
   min-width: 44px;
-  min-height: 44px;
+  min-height: 21px;
   display: inline-flex;
   align-items: center;
   justify-content: center;

@@ -80,6 +80,13 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning dir="ltr">
       <head>
+        {process.env.NODE_ENV === "development" && (
+          <Script
+            src="https://unpkg.com/react-grab@0.1.29/dist/index.global.js"
+            strategy="beforeInteractive"
+            async
+          />
+        )}
         <Script id="sw-emergency-reset" strategy="beforeInteractive">
           {`(function () {
             try {

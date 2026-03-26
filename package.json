@@ -93,6 +93,7 @@
     "eslint": "^10.0.2",
     "globals": "^17.4.0",
     "postcss": "^8.5",
+    "react-grab": "^0.1.29",
     "sharp": "^0.34.5",
     "tailwindcss": "^4.1.9",
     "tsx": "^4.21.0",

@@ -53,11 +53,11 @@ export const PublicacionCard = memo(function PublicacionCard({
     setIsSharing(true)
 
     const url = `${window.location.origin}/publicacion/${publicacion.id}`
-    const tipoTexto = publicacion.tipoPublicacion === "buscada" 
-      ? "buscado" 
+    const tipoTexto = publicacion.tipoPublicacion === "buscada"
+      ? "buscado"
       : publicacion.tipoPublicacion === "adopcion"
-      ? "en adopción"
-      : "encontrado"
+        ? "en adopción"
+        : "encontrado"
     const title = `${especieLabels[mascota.especie]} ${generoLabels[mascota.sexo].toLowerCase()} ${razasLabels[mascota.raza]} ${tipoTexto} en ${publicacion.ubicacion}`
     const transitoTag = publicacion.transitoUrgente ? " ¡Tránsito urgente!" : ""
     const shareText = `${title}${transitoTag}\n\n${mascota.descripcion}\n\n${url}`
@@ -280,7 +280,7 @@ export const PublicacionCard = memo(function PublicacionCard({
                         minHeight: "inherit",
                       } as any}
                     >
-                      <div className="space-y-0.5 rounded-lg bg-transparent p-3 overflow-hidden h-full">
+                      <div className="space-y-0 leading-tight rounded-lg bg-transparent p-3 overflow-hidden h-full">
                         <div className="flex items-center gap-1.5 mb-1">
                           <UserPlus className="h-3.5 w-3.5 text-primary" />
                           <span className="text-xs font-medium text-primary">Cuidador actual</span>
@@ -317,7 +317,7 @@ export const PublicacionCard = memo(function PublicacionCard({
                           right: 0,
                         } as any}
                       >
-                        <div className="space-y-0.5 rounded-lg bg-transparent p-3 overflow-hidden h-full">
+                        <div className="space-y-0 leading-tight rounded-lg bg-transparent p-3 overflow-hidden h-full">
                           <div className="flex items-center gap-1.5 mb-1">
                             <History className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
                             <span className="text-xs font-medium text-amber-600 dark:text-amber-400">Cuidador anterior</span>
@@ -345,7 +345,7 @@ export const PublicacionCard = memo(function PublicacionCard({
                 </div>
               ) : (
                 /* Contacto normal (sin tránsito) */
-                <div className="space-y-0.5 rounded-lg bg-transparent p-3 overflow-hidden min-h-[84px] flex flex-col flex-1">
+                <div className="space-y-0 leading-tight rounded-lg bg-transparent p-3 overflow-hidden min-h-[84px] flex flex-col flex-1">
                   <div className="flex items-center gap-1.5 mb-1">
                     <User className="h-3.5 w-3.5 text-muted-foreground" />
                     <span className="text-xs font-medium text-muted-foreground">Contacto</span>
@@ -369,22 +369,24 @@ export const PublicacionCard = memo(function PublicacionCard({
                 </div>
               )}
             </div>
-            ) : (
-              <div className="rounded-lg bg-[#FF8A65]/10 p-3 min-h-[84px] flex flex-col justify-center">
-                <div className="flex items-center gap-2 text-sm text-foreground/70 mb-1">
-                  <Lock className="h-4 w-4 shrink-0" />
-                  <div className="flex flex-col">
-                    <button
-                      type="button"
-                      onClick={handleLoginClick}
-                      className="text-[#FF8A65] font-medium text-left"
-                    >
-                      Iniciá sesión o regístrate
-                    </button>
-                    <span className="text-xs text-foreground/60 mt-0.5">para ver los datos de contacto</span>
-                  </div>
+          ) : (
+            <div className="rounded-lg bg-[#FF8A65]/10 p-3 min-h-[104px] flex flex-col justify-center">
+              <div className="flex items-center gap-2 text-foreground/70">
+                <Lock className="h-4 w-4 shrink-0" />
+                <div className="flex flex-col items-start">
+                  <button
+                    type="button"
+                    onClick={handleLoginClick}
+                    className="text-[#FF8A65] text-sm font-medium text-left bg-transparent border-none p-0 inline-block focus:outline-none"
+                  >
+                    Iniciá sesión o regístrate
+                  </button>
+                  <span className="text-xs text-muted-foreground">
+                    para ver los datos de contacto
+                  </span>
                 </div>
               </div>
+            </div>
           )}
         </div>
       </CardContent>

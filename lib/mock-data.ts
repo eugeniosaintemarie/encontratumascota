@@ -480,7 +480,7 @@ export const mockPublicaciones: Publicacion[] = [
             color: "Blanco polar",
             descripcion: "Gato blanco esponjoso, requiere vacunas, pero está sano. Es sordo de nacimiento.",
             edad: "8 meses",
-            imagenUrl: "https://images.unsplash.com/photo-1519052537078-e6302a4968d4?w=600&h=600&fit=crop",
+            imagenUrl: "https://loremflickr.com/600/600/white,fluffy,kitten?lock=8888",
         },
         ubicacion: "Chacarita",
         fechaPublicacion: toDate(65),
