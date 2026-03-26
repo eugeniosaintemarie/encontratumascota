@@ -104,7 +104,7 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <link rel="canonical" href={siteUrl} />
         {/* Preload logo for LCP optimization */}
-        <link rel="preload" href="/logo.png" as="image" fetchpriority="high" />
+        <link rel="preload" href="/logo.png" as="image" fetchPriority="high" />
         {/* Organization Schema */}
         <Script
           id="organization-schema"

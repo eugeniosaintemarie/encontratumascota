@@ -1,8 +1,42 @@
 "use client"
 
-import { createAuthClient } from "@neondatabase/auth/next"
+let authClientInstance: any = null
 
-export const authClient = createAuthClient()
+async function getAuthClientInstance() {
+  if (!authClientInstance) {
+    try {
+      const { createAuthClient } = await import("@neondatabase/auth/next")
+      authClientInstance = createAuthClient()
+    } catch (error) {
+      console.error("Error initializing Neon Auth client:", error)
+      throw error
+    }
+  }
+  return authClientInstance
+}
+
+export const authClient = {
+  signIn: {
+    async email(data: any) {
+      const client = await getAuthClientInstance()
+      return client.signIn.email(data)
+    },
+    async social(data: any) {
+      const client = await getAuthClientInstance()
+      return client.signIn.social(data)
+    },
+  },
+  signUp: {
+    async email(data: any) {
+      const client = await getAuthClientInstance()
+      return client.signUp.email(data)
+    },
+  },
+  async changePassword(data: any) {
+    const client = await getAuthClientInstance()
+    return client.changePassword(data)
+  },
+}
 
 /**
  * Cierra la sesion navegando al endpoint server-side /api/auth/logout.
