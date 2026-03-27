@@ -44,13 +44,13 @@ const baseConfig = {
   async headers() {
     const isDev = process.env.NODE_ENV === 'development'
     // Next.js app router needs inline bootstrap scripts to hydrate client components.
-    const googleScriptHosts = "https://www.google.com https://www.gstatic.com"
+    const googleScriptHosts = "https://www.google.com https://www.gstatic.com https://recaptcha.google.com https://recaptcha.net https://www.recaptcha.net"
     const scriptSrc = isDev
       ? `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://va.vercel-scripts.com https://vercel.live https://static.cloudflareinsights.com https://unpkg.com ${googleScriptHosts}`
       : `script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://va.vercel-scripts.com https://vercel.live https://static.cloudflareinsights.com https://unpkg.com ${googleScriptHosts}`
     const scriptSrcElem = `script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://va.vercel-scripts.com https://vercel.live https://static.cloudflareinsights.com https://unpkg.com ${googleScriptHosts}`
-    const connectSrc = "connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://va.vercel-scripts.com https://vercel.live https://www.google.com"
-    const frameSrc = `frame-src 'self' https://www.google.com https://accounts.google.com`
+    const connectSrc = "connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://va.vercel-scripts.com https://vercel.live https://www.google.com https://www.gstatic.com https://recaptcha.google.com https://recaptcha.net https://www.recaptcha.net"
+    const frameSrc = `frame-src 'self' https://www.google.com https://accounts.google.com https://recaptcha.google.com https://recaptcha.net https://www.recaptcha.net`
 
     return [
       {
