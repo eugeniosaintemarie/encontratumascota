@@ -49,7 +49,7 @@ const baseConfig = {
       ? `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://va.vercel-scripts.com https://vercel.live https://static.cloudflareinsights.com https://unpkg.com ${googleScriptHosts}`
       : `script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://va.vercel-scripts.com https://vercel.live https://static.cloudflareinsights.com https://unpkg.com ${googleScriptHosts}`
     const scriptSrcElem = `script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://va.vercel-scripts.com https://vercel.live https://static.cloudflareinsights.com https://unpkg.com ${googleScriptHosts}`
-    const connectSrc = "connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://va.vercel-scripts.com https://vercel.live"
+    const connectSrc = "connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://va.vercel-scripts.com https://vercel.live https://www.google.com"
     const frameSrc = `frame-src 'self' https://www.google.com https://accounts.google.com`
 
     return [
