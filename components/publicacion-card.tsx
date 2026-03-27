@@ -12,6 +12,7 @@ import { razasLabels, especieLabels, generoLabels } from "@/lib/labels"
 import { generateShareImage } from "@/lib/generate-share-image"
 import { toast } from "sonner"
 import { ImageViewerModal } from "@/components/image-viewer-modal"
+import { formatHeartEmojiSpacing } from "@/lib/utils"
 
 interface PublicacionCardProps {
   publicacion: Publicacion
@@ -358,7 +359,7 @@ export const PublicacionCard = memo(function PublicacionCard({
                         onClick={() => router.push(`/refugio/${publicacion.usuarioId}`)}
                         className="text-sm font-medium text-foreground hover:text-primary text-left transition-colors p-0 m-0 h-auto bg-transparent border-0 ml-0"
                       >
-                        {publicacion.contactoNombre}
+                        {formatHeartEmojiSpacing(publicacion.contactoNombre)}
                       </button>
                     ) : (
                       <p className="text-sm font-medium text-foreground m-0 p-0 ml-0">

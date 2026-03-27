@@ -8,6 +8,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { PublicacionesProvider } from '@/lib/publicaciones-context'
 import { AuthProvider } from '@/lib/auth-context'
 import { ServiceWorkerRegistration } from '@/components/sw-registration'
+import { AppSplashScreen } from '@/components/app-splash-screen'
 import './globals.css'
 
 const inter = Inter({ subsets: ["latin"] });
@@ -69,6 +70,7 @@ export const metadata: Metadata = {
   },
   other: {
     'mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-title': 'Encontra Tu Mascota',
   },
 }
 
@@ -147,6 +149,7 @@ export default function RootLayout({
         </Script>
       </head>
       <body className={`${inter.className} font-sans antialiased`}>
+        <AppSplashScreen />
         {/* Skip link for keyboard navigation */}
         <a href="#main" className="sr-only focus:not-sr-only focus:bg-primary focus:text-primary-foreground focus:p-4 focus:fixed focus:top-0 focus:left-0 focus:z-50">
           Ir al contenido principal

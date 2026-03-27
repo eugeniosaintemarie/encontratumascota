@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { usePublicaciones } from "@/lib/publicaciones-context"
 import { especieLabels, generoLabels, razasLabels } from "@/lib/labels"
-import { X, MapPin, RotateCcw, ArrowRight } from "lucide-react"
+import { X, MapPin, RotateCcw } from "lucide-react"
 
 interface SwipeExplorerModalProps {
     isOpen: boolean
@@ -244,7 +244,6 @@ export function SwipeExplorerModal({ isOpen, onClose }: SwipeExplorerModalProps)
                                                 className="inline-flex items-center gap-1 text-[#FF8A65] hover:underline"
                                             >
                                                 Ver detalle
-                                                <ArrowRight className="h-3.5 w-3.5" />
                                             </button>
                                         </div>
                                     </div>

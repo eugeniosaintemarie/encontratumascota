@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { ArrowRight, HeartHandshake, MapPin, PawPrint } from "lucide-react"
 import { mockPublicaciones } from "@/lib/mock-data"
 import { isDemoHost } from "@/lib/env"
+import { formatHeartEmojiSpacing } from "@/lib/utils"
 
 interface RefugioLandingItem {
   usuarioId: string
@@ -28,7 +29,7 @@ function getDemoRefugios(): RefugioLandingItem[] {
     if (!existing) {
       grouped.set(pub.usuarioId, {
         usuarioId: pub.usuarioId,
-        nombre: pub.contactoNombre,
+        nombre: formatHeartEmojiSpacing(pub.contactoNombre),
         ubicacion: pub.ubicacion,
         publicacionesActivas: pub.activa ? 1 : 0,
       })
@@ -70,7 +71,7 @@ async function getProdRefugios(): Promise<RefugioLandingItem[]> {
 
     return profiles.map((profile) => ({
       usuarioId: profile.authUserId,
-      nombre: profile.nombreRefugio || "Refugio",
+      nombre: formatHeartEmojiSpacing(profile.nombreRefugio || "Refugio"),
       ubicacion: ubicaciones.get(profile.authUserId) || "Argentina",
       publicacionesActivas: counts.get(profile.authUserId) || 0,
     }))

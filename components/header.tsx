@@ -86,7 +86,7 @@ export const Header = memo(function Header({ isReadOnly = false }: HeaderProps) 
             asChild
             variant="ghost"
             size="sm"
-            className="dark:text-[#d66528] dark:hover:text-[#d66528]"
+            className="text-[#d66528] hover:text-[#d66528] dark:text-[#d66528] dark:hover:text-[#d66528]"
           >
             <Link href="/refugios">
               <HeartHandshake className="mr-1.5 h-4 w-4" />
@@ -148,7 +148,7 @@ export const Header = memo(function Header({ isReadOnly = false }: HeaderProps) 
               )}
               <DropdownMenuItem
                 asChild
-                className="dark:text-[#d66528] dark:focus:text-[#d66528]"
+                className="text-[#d66528] focus:text-[#d66528] dark:text-[#d66528] dark:focus:text-[#d66528]"
               >
                 <Link
                   href="/refugios"
