@@ -50,6 +50,7 @@ const baseConfig = {
       : `script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://va.vercel-scripts.com https://vercel.live https://static.cloudflareinsights.com https://unpkg.com ${googleScriptHosts}`
     const scriptSrcElem = `script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://va.vercel-scripts.com https://vercel.live https://static.cloudflareinsights.com https://unpkg.com ${googleScriptHosts}`
     const connectSrc = "connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://va.vercel-scripts.com https://vercel.live"
+    const frameSrc = `frame-src 'self' https://www.google.com https://accounts.google.com`
 
     return [
       {
@@ -57,7 +58,7 @@ const baseConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: `default-src 'self'; base-uri 'self'; frame-ancestors 'self'; object-src 'none'; img-src 'self' https: data: blob:; media-src *; ${scriptSrc}; ${scriptSrcElem}; ${connectSrc}; style-src 'self' 'unsafe-inline'; font-src 'self' data: https:;`
+            value: `default-src 'self'; base-uri 'self'; frame-ancestors 'self'; object-src 'none'; img-src 'self' https: data: blob:; media-src *; ${scriptSrc}; ${scriptSrcElem}; ${connectSrc}; ${frameSrc}; style-src 'self' 'unsafe-inline'; font-src 'self' data: https:;`
           },
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
