@@ -15,8 +15,7 @@ export async function POST(request: Request) {
     // Verificar reCAPTCHA con Google
     const secretKey = process.env.RECAPTCHA_SECRET_KEY
     if (!secretKey) {
-      console.error("RECAPTCHA_SECRET_KEY no configurada")
-      // En desarrollo sin key, permitir el registro
+      console.warn("RECAPTCHA_SECRET_KEY no configurada; saltando verificación para desarrollo")
       return NextResponse.json({ verified: true })
     }
 
@@ -26,6 +25,14 @@ export async function POST(request: Request) {
       body: `secret=${secretKey}&response=${recaptchaToken}`,
     })
     const verifyData = await verifyRes.json()
+
+    if (process.env.NODE_ENV !== "production") {
+      console.debug("[API /auth/register] reCAPTCHA verification response", {
+        success: verifyData.success,
+        score: verifyData.score,
+        hostname: verifyData.hostname,
+      })
+    }
 
     if (!verifyData.success || (verifyData.score != null && verifyData.score < 0.5)) {
       return NextResponse.json({ error: "Verificacion CAPTCHA fallida. Intenta de nuevo" }, { status: 403 })

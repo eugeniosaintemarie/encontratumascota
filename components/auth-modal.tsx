@@ -58,8 +58,13 @@ export function AuthModal({
         provider: "google",
         callbackURL: window.location.pathname,
       })
-    } catch {
-      setError("Error al iniciar sesión con Google")
+    } catch (error) {
+      console.error("Google sign-in failed", error)
+      setError(
+        error instanceof Error
+          ? error.message || "Error al iniciar sesión con Google"
+          : "Error al iniciar sesión con Google"
+      )
       setIsLoading(false)
     }
   }

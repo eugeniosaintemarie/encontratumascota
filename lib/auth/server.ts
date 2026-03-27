@@ -4,8 +4,21 @@ import { isDemoRequest } from "@/lib/env"
 // Lazy singleton para evitar errores en build-time cuando
 // las env vars no estan disponibles.
 let _auth: ReturnType<typeof createNeonAuth> | null = null
+let envStatusLogged = false
+
+function logNeonAuthEnvStatus() {
+  if (envStatusLogged) return
+  envStatusLogged = true
+  const missingVars = []
+  if (!process.env.NEON_AUTH_BASE_URL) missingVars.push("NEON_AUTH_BASE_URL")
+  if (!process.env.NEON_AUTH_COOKIE_SECRET) missingVars.push("NEON_AUTH_COOKIE_SECRET")
+  console.debug(
+    `[getAuth] Neon Auth env status - missing: ${missingVars.length ? missingVars.join(", ") : "none"}`
+  )
+}
 
 export function getAuth() {
+  logNeonAuthEnvStatus()
   if (!_auth) {
     _auth = createNeonAuth({
       baseUrl: process.env.NEON_AUTH_BASE_URL!,
@@ -47,7 +60,8 @@ export async function getServerSession(request?: Request) {
     const { data } = await auth.getSession()
     if (!data?.user) return null
     return data
-  } catch {
+  } catch (error) {
+    console.error("[getServerSession] Neon Auth request failed", error)
     return null
   }
 }

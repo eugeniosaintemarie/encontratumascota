@@ -54,6 +54,7 @@ export async function fetchServerSession() {
     const data = await res.json()
     return data?.user ?? null
   } catch (e) {
+    console.error("[fetchServerSession] request failed", e)
     return null
   }
 }
@@ -72,12 +73,19 @@ export async function fetchServerSessionWithRetry(
   const multiplier = options.multiplier ?? 1.5
 
   for (let attempt = 0; attempt < retries; attempt += 1) {
+    if (process.env.NODE_ENV !== "production") {
+      console.debug(`[fetchServerSessionWithRetry] attempt ${attempt + 1}`)
+    }
     const session = await fetchServerSession()
     if (session) {
       if (process.env.NODE_ENV !== "production" && attempt > 0) {
         console.debug(`[fetchServerSessionWithRetry] secured session on attempt ${attempt + 1}`)
       }
       return session
+    }
+
+    if (process.env.NODE_ENV !== "production") {
+      console.debug(`[fetchServerSessionWithRetry] attempt ${attempt + 1} did not return a session`)
     }
 
     if (attempt < retries - 1) {

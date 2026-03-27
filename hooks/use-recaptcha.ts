@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react"
 
 const RECAPTCHA_SCRIPT_ID = "recaptcha-v3-script"
 
+const siteKeyMissingWarned = new Set<string>()
+
 /**
  * Hook para Google reCAPTCHA v3.
  * Carga el script bajo demanda y expone execute(action).
@@ -14,7 +16,13 @@ export function useRecaptcha() {
   const abortControllerRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
-    if (!siteKey) return
+    if (!siteKey) {
+      if (!siteKeyMissingWarned.has("recaptcha")) {
+        console.warn("[useRecaptcha] NEXT_PUBLIC_RECAPTCHA_SITE_KEY is empty")
+        siteKeyMissingWarned.add("recaptcha")
+      }
+      return
+    }
     if (document.getElementById(RECAPTCHA_SCRIPT_ID)) {
       setReady(true)
       return
