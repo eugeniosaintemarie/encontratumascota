@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, memo } from "react"
+import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -30,6 +31,7 @@ export const PublicacionCard = memo(function PublicacionCard({
   isAuthenticated = false,
   onRequireAuth,
 }: PublicacionCardProps) {
+  const router = useRouter()
   const { mascota } = publicacion
 
   const [isSharing, setIsSharing] = useState(false)
@@ -232,7 +234,7 @@ export const PublicacionCard = memo(function PublicacionCard({
         </div>
       </div>
 
-      <CardContent className="flex flex-1 flex-col px-[10px] py-[10px]">
+      <CardContent className="flex flex-1 flex-col px-3 py-3">
         <p className="text-sm text-foreground/80 line-clamp-3 mb-[10px] min-h-[60px]">
           {descripcionFormateada}
         </p>
@@ -243,7 +245,7 @@ export const PublicacionCard = memo(function PublicacionCard({
             const canSeeContact = isAuthenticated || (publicacion.mostrarContactoPublico && !isCerrada)
             return canSeeContact
           })() ? (
-            <div className="rounded-lg bg-[#FF8A65]/10 min-h-[84px] relative flex flex-col">
+            <div className="rounded-lg bg-[#FF8A65]/10 px-3 py-3 min-h-[84px] relative flex flex-col">
               {/* Icono flip para ver historial (solo si hay historial) */}
               {tieneHistorial && (
                 <button
@@ -280,23 +282,23 @@ export const PublicacionCard = memo(function PublicacionCard({
                         minHeight: "inherit",
                       } as any}
                     >
-                      <div className="space-y-0 leading-tight rounded-lg bg-transparent p-3 overflow-hidden h-full">
+                      <div className="space-y-0 leading-tight rounded-lg bg-transparent p-0 overflow-hidden h-full">
                         <div className="flex items-center gap-1.5 mb-1">
                           <UserPlus className="h-3.5 w-3.5 text-primary" />
                           <span className="text-xs font-medium text-primary">Cuidador actual</span>
                         </div>
-                        <p className="text-sm font-medium text-foreground">
+                        <p className="text-sm font-medium text-foreground m-0 p-0 ml-0">
                           {publicacion.transitoContactoNombre}
                         </p>
                         <a
                           href={`tel:${publicacion.transitoContactoTelefono?.replace(/\s/g, '')}`}
-                          className="block text-sm text-muted-foreground hover:text-primary"
+                          className="block text-sm text-muted-foreground hover:text-primary m-0 p-0 ml-0"
                         >
                           {publicacion.transitoContactoTelefono}
                         </a>
                         <a
                           href={`mailto:${publicacion.transitoContactoEmail}`}
-                          className="block text-sm text-muted-foreground hover:text-primary truncate"
+                          className="block text-sm text-muted-foreground hover:text-primary truncate m-0 p-0 ml-0"
                           title={publicacion.transitoContactoEmail ?? ""}
                         >
                           {publicacion.transitoContactoEmail}
@@ -317,23 +319,23 @@ export const PublicacionCard = memo(function PublicacionCard({
                           right: 0,
                         } as any}
                       >
-                        <div className="space-y-0 leading-tight rounded-lg bg-transparent p-3 overflow-hidden h-full">
+                        <div className="space-y-0 leading-tight rounded-lg bg-transparent p-0 overflow-hidden h-full">
                           <div className="flex items-center gap-1.5 mb-1">
                             <History className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
                             <span className="text-xs font-medium text-amber-600 dark:text-amber-400">Cuidador anterior</span>
                           </div>
-                          <p className="text-sm font-medium text-foreground">
+                          <p className="text-sm font-medium text-foreground m-0 p-0 ml-0">
                             {contactoAnterior.nombre}
                           </p>
                           <a
                             href={`tel:${contactoAnterior.telefono.replace(/\s/g, '')}`}
-                            className="block text-sm text-muted-foreground hover:text-primary"
+                            className="block text-sm text-muted-foreground hover:text-primary m-0 p-0 ml-0"
                           >
                             {contactoAnterior.telefono}
                           </a>
                           <a
                             href={`mailto:${contactoAnterior.email}`}
-                            className="block text-sm text-muted-foreground hover:text-primary truncate"
+                            className="block text-sm text-muted-foreground hover:text-primary truncate m-0 p-0 ml-0"
                             title={contactoAnterior.email}
                           >
                             {contactoAnterior.email}
@@ -345,23 +347,34 @@ export const PublicacionCard = memo(function PublicacionCard({
                 </div>
               ) : (
                 /* Contacto normal (sin tránsito) */
-                <div className="space-y-0 leading-tight rounded-lg bg-transparent p-3 overflow-hidden min-h-[84px] flex flex-col flex-1">
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <User className="h-3.5 w-3.5 text-muted-foreground" />
-                    <span className="text-xs font-medium text-muted-foreground">Contacto</span>
+                <div className="space-y-0 leading-tight rounded-lg bg-transparent p-0 overflow-hidden min-h-[84px] flex flex-col flex-1">
+                  <div className="mb-1">
+                    <div className="flex items-center gap-1.5">
+                      <User className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="text-xs font-medium text-muted-foreground">Contacto</span>
+                    </div>
+                    {publicacion.esRefugio ? (
+                      <button
+                        onClick={() => router.push(`/refugio/${publicacion.usuarioId}`)}
+                        className="text-sm font-medium text-foreground hover:text-primary text-left transition-colors p-0 m-0 h-auto bg-transparent border-0 ml-0"
+                      >
+                        {publicacion.contactoNombre}
+                      </button>
+                    ) : (
+                      <p className="text-sm font-medium text-foreground m-0 p-0 ml-0">
+                        {publicacion.contactoNombre}
+                      </p>
+                    )}
                   </div>
-                  <p className="text-sm font-medium text-foreground">
-                    {publicacion.contactoNombre}
-                  </p>
                   <a
                     href={`tel:${publicacion.contactoTelefono.replace(/\s/g, '')}`}
-                    className="block text-sm text-muted-foreground hover:text-primary"
+                    className="block text-sm text-muted-foreground hover:text-primary m-0 p-0 ml-0"
                   >
                     {publicacion.contactoTelefono}
                   </a>
                   <a
                     href={`mailto:${publicacion.contactoEmail}`}
-                    className="block text-sm text-muted-foreground hover:text-primary truncate"
+                    className="block text-sm text-muted-foreground hover:text-primary truncate m-0 p-0 ml-0"
                     title={publicacion.contactoEmail}
                   >
                     {publicacion.contactoEmail}
@@ -369,8 +382,8 @@ export const PublicacionCard = memo(function PublicacionCard({
                 </div>
               )}
             </div>
-          ) : (
-            <div className="rounded-lg bg-[#FF8A65]/10 p-3 min-h-[104px] flex flex-col justify-center">
+            ) : (
+            <div className="rounded-lg bg-[#FF8A65]/10 px-3 py-3 min-h-[104px] flex flex-col justify-center">
               <div className="flex items-center gap-2 text-foreground/70">
                 <Lock className="h-4 w-4 shrink-0" />
                 <div className="flex flex-col items-start">

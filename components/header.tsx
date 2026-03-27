@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Plus, LogIn, Menu, Moon, Sun, User, LogOut, ArrowLeft, ExternalLink, Eye } from "lucide-react"
+import { Plus, LogIn, Menu, Moon, Sun, User, LogOut, ExternalLink, Eye, HeartHandshake } from "lucide-react"
 import Image from "next/image"
 import { useTheme } from "next-themes"
 import { useAuth } from "@/lib/auth-context"
@@ -70,6 +70,17 @@ export const Header = memo(function Header({ isReadOnly = false }: HeaderProps) 
 
         {/* Desktop navigation */}
         <nav className="hidden sm:flex items-center gap-2">
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="dark:text-[#d66528] dark:hover:text-[#d66528]"
+          >
+            <Link href="/refugios">
+              <HeartHandshake className="mr-1.5 h-4 w-4" />
+              Refugios
+            </Link>
+          </Button>
           {isReadOnly ? (
             <Button variant="outline" size="sm" disabled className="opacity-60">
               <Eye className="mr-1.5 h-4 w-4" />
@@ -105,6 +116,20 @@ export const Header = memo(function Header({ isReadOnly = false }: HeaderProps) 
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem
+                asChild
+                className="dark:text-[#d66528] dark:focus:text-[#d66528]"
+              >
+                <Link
+                  href="/refugios"
+                  onClick={() => {
+                    setMenuOpen(false)
+                  }}
+                >
+                  <HeartHandshake className="mr-2 h-4 w-4" />
+                  Refugios
+                </Link>
+              </DropdownMenuItem>
               {isReadOnly ? (
                 <DropdownMenuItem disabled className="opacity-60">
                   <Eye className="mr-2 h-4 w-4" />

@@ -53,6 +53,7 @@ export interface Publicacion {
   activa: boolean
   esPrueba?: boolean
   transitoUrgente?: boolean
+  esRefugio?: boolean
   // Contacto de la persona que tiene la mascota en transito
   transitoContactoNombre?: string | null
   transitoContactoTelefono?: string | null
@@ -72,4 +73,6 @@ export interface Usuario {
   email: string
   fechaRegistro: Date
   isReadOnly?: boolean // true para usuarios demo (modo solo lectura)
+  esRefugio?: boolean
+  nombreRefugio?: string | null
 }

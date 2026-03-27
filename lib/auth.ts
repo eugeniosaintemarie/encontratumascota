@@ -7,6 +7,8 @@ export function mapNeonUser(user: {
   email: string
   createdAt: Date | string
   isReadOnly?: boolean
+  esRefugio?: boolean
+  nombreRefugio?: string | null
 }): Usuario {
   return {
     id: user.id,
@@ -14,5 +16,7 @@ export function mapNeonUser(user: {
     email: user.email,
     fechaRegistro: new Date(user.createdAt),
     isReadOnly: user.isReadOnly,
+    esRefugio: user.esRefugio,
+    nombreRefugio: user.nombreRefugio,
   }
 }

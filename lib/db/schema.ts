@@ -13,6 +13,15 @@ export const usuarios = pgTable("usuarios", {
   fechaRegistro: timestamp("fecha_registro", { withTimezone: true }).defaultNow().notNull(),
 })
 
+// Perfil extendido por usuario de auth (produccion)
+// Guardamos flags de negocio desacoplados de Neon Auth.
+export const usuariosPerfil = pgTable("usuarios_perfil", {
+  authUserId: text("auth_user_id").primaryKey(),
+  esRefugio: boolean("es_refugio").default(false).notNull(),
+  nombreRefugio: text("nombre_refugio"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+})
+
 // ─── Publicaciones ──────────────────────────────────────────
 export const publicaciones = pgTable("publicaciones", {
   id: text("id").$defaultFn(shortId).primaryKey(),

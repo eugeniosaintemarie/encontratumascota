@@ -7,19 +7,29 @@ import { FiltrosPublicaciones } from "@/components/filtros-publicaciones"
 import { PawPrint, ChevronLeft, ChevronRight } from "lucide-react"
 import { usePublicaciones } from "@/lib/publicaciones-context"
 import { Button } from "@/components/ui/button"
-import type { Especie, Sexo, TipoPublicacion } from "@/lib/types"
+import type { Especie, Sexo, TipoPublicacion, Publicacion } from "@/lib/types"
 import { useItemsPerPage } from "@/hooks/use-items-per-page"
 
 interface ListadoPublicacionesProps {
   isAuthenticated?: boolean
   onRequireAuth?: (publicacionId: string) => void
+  publicacionesBase?: Publicacion[]
+  fixedTipoPublicacion?: TipoPublicacion
+  hideTipoSelector?: boolean
+  emptyTitle?: string
+  emptyDescription?: string
 }
 
 export function ListadoPublicaciones({
   isAuthenticated = false,
   onRequireAuth,
+  publicacionesBase,
+  fixedTipoPublicacion,
+  hideTipoSelector = false,
+  emptyTitle = "Todavía no hay mascotas perdidas",
+  emptyDescription = "Las publicaciones de mascotas perdidas aparecerán aquí",
 }: ListadoPublicacionesProps) {
-  const [tipoPublicacion, setTipoPublicacion] = useState<TipoPublicacion | undefined>(undefined)
+  const [tipoPublicacion, setTipoPublicacion] = useState<TipoPublicacion | undefined>(fixedTipoPublicacion)
   const [especie, setEspecie] = useState<Especie | "todos">("todos")
   const [raza, setRaza] = useState<string | "todos">("todos")
   const [sexo, setSexo] = useState<Sexo | "todos">("todos")
@@ -30,12 +40,14 @@ export function ListadoPublicaciones({
   const { itemsPerPage, columns } = useItemsPerPage()
 
   const { publicaciones } = usePublicaciones()
+  const sourcePublicaciones = publicacionesBase ?? publicaciones
+  const tipoActivo = fixedTipoPublicacion ?? tipoPublicacion
 
   const publicacionesFiltradas = useMemo(() => {
-    return publicaciones.filter((pub) => {
+    return sourcePublicaciones.filter((pub) => {
       // Excluir publicaciones "buscadas" del home (tienen su propia página)
       if (pub.tipoPublicacion === "buscada") return false
-      if (tipoPublicacion !== undefined && pub.tipoPublicacion !== tipoPublicacion) return false
+      if (tipoActivo !== undefined && pub.tipoPublicacion !== tipoActivo) return false
       if (especie !== "todos" && pub.mascota.especie !== especie) return false
       if (raza !== "todos" && pub.mascota.raza !== raza) return false
       if (sexo !== "todos" && pub.mascota.sexo !== sexo) return false
@@ -45,7 +57,7 @@ export function ListadoPublicaciones({
       )
         return false
       // Filtrar por fechaDesde sólo para publicaciones de pérdida
-      if (tipoPublicacion !== 'adopcion' && fechaDesde) {
+      if (tipoActivo !== 'adopcion' && fechaDesde) {
         try {
           const since = new Date(fechaDesde)
           if (isNaN(since.getTime())) return false
@@ -53,10 +65,10 @@ export function ListadoPublicaciones({
         } catch { /* ignore parse errors */ }
       }
       // Filtrar por tránsito urgente
-      if (tipoPublicacion === "perdida" && transitoUrgente && !pub.transitoUrgente) return false
+      if (tipoActivo === "perdida" && transitoUrgente && !pub.transitoUrgente) return false
       return pub.activa
     })
-  }, [tipoPublicacion, especie, raza, sexo, ubicacion, transitoUrgente, publicaciones])
+  }, [tipoActivo, especie, raza, sexo, ubicacion, transitoUrgente, sourcePublicaciones, fechaDesde])
 
   const totalPages = Math.ceil(publicacionesFiltradas.length / itemsPerPage)
   const paginatedPublicaciones = useMemo(() => {
@@ -82,6 +94,13 @@ export function ListadoPublicaciones({
     setCurrentPage(1)
   }, [itemsPerPage])
 
+  useEffect(() => {
+    if (fixedTipoPublicacion) {
+      setTipoPublicacion(fixedTipoPublicacion)
+      setCurrentPage(1)
+    }
+  }, [fixedTipoPublicacion])
+
   const handleSearch = () => {
     // La busqueda ya es reactiva, este handler es para el boton de lupa
   }
@@ -89,15 +108,17 @@ export function ListadoPublicaciones({
   return (
     <div className="space-y-4">
       <FiltrosPublicaciones
-        tipoPublicacion={tipoPublicacion}
+        tipoPublicacion={tipoActivo}
         especie={especie}
         raza={raza}
         sexo={sexo}
         ubicacion={ubicacion}
         fechaDesde={fechaDesde}
         transitoUrgente={transitoUrgente}
-        wideUbicacion={tipoPublicacion === "adopcion"}
+        hideTipoSelector={hideTipoSelector}
+        wideUbicacion={tipoActivo === "adopcion"}
         onTipoPublicacionChange={(v) => {
+          if (fixedTipoPublicacion) return
           setTipoPublicacion(v)
           setCurrentPage(1)
         }}
@@ -193,10 +214,10 @@ export function ListadoPublicaciones({
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 py-16">
           <PawPrint className="mb-4 h-12 w-12 text-muted-foreground/50" />
           <h3 className="text-lg font-medium text-foreground">
-            Todavía no hay mascotas perdidas
+            {emptyTitle}
           </h3>
           <p className="mt-1 text-sm text-muted-foreground text-center">
-            Las publicaciones de mascotas perdidas aparecerán aquí
+            {emptyDescription}
           </p>
         </div>
       )}

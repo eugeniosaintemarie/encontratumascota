@@ -5,8 +5,32 @@ import type { Especie, Sexo } from "@/lib/types"
 import { mockPublicaciones } from "@/lib/mock-data"
 import { isDemoHost } from "@/lib/env"
 import type { Publicacion } from "@/lib/types"
+import type { publicaciones as publicacionesTable } from "@/lib/db/schema"
 
 const isDemoEnv = isDemoHost(undefined)
+
+async function enrichPublicacionesWithRefugioProfile(publicaciones: Publicacion[]): Promise<Publicacion[]> {
+  if (publicaciones.length === 0) return publicaciones
+
+  const { getRefugioProfileMapByAuthUserIds } = await import("@/lib/actions/refugios")
+  const profileMap = await getRefugioProfileMapByAuthUserIds(publicaciones.map((p) => p.usuarioId))
+
+  return publicaciones.map((pub) => {
+    const profile = profileMap.get(pub.usuarioId)
+    if (!profile) return { ...pub, esRefugio: false }
+
+    return {
+      ...pub,
+      esRefugio: profile.esRefugio,
+      contactoNombre: profile.esRefugio && profile.nombreRefugio ? profile.nombreRefugio : pub.contactoNombre,
+    }
+  })
+}
+
+async function enrichPublicacionWithRefugioProfile(publicacion: Publicacion): Promise<Publicacion> {
+  const [result] = await enrichPublicacionesWithRefugioProfile([publicacion])
+  return result
+}
 
 // ─── Tipos para las queries ─────────────────────────────────
 interface FiltrosPublicaciones {
@@ -16,7 +40,10 @@ interface FiltrosPublicaciones {
   sexo?: Sexo | "todos"
   ubicacion?: string
   transitoUrgente?: boolean
+  soloEnTransito?: boolean
   soloActivas?: boolean
+  usuarioId?: string
+  soloRefugios?: boolean
 }
 
 // ─── SELECT: Obtener publicaciones ──────────────────────────
@@ -64,6 +91,10 @@ export async function getPublicaciones(filtros?: FiltrosPublicaciones, opts?: { 
       conditions.push(eq(publicaciones.transitoUrgente, true))
     }
 
+    if (filtros?.usuarioId) {
+      conditions.push(eq(publicaciones.usuarioId, filtros.usuarioId))
+    }
+
     rows = await db
       .select()
       .from(publicaciones)
@@ -73,6 +104,14 @@ export async function getPublicaciones(filtros?: FiltrosPublicaciones, opts?: { 
 
   // Transformar a las interfaces del frontend
   let result = rows.map(mapRowToPublicacion)
+
+  // En produccion, reflejar el flag esRefugio desde perfil de usuario
+  if (!isDemo) {
+    result = await enrichPublicacionesWithRefugioProfile(result)
+    if (filtros?.soloRefugios) {
+      result = result.filter((pub) => pub.esRefugio === true)
+    }
+  }
 
   // Inyectar mocks estaticos si estamos en demo
   if (isDemo) {
@@ -89,8 +128,11 @@ export async function getPublicaciones(filtros?: FiltrosPublicaciones, opts?: { 
       return true
     })
 
-    // Force mock publicaciones to belong to demo-admin so demo shows admin-owned posts
-    const mockAdjusted = mockFiltradas.map((p) => ({ ...p, usuarioId: "demo-admin" }))
+    // Keep original usuarioId for refugios so profile routes (/refugio/[usuarioId]) work in demo.
+    // Non-refugio mocks remain owned by demo-admin for current demo behavior.
+    const mockAdjusted = mockFiltradas.map((p) =>
+      p.esRefugio ? p : { ...p, usuarioId: "demo-admin" }
+    )
     // Agregamos las de prueba primero
     result = [...mockAdjusted, ...result]
   }
@@ -105,7 +147,7 @@ export async function getPublicacionById(id: string, opts?: { forceDemo?: boolea
   // Buscar primero en los mocks si es demo
   if (isDemo) {
     const mockPub = mockPublicaciones.find((p) => p.id === id)
-    if (mockPub) return { ...mockPub, usuarioId: "demo-admin" }
+    if (mockPub) return mockPub.esRefugio ? mockPub : { ...mockPub, usuarioId: "demo-admin" }
   }
 
   // Si no es demo, consultar la DB (lazy-import)
@@ -123,7 +165,8 @@ export async function getPublicacionById(id: string, opts?: { forceDemo?: boolea
     .limit(1)
 
   if (rows.length === 0) return null
-  return mapRowToPublicacion(rows[0])
+  const mapped = mapRowToPublicacion(rows[0])
+  return enrichPublicacionWithRefugioProfile(mapped)
 }
 
 // ─── INSERT: Crear publicacion ──────────────────────────────
@@ -268,7 +311,7 @@ export async function contarMascotasReunidas() {
 }
 
 // ─── Helper: mapear row de DB a interface del frontend ──────
-function mapRowToPublicacion(row: typeof publicaciones.$inferSelect): Publicacion {
+function mapRowToPublicacion(row: typeof publicacionesTable.$inferSelect): Publicacion {
   return {
     id: row.id,
     tipoPublicacion: row.tipoPublicacion as "perdida" | "adopcion",
