@@ -11,10 +11,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Plus, LogIn, Menu, Moon, Sun, User, LogOut, ExternalLink, Eye, HeartHandshake } from "lucide-react"
+import { Plus, LogIn, Menu, Moon, Sun, User, LogOut, ExternalLink, Eye, HeartHandshake, SquareStack } from "lucide-react"
 import Image from "next/image"
 import { useTheme } from "next-themes"
 import { useAuth } from "@/lib/auth-context"
+import { SwipeExplorerModal } from "@/components/swipe-explorer-modal"
 
 interface HeaderProps {
   isReadOnly?: boolean
@@ -29,6 +30,7 @@ export const Header = memo(function Header({ isReadOnly = false }: HeaderProps) 
     logout,
   } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [isSwipeOpen, setIsSwipeOpen] = useState(false)
   const { setTheme, resolvedTheme } = useTheme()
   const isDark = resolvedTheme === "dark"
   const [isDemoEnv, setIsDemoEnv] = useState(false)
@@ -58,6 +60,16 @@ export const Header = memo(function Header({ isReadOnly = false }: HeaderProps) 
               Encontra Tu Mascota
             </span>
           </Link>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 rounded-full px-2.5 text-[#d66528] hover:text-[#d66528]"
+            onClick={() => setIsSwipeOpen(true)}
+            aria-label="Abrir vista interactiva de publicaciones"
+          >
+            Cartas
+            <SquareStack className="h-4 w-4" />
+          </Button>
           {!isDemoEnv && (
             <a href="https://demo.encontratumascota.ar/" target="_blank" rel="noopener noreferrer">
               <Button variant="ghost" size="sm">
@@ -196,6 +208,8 @@ export const Header = memo(function Header({ isReadOnly = false }: HeaderProps) 
           </DropdownMenu>
         </div>
       </div>
+
+      <SwipeExplorerModal isOpen={isSwipeOpen} onClose={() => setIsSwipeOpen(false)} />
     </header>
   )
 })
