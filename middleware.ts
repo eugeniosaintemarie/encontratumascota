@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from "next/server"
 import { getAuth } from "@/lib/auth/server"
 import { isDemoRequest } from "@/lib/env"
 
-const neonMiddleware = getAuth().middleware()
-
 export default async function middleware(request: NextRequest) {
   if (isDemoRequest(request)) {
     return NextResponse.next()
@@ -14,6 +12,7 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  const neonMiddleware = getAuth().middleware()
   return neonMiddleware(request)
 }
 
