@@ -33,8 +33,13 @@ export async function GET(request: Request) {
       return NextResponse.json({ user: session.user })
     }
 
-    const { getRefugioProfileByAuthUserId } = await import("@/lib/actions/refugios")
-    const profile = await getRefugioProfileByAuthUserId(authUserId)
+    let profile = null
+    try {
+      const { getRefugioProfileByAuthUserId } = await import("@/lib/actions/refugios")
+      profile = await getRefugioProfileByAuthUserId(authUserId)
+    } catch (error) {
+      console.error("[api/auth/me] failed to fetch refugio profile", error)
+    }
 
     return NextResponse.json({
       user: {

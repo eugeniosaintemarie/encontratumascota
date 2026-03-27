@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     const user = {
       id: "demo-user",
       name: "Usuario Demo",
-      email: "demo@ejemplo.com",
+      email: "demo@encontratumascota.ar",
       createdAt: new Date().toISOString(),
       isReadOnly: true, // Flag para indicar modo solo lectura
     }
