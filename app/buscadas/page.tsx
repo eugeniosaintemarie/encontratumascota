@@ -173,7 +173,7 @@ export default function BuscadosPage() {
               <div className="rounded-full bg-muted p-6 mb-4">
                 <PawPrint className="h-12 w-12 text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">
+              <h3 className="text-lg font-semibold text-foreground mb-2 text-center">
                 Todavía no hay mascotas que estén siendo buscadas por sus familias
               </h3>
               <p className="text-muted-foreground max-w-md">

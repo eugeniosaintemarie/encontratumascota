@@ -120,7 +120,7 @@ export default function ReunidasPage() {
           ) : (
             <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 py-16">
               <PawPrint className="mb-4 h-12 w-12 text-muted-foreground/50" />
-              <h3 className="text-lg font-medium text-foreground">
+              <h3 className="text-lg font-medium text-foreground" text-center>
                 Todavía no hay mascotas que hayan sido reunidas con sus familias
               </h3>
               <p className="mt-1 text-sm text-muted-foreground">

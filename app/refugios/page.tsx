@@ -112,11 +112,6 @@ export default async function RefugiosPage() {
               <h2 className="text-lg font-semibold text-foreground">
                 {isDemo ? "Todavía no hay refugios publicados" : "No hay refugios para mostrar actualmente"}
               </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {isDemo
-                  ? "Cuando haya usuarios marcados como refugio, aparecerán acá."
-                  : "Volvé pronto para ver nuevos perfiles de refugios."}
-              </p>
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
