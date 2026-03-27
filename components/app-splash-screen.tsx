@@ -52,7 +52,7 @@ export function AppSplashScreen() {
         </div>
         <div>
           <p className="text-2xl font-semibold tracking-tight text-[#d66528]">Encontra Tu Mascota</p>
-          <p className="mt-1 text-sm text-muted-foreground">Conectando mascotas con sus familias</p>
+          <p className="mt-1 text-sm text-muted-foreground">Plataforma colaborativa para reunir mascotas perdidas, encontradas y en adopción con sus familias</p>
         </div>
       </div>
     </div>

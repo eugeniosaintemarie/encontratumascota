@@ -26,7 +26,7 @@ const siteUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: 'Encontra Tu Mascota',
-  description: 'Plataforma colaborativa para reunir mascotas perdidas y encontradas. Publica, busca y ayuda a reunir perros, gatos y otras mascotas con sus familias.',
+  description: 'Plataforma colaborativa para reunir mascotas perdidas, encontradas y en adopción con sus familias',
   keywords: ['mascotas perdidas', 'perros encontrados', 'gatos perdidos', 'reunir mascotas', 'mascotas', 'Argentina'],
   generator: 'Next.js',
   manifest: '/manifest.json',
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     url: siteUrl,
     siteName: 'Encontra Tu Mascota',
     title: 'Encontra Tu Mascota',
-    description: 'Plataforma colaborativa para reunir mascotas perdidas con sus familias en Argentina',
+    description: 'Plataforma colaborativa para reunir mascotas perdidas, encontradas y en adopción con sus familias',
     images: [
       {
         url: `${siteUrl}/logo.png`,
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Encontra Tu Mascota',
-    description: 'Plataforma colaborativa para reunir mascotas perdidas con sus familias',
+    description: 'Plataforma colaborativa para reunir mascotas perdidas, encontradas y en adopción con sus familias',
     images: [`${siteUrl}/logo.png`],
   },
   appleWebApp: {
@@ -125,7 +125,7 @@ export default function RootLayout({
               'name': 'Encontra Tu Mascota',
               'url': siteUrl,
               'logo': `${siteUrl}/logo.png`,
-              'description': 'Plataforma colaborativa para reunir mascotas perdidas y encontradas con sus familias',
+              'description': 'Plataforma colaborativa para reunir mascotas perdidas, encontradas y en adopción con sus familias',
               'sameAs': [
                 'https://www.facebook.com/encontratumascota',
                 'https://twitter.com/encontratumascota',

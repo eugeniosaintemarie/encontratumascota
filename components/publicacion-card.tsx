@@ -94,7 +94,7 @@ export const PublicacionCard = memo(function PublicacionCard({
         }
 
         toast.success("Enlace copiado al portapapeles", {
-          description: "Pega el link en la publicacion para que vean los detalles.",
+          description: "Podés pegarlo donde quieras",
         })
         setIsSharing(false)
         return
@@ -120,7 +120,7 @@ export const PublicacionCard = memo(function PublicacionCard({
       if ((err as Error).name === "AbortError") {
         // Igualmente el link se copió
         toast.info("Enlace copiado al portapapeles", {
-          description: "Podés pegarlo donde quieras.",
+          description: "Podés pegarlo donde quieras",
         })
         setIsSharing(false)
         return
