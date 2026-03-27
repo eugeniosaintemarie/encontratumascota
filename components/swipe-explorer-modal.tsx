@@ -225,8 +225,12 @@ export function SwipeExplorerModal({ isOpen, onClose }: SwipeExplorerModalProps)
                                     </div>
 
                                     <div className="flex h-[28%] flex-col justify-between p-4 text-card-foreground">
+                                        <p className="line-clamp-3 text-sm text-muted-foreground">
+                                            {current?.mascota.descripcion}
+                                        </p>
+
                                         <div className="mt-3 flex items-center justify-between gap-2 text-xs">
-                                            <p className="text-xs font-medium text-muted-foreground">{rightLabel}</p>
+                                            <p className="text-xs font-medium text-muted-foreground italic">{rightLabel}</p>
                                             <button
                                                 type="button"
                                                 onPointerDown={(event) => event.stopPropagation()}
@@ -239,12 +243,9 @@ export function SwipeExplorerModal({ isOpen, onClose }: SwipeExplorerModalProps)
                                                 }}
                                                 className="inline-flex items-center gap-1 text-[#FF8A65] hover:underline"
                                             >
-                                                Ver detalle
+                                                Contacto
                                             </button>
                                         </div>
-                                        <p className="line-clamp-3 text-sm text-muted-foreground italic">
-                                            {current?.mascota.descripcion}
-                                        </p>
                                     </div>
                                 </article>
                             </div>
