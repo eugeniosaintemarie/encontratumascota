@@ -5,12 +5,16 @@ import { useState, useEffect, useCallback } from "react"
 export interface UseDemoSessionReturn {
   /** Demo user object if demo session is active */
   demoUser: any | null
+  /** Active server session (non-demo) */
+  sessionUser: any | null
+  /** Combined active user (session or demo) */
+  user: any | null
   /** Setter for demo user (useful for manual updates after auth) */
   setDemoUser: (user: any | null) => void
   /** Combined auth state: true if either real session or demo session exists */
   isAuthenticated: boolean
   /** Refreshes the demo session manually */
-  refreshDemoSession: () => Promise<void>
+  refreshDemoSession: () => Promise<boolean>
   /** Current user ID from session or demo */
   userId: string | undefined
 }
@@ -70,9 +74,12 @@ export function useDemoSession(): UseDemoSessionReturn {
 
   const isAuthenticated = !!sessionUser || !!demoUser
   const userId = sessionUser?.id ?? demoUser?.id
+  const activeUser = sessionUser ?? demoUser
 
   return {
+    sessionUser,
     demoUser,
+    user: activeUser,
     setDemoUser,
     isAuthenticated,
     refreshDemoSession,

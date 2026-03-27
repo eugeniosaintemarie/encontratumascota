@@ -27,9 +27,9 @@ export default function ReunidasPage() {
   const [isPublicarModalOpen, setIsPublicarModalOpen] = useState(false)
   const [isPerfilModalOpen, setIsPerfilModalOpen] = useState(false)
 
-  const { demoUser, isAuthenticated } = useDemoSession()
+  const { user, isAuthenticated } = useDemoSession()
 
-  const currentUser = demoUser ? mapNeonUser(demoUser) : null
+  const currentUser = user ? mapNeonUser(user) : null
 
   const { publicaciones } = usePublicaciones()
   const { itemsPerPage, columns } = useItemsPerPage()

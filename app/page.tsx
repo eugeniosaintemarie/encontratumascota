@@ -26,8 +26,8 @@ export default function HomePage() {
     logout,
   } = useAuth()
   
-  const { demoUser } = useDemoSession()
-  const currentUser = demoUser ? mapNeonUser(demoUser) : null
+  const { user } = useDemoSession()
+  const currentUser = user ? mapNeonUser(user) : null
 
   const handleAuthSuccess = useCallback(() => {
     closeAuthModal()
