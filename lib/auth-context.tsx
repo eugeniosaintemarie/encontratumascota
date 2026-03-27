@@ -14,6 +14,7 @@ interface AuthContextType {
   isAuthenticated: boolean
   userId: string | undefined
   demoUser: any | null
+  refreshSession: () => Promise<void>
   
   // Modal state
   authModal: AuthModalState
@@ -37,7 +38,7 @@ const AuthContext = createContext<AuthContextType | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   // Auth state from demo session hook
-  const { demoUser, setDemoUser, isAuthenticated, userId } = useDemoSession()
+  const { demoUser, setDemoUser, isAuthenticated, userId, refreshDemoSession } = useDemoSession()
   
   // Modal states
   const [authModal, setAuthModal] = useState<AuthModalState>({
@@ -110,6 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       logout,
       requireAuth,
       clearPendingPublicacion,
+      refreshSession: refreshDemoSession,
     }),
     [
       isAuthenticated,
@@ -128,6 +130,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       logout,
       requireAuth,
       clearPendingPublicacion,
+      refreshDemoSession,
     ]
   )
 

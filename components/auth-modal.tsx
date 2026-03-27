@@ -14,6 +14,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, ShieldCheck } from "lucide-react"
 import { authClient } from "@/lib/auth/client"
 import { useRecaptcha } from "@/hooks/use-recaptcha"
+import { useAuth } from "@/lib/auth-context"
 import { sanitizeText, sanitizeEmail } from "@/lib/sanitize"
 
 
@@ -47,6 +48,7 @@ export function AuthModal({
   const [registerConfirmPassword, setRegisterConfirmPassword] = useState("")
 
   const { execute: executeRecaptcha } = useRecaptcha()
+  const { refreshSession } = useAuth()
 
   const handleGoogleSignIn = async () => {
     setError(null)
@@ -104,6 +106,7 @@ export function AuthModal({
       if (result.error) {
         setError(result.error.message || "Email o contraseña incorrectos")
       } else {
+        await refreshSession().catch(() => null)
         onAuthSuccess?.()
         onClose()
       }
@@ -168,6 +171,7 @@ export function AuthModal({
       if (result.error) {
         setError(result.error.message || "Error al registrarse")
       } else {
+        await refreshSession().catch(() => null)
         onAuthSuccess?.()
         onClose()
       }
