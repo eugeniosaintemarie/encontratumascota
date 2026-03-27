@@ -1,6 +1,14 @@
 import { getAuth } from "@/lib/auth/server"
 
-const middleware = getAuth().middleware()
+const middleware = getAuth().middleware({
+  skipRoutes: [
+    "/",
+    "/_next/static",
+    "/_next/image",
+    "/favicon.ico",
+    "/sw.js",
+  ],
+})
 
 export default middleware
 
