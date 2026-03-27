@@ -44,10 +44,11 @@ const baseConfig = {
   async headers() {
     const isDev = process.env.NODE_ENV === 'development'
     // Next.js app router needs inline bootstrap scripts to hydrate client components.
+    const googleScriptHosts = "https://www.google.com https://www.gstatic.com"
     const scriptSrc = isDev
-      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://va.vercel-scripts.com https://vercel.live https://static.cloudflareinsights.com https://unpkg.com"
-      : "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://va.vercel-scripts.com https://vercel.live https://static.cloudflareinsights.com https://unpkg.com"
-    const scriptSrcElem = "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://va.vercel-scripts.com https://vercel.live https://static.cloudflareinsights.com https://unpkg.com"
+      ? `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://va.vercel-scripts.com https://vercel.live https://static.cloudflareinsights.com https://unpkg.com ${googleScriptHosts}`
+      : `script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://va.vercel-scripts.com https://vercel.live https://static.cloudflareinsights.com https://unpkg.com ${googleScriptHosts}`
+    const scriptSrcElem = `script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://va.vercel-scripts.com https://vercel.live https://static.cloudflareinsights.com https://unpkg.com ${googleScriptHosts}`
     const connectSrc = "connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://va.vercel-scripts.com https://vercel.live"
 
     return [
