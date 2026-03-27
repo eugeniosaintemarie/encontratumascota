@@ -225,10 +225,6 @@ export function SwipeExplorerModal({ isOpen, onClose }: SwipeExplorerModalProps)
                                     </div>
 
                                     <div className="flex h-[28%] flex-col justify-between p-4 text-card-foreground">
-                                        <p className="line-clamp-3 text-sm text-muted-foreground">
-                                            {current?.mascota.descripcion}
-                                        </p>
-
                                         <div className="mt-3 flex items-center justify-between gap-2 text-xs">
                                             <p className="text-xs font-medium text-muted-foreground">{rightLabel}</p>
                                             <button
@@ -246,6 +242,9 @@ export function SwipeExplorerModal({ isOpen, onClose }: SwipeExplorerModalProps)
                                                 Ver detalle
                                             </button>
                                         </div>
+                                        <p className="line-clamp-3 text-sm text-muted-foreground italic">
+                                            {current?.mascota.descripcion}
+                                        </p>
                                     </div>
                                 </article>
                             </div>

@@ -25,7 +25,7 @@ const siteUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: 'Encontra Tu Mascota - Reunir Perros y Gatos Perdidos',
+  title: 'Encontra Tu Mascota',
   description: 'Plataforma colaborativa para reunir mascotas perdidas y encontradas. Publica, busca y ayuda a reunir perros, gatos y otras mascotas con sus familias.',
   keywords: ['mascotas perdidas', 'perros encontrados', 'gatos perdidos', 'reunir mascotas', 'mascotas', 'Argentina'],
   generator: 'Next.js',
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     locale: 'es_AR',
     url: siteUrl,
     siteName: 'Encontra Tu Mascota',
-    title: 'Encontra Tu Mascota - Reunir Mascotas Perdidas',
+    title: 'Encontra Tu Mascota',
     description: 'Plataforma colaborativa para reunir mascotas perdidas con sus familias en Argentina',
     images: [
       {
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Encontra Tu Mascota - Reunir Mascotas Perdidas',
+    title: 'Encontra Tu Mascota',
     description: 'Plataforma colaborativa para reunir mascotas perdidas con sus familias',
     images: [`${siteUrl}/logo.png`],
   },
