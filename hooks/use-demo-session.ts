@@ -26,13 +26,13 @@ export function useDemoSession(): UseDemoSessionReturn {
 
   const refreshDemoSession = useCallback(async () => {
     try {
-      const { fetchServerSession } = await import("@/lib/auth/client")
-      const user = await fetchServerSession()
+      const { fetchServerSessionWithRetry } = await import("@/lib/auth/client")
+      const user = await fetchServerSessionWithRetry({ attempts: 4, initialDelayMs: 200 })
 
       if (!user) {
         setSessionUser(null)
         setDemoUser(null)
-        return
+        return false
       }
 
       const cookies = typeof document !== "undefined" ? document.cookie : ""
@@ -45,8 +45,13 @@ export function useDemoSession(): UseDemoSessionReturn {
         setSessionUser(user)
         setDemoUser(null)
       }
+
+      return true
     } catch {
       // Ignore errors - demo session will simply not be set
+      setSessionUser(null)
+      setDemoUser(null)
+      return false
     }
   }, [])
 

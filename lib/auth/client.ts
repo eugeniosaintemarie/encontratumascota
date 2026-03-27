@@ -57,3 +57,37 @@ export async function fetchServerSession() {
     return null
   }
 }
+
+export interface SessionFetchRetryOptions {
+  attempts?: number
+  initialDelayMs?: number
+  multiplier?: number
+}
+
+export async function fetchServerSessionWithRetry(
+  options: SessionFetchRetryOptions = {}
+) {
+  const retries = options.attempts ?? 4
+  let delay = options.initialDelayMs ?? 200
+  const multiplier = options.multiplier ?? 1.5
+
+  for (let attempt = 0; attempt < retries; attempt += 1) {
+    const session = await fetchServerSession()
+    if (session) {
+      if (process.env.NODE_ENV !== "production" && attempt > 0) {
+        console.debug(`[fetchServerSessionWithRetry] secured session on attempt ${attempt + 1}`)
+      }
+      return session
+    }
+
+    if (attempt < retries - 1) {
+      if (process.env.NODE_ENV !== "production") {
+        console.debug(`[fetchServerSessionWithRetry] attempt ${attempt + 1} failed, retrying in ${delay}ms`)
+      }
+      await new Promise((resolve) => setTimeout(resolve, delay))
+      delay = Math.min(delay * multiplier, 2000)
+    }
+  }
+
+  return null
+}

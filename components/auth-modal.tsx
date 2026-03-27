@@ -106,7 +106,11 @@ export function AuthModal({
       if (result.error) {
         setError(result.error.message || "Email o contraseña incorrectos")
       } else {
-        await refreshSession().catch(() => null)
+        const sessionReady = await refreshSession()
+        if (!sessionReady) {
+          setError("No pudimos confirmar tu sesión. Probá recargar la página y volvé a iniciar sesión.")
+          return
+        }
         onAuthSuccess?.()
         onClose()
       }
@@ -171,7 +175,11 @@ export function AuthModal({
       if (result.error) {
         setError(result.error.message || "Error al registrarse")
       } else {
-        await refreshSession().catch(() => null)
+        const sessionReady = await refreshSession()
+        if (!sessionReady) {
+          setError("No pudimos confirmar tu sesión luego de registrarte. Intentá recargar y volver a ingresar.")
+          return
+        }
         onAuthSuccess?.()
         onClose()
       }
