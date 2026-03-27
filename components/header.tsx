@@ -67,9 +67,13 @@ export const Header = memo(function Header({ isReadOnly = false }: HeaderProps) 
             onClick={() => setIsSwipeOpen(true)}
             aria-label="Abrir vista interactiva de publicaciones"
           >
-            Cartas
             <SquareStack className="h-4 w-4" />
+            Cartas
           </Button>
+        </div>
+
+        {/* Desktop navigation */}
+        <nav className="hidden sm:flex items-center gap-2">
           {!isDemoEnv && (
             <a href="https://demo.encontratumascota.ar/" target="_blank" rel="noopener noreferrer">
               <Button variant="ghost" size="sm">
@@ -78,10 +82,6 @@ export const Header = memo(function Header({ isReadOnly = false }: HeaderProps) 
               </Button>
             </a>
           )}
-        </div>
-
-        {/* Desktop navigation */}
-        <nav className="hidden sm:flex items-center gap-2">
           <Button
             asChild
             variant="ghost"
@@ -128,6 +128,24 @@ export const Header = memo(function Header({ isReadOnly = false }: HeaderProps) 
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
+              {!isDemoEnv && (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <a
+                        href="https://demo.encontratumascota.ar/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => {
+                          setMenuOpen(false)
+                        }}
+                      >
+                        <ExternalLink className="mr-2 h-4 w-4" />
+                        Demo
+                      </a>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+              )}
               <DropdownMenuItem
                 asChild
                 className="dark:text-[#d66528] dark:focus:text-[#d66528]"

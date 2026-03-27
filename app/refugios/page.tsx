@@ -42,37 +42,41 @@ function getDemoRefugios(): RefugioLandingItem[] {
 }
 
 async function getProdRefugios(): Promise<RefugioLandingItem[]> {
-  const { listRefugioProfiles } = await import("@/lib/actions/refugios")
-  const { getPublicaciones } = await import("@/lib/actions/publicaciones")
+  try {
+    const { listRefugioProfiles } = await import("@/lib/actions/refugios")
+    const { getPublicaciones } = await import("@/lib/actions/publicaciones")
 
-  const [profiles, publicacionesRefugio] = await Promise.all([
-    listRefugioProfiles(true),
-    getPublicaciones(
-      {
-        tipoPublicacion: "adopcion",
-        soloRefugios: true,
-        soloActivas: true,
-      },
-      { forceDemo: false }
-    ),
-  ])
+    const [profiles, publicacionesRefugio] = await Promise.all([
+      listRefugioProfiles(true),
+      getPublicaciones(
+        {
+          tipoPublicacion: "adopcion",
+          soloRefugios: true,
+          soloActivas: true,
+        },
+        { forceDemo: false }
+      ),
+    ])
 
-  const counts = new Map<string, number>()
-  const ubicaciones = new Map<string, string>()
+    const counts = new Map<string, number>()
+    const ubicaciones = new Map<string, string>()
 
-  for (const pub of publicacionesRefugio) {
-    counts.set(pub.usuarioId, (counts.get(pub.usuarioId) || 0) + 1)
-    if (!ubicaciones.has(pub.usuarioId)) {
-      ubicaciones.set(pub.usuarioId, pub.ubicacion)
+    for (const pub of publicacionesRefugio) {
+      counts.set(pub.usuarioId, (counts.get(pub.usuarioId) || 0) + 1)
+      if (!ubicaciones.has(pub.usuarioId)) {
+        ubicaciones.set(pub.usuarioId, pub.ubicacion)
+      }
     }
-  }
 
-  return profiles.map((profile) => ({
-    usuarioId: profile.authUserId,
-    nombre: profile.nombreRefugio || "Refugio",
-    ubicacion: ubicaciones.get(profile.authUserId) || "Argentina",
-    publicacionesActivas: counts.get(profile.authUserId) || 0,
-  }))
+    return profiles.map((profile) => ({
+      usuarioId: profile.authUserId,
+      nombre: profile.nombreRefugio || "Refugio",
+      ubicacion: ubicaciones.get(profile.authUserId) || "Argentina",
+      publicacionesActivas: counts.get(profile.authUserId) || 0,
+    }))
+  } catch {
+    return []
+  }
 }
 
 export default async function RefugiosPage() {
@@ -105,9 +109,13 @@ export default async function RefugiosPage() {
           {refugios.length === 0 ? (
             <div className="rounded-2xl border border-dashed bg-muted/20 p-10 text-center">
               <PawPrint className="mx-auto mb-3 h-10 w-10 text-muted-foreground/60" />
-              <h2 className="text-lg font-semibold text-foreground">Todavía no hay refugios publicados</h2>
+              <h2 className="text-lg font-semibold text-foreground">
+                {isDemo ? "Todavía no hay refugios publicados" : "No hay refugios para mostrar actualmente"}
+              </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Cuando haya usuarios marcados como refugio, aparecerán acá.
+                {isDemo
+                  ? "Cuando haya usuarios marcados como refugio, aparecerán acá."
+                  : "Volvé pronto para ver nuevos perfiles de refugios."}
               </p>
             </div>
           ) : (

@@ -1,6 +1,7 @@
 "use client"
 
 import { ListadoPublicaciones } from "@/components/listado-publicaciones"
+import Link from "next/link"
 import { HeartHandshake } from "lucide-react"
 import type { Publicacion } from "@/lib/types"
 
@@ -32,10 +33,13 @@ export function RefugioContent({
     <main className="flex-1">
       <section className="mx-auto w-full max-w-7xl px-4 pt-6">
         <div className="rounded-2xl border bg-gradient-to-br from-[#FF8A65]/20 via-background to-background p-6 sm:p-8">
-          <p className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-[#d66528]">
+          <Link
+            href="/refugios"
+            className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-[#d66528] hover:opacity-80"
+          >
             <HeartHandshake className="h-4 w-4" />
             Red de refugios
-          </p>
+          </Link>
           <h1 className="mt-2 text-3xl font-bold text-foreground sm:text-4xl">{nombreRefugio}</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
             {publicaciones.length} mascota
