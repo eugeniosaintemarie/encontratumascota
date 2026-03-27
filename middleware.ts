@@ -1,11 +1,6 @@
-import { neonAuthMiddleware } from "@neondatabase/auth/next"
+import { getAuth } from "@/lib/auth/server"
 
-const middleware = neonAuthMiddleware({
-  baseUrl: process.env.NEON_AUTH_BASE_URL!,
-  cookies: {
-    secret: process.env.NEON_AUTH_COOKIE_SECRET!,
-  },
-})
+const middleware = getAuth().middleware()
 
 export default middleware
 
