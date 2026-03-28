@@ -44,32 +44,31 @@ export function ImageViewerModal({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
-        className="max-w-[95vw] max-h-[95vh] w-auto h-auto p-0 bg-transparent border-0 shadow-none top-[50%] translate-y-[-50%]"
+        className="w-full max-w-[calc(100vw-1rem)] sm:max-w-[640px] max-h-[95vh] h-auto p-0 bg-transparent border-0 shadow-none left-1/2 top-[50%] -translate-x-1/2 translate-y-[-50%]"
         showCloseButton={false}
       >
         <DialogTitle className="sr-only">{alt}</DialogTitle>
-        <div className="relative flex items-center justify-center">
-          {/* Close button */}
+        <div className="flex flex-col items-center justify-center gap-4">
+          {/* Image container */}
+          <div className="relative w-full max-w-[calc(100vw-1rem)] sm:max-w-[640px] max-h-[calc(100vh-3rem)]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={imageUrl || "/placeholder.svg"}
+              alt={alt}
+              className="w-full h-auto max-h-[calc(100vh-3rem)] object-contain rounded-2xl shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+
           <Button
             variant="secondary"
             size="icon"
-            className="absolute -top-12 right-0 z-50 rounded-full bg-black/50 hover:bg-black/70 text-white border-0 h-10 w-10"
+            className="z-50 rounded-full bg-black/70 hover:bg-black/80 text-white border-0 h-10 w-10"
             onClick={onClose}
             aria-label="Cerrar vista de imagen"
           >
             <X className="h-5 w-5" aria-hidden="true" />
           </Button>
-
-          {/* Image container */}
-          <div className="relative max-w-[90vw] max-h-[85vh]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={imageUrl || "/placeholder.svg"}
-              alt={alt}
-              className="max-w-full max-h-[85vh] w-auto h-auto object-contain rounded-lg shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
-            />
-          </div>
         </div>
       </DialogContent>
     </Dialog>
