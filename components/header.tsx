@@ -177,27 +177,17 @@ export const Header = memo(function Header({ isReadOnly = false }: HeaderProps) 
                   Publicar
                 </DropdownMenuItem>
               )}
+              <DropdownMenuSeparator />
               {isAuthenticated ? (
-                <>
-                  <DropdownMenuItem
-                    onClick={() => {
-                      setMenuOpen(false)
-                      openPerfilModal()
-                    }}
-                  >
-                    <User className="mr-2 h-4 w-4" />
-                    Mi perfil
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => {
-                      setMenuOpen(false)
-                      logout()
-                    }}
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Cerrar sesión
-                  </DropdownMenuItem>
-                </>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setMenuOpen(false)
+                    openPerfilModal()
+                  }}
+                >
+                  <User className="mr-2 h-4 w-4" />
+                  Mi perfil
+                </DropdownMenuItem>
               ) : (
                 <DropdownMenuItem
                   onClick={() => {
