@@ -1,20 +1,21 @@
 import type { Raza, Especie, Sexo } from "./types"
 
-// Lista centralizada de razas por especie
 export const razasPorEspecie: Record<Especie, { value: Raza; label: string }[]> = {
   perro: [
     { value: "beagle", label: "Beagle" },
     { value: "bulldog", label: "Bulldog" },
     { value: "caniche", label: "Caniche" },
-    { value: "golden", label: "Golden Retriever" },
+    { value: "golden", label: "Golden retriever" },
     { value: "labrador", label: "Labrador" },
     { value: "mestizo_perro", label: "Mestizo" },
     { value: "otro_perro", label: "Otro" },
-    { value: "pastor_aleman", label: "Pastor Alemán" },
+    { value: "pastor_aleman", label: "Pastor alemán" },
+    { value: "pastor_australiano", label: "Pastor australiano" },
+    { value: "shar_pei", label: "Shar-Pei" },
   ],
   gato: [
-    { value: "comun_europeo", label: "Común Europeo" },
-    { value: "maine_coon", label: "Maine Coon" },
+    { value: "comun_europeo", label: "Común europeo" },
+    { value: "maine_coon", label: "Maine coon" },
     { value: "mestizo_gato", label: "Mestizo" },
     { value: "otro_gato", label: "Otro" },
     { value: "persa", label: "Persa" },
@@ -32,7 +33,9 @@ export const razasLabels: Record<Raza, string> = {
   golden_retriever: "Golden Retriever",
   golden: "Golden Retriever",
   bulldog: "Bulldog",
-  pastor_aleman: "Pastor Alemán",
+  pastor_aleman: "Pastor alemán",
+  pastor_australiano: "Pastor australiano",
+  shar_pei: "Shar-Pei",
   caniche: "Caniche",
   beagle: "Beagle",
   otro_perro: "Otro",
