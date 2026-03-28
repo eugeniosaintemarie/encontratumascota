@@ -6,13 +6,12 @@ import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MapPin, Lock, Share2, Check, Loader2, AlertTriangle, UserPlus, User, Download, ZoomIn, History } from "lucide-react"
+import { MapPin, Lock, Share2, Check, Loader2, AlertTriangle, UserPlus, User, ZoomIn, History } from "lucide-react"
 import type { Publicacion } from "@/lib/types"
 import { razasLabels, especieLabels, generoLabels } from "@/lib/labels"
-import { generateShareImage } from "@/lib/generate-share-image"
-import { toast } from "sonner"
 import { ImageViewerModal } from "@/components/image-viewer-modal"
 import { formatHeartEmojiSpacing } from "@/lib/utils"
+import { useSharePublicacion } from "@/hooks/use-share-publicacion"
 
 interface PublicacionCardProps {
   publicacion: Publicacion
@@ -35,8 +34,7 @@ export const PublicacionCard = memo(function PublicacionCard({
   const router = useRouter()
   const { mascota } = publicacion
 
-  const [isSharing, setIsSharing] = useState(false)
-  const [isCopied, setIsCopied] = useState(false)
+  const { isSharing, isCopied, handleShare } = useSharePublicacion(publicacion)
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
 
@@ -48,99 +46,6 @@ export const PublicacionCard = memo(function PublicacionCard({
   const handleLoginClick = () => {
     if (onRequireAuth) {
       onRequireAuth(publicacion.id)
-    }
-  }
-
-  const handleShare = async () => {
-    if (isSharing) return
-    setIsSharing(true)
-
-    const url = `${window.location.origin}/publicacion/${publicacion.id}`
-    const tipoTexto = publicacion.tipoPublicacion === "buscada"
-      ? "buscado"
-      : publicacion.tipoPublicacion === "adopcion"
-        ? "en adopción"
-        : "encontrado"
-    const title = `${especieLabels[mascota.especie]} ${generoLabels[mascota.sexo].toLowerCase()} ${razasLabels[mascota.raza]} ${tipoTexto} en ${publicacion.ubicacion}`
-    const transitoTag = publicacion.transitoUrgente ? " ¡Tránsito urgente!" : ""
-    const shareText = `${title}${transitoTag}\n\n${mascota.descripcion}\n\n${url}`
-
-    try {
-      // 1. Generar imagen para compartir (formato 4:5)
-      const imageBlob = await generateShareImage(publicacion)
-
-      // 2. Siempre copiar link al portapapeles
-      try {
-        await navigator.clipboard.writeText(url)
-      } catch {
-        // Silently fail on clipboard - some browsers block it
-      }
-
-      // 3. Intentar Web Share API con imagen (Instagram Stories, etc.)
-      if (navigator.share) {
-        const imageFile = new File([imageBlob], `mascota-${publicacion.id}.jpg`, {
-          type: "image/jpeg",
-        })
-
-        if (navigator.canShare?.({ files: [imageFile] })) {
-          await navigator.share({
-            files: [imageFile],
-            title,
-            text: shareText,
-          })
-        } else {
-          // Sin soporte de archivos: share solo texto con link (OG metadata hace el preview)
-          await navigator.share({ title, text: shareText })
-        }
-
-        toast.success("Enlace copiado al portapapeles", {
-          description: "Podés pegarlo donde quieras",
-        })
-        setIsSharing(false)
-        return
-      }
-
-      // 4. Fallback: descargar imagen + confirmar link copiado
-      const downloadUrl = URL.createObjectURL(imageBlob)
-      const a = document.createElement("a")
-      a.href = downloadUrl
-      a.download = `mascota-${publicacion.id}.jpg`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(downloadUrl)
-
-      setIsCopied(true)
-      toast.success("¡Imagen descargada y enlace copiado!", {
-        description: "Subí la imagen a tus redes y pegá el enlace.",
-      })
-      setTimeout(() => setIsCopied(false), 3000)
-    } catch (err) {
-      // Si el usuario canceló el share nativo, no mostrar error
-      if ((err as Error).name === "AbortError") {
-        // Igualmente el link se copió
-        toast.info("Enlace copiado al portapapeles", {
-          description: "Podés pegarlo donde quieras",
-        })
-        setIsSharing(false)
-        return
-      }
-
-      // Fallback final: solo copiar link
-      try {
-        await navigator.clipboard.writeText(url)
-        setIsCopied(true)
-        toast.success("¡Enlace copiado!", {
-          description: "El enlace a la publicación está en tu portapapeles.",
-        })
-        setTimeout(() => setIsCopied(false), 2000)
-      } catch {
-        toast.error("No se pudo compartir", {
-          description: "Intentá copiar el enlace manualmente.",
-        })
-      }
-    } finally {
-      setIsSharing(false)
     }
   }
 

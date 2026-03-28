@@ -6,9 +6,10 @@ import { useRouter } from "next/navigation"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { useSharePublicacion } from "@/hooks/use-share-publicacion"
 import { usePublicaciones } from "@/lib/publicaciones-context"
 import { especieLabels, generoLabels, razasLabels } from "@/lib/labels"
-import { X, MapPin, RotateCcw } from "lucide-react"
+import { X, MapPin, RotateCcw, Share2, Check, Loader2 } from "lucide-react"
 
 interface SwipeExplorerModalProps {
     isOpen: boolean
@@ -45,6 +46,7 @@ export function SwipeExplorerModal({ isOpen, onClose }: SwipeExplorerModalProps)
 
     const current = deck[index]
     const next = deck[index + 1]
+    const { isSharing, isCopied, handleShare } = useSharePublicacion(current ?? null)
 
     const clearTimer = useCallback(() => {
         if (timeoutRef.current !== null) {
@@ -191,6 +193,33 @@ export function SwipeExplorerModal({ isOpen, onClose }: SwipeExplorerModalProps)
                                         />
 
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+
+                                        {current && (
+                                            <div className="absolute right-3 top-3 z-10">
+                                                <Button
+                                                    size="icon"
+                                                    variant="secondary"
+                                                    className="h-9 w-9 rounded-full bg-card/90 backdrop-blur-sm shadow-sm border-0 hover:bg-card transition-all"
+                                                    onPointerDown={(event) => event.stopPropagation()}
+                                                    onPointerUp={(event) => event.stopPropagation()}
+                                                    onClick={(event) => {
+                                                        event.preventDefault()
+                                                        event.stopPropagation()
+                                                        handleShare()
+                                                    }}
+                                                    disabled={isSharing}
+                                                    aria-label="Compartir publicación"
+                                                >
+                                                    {isSharing ? (
+                                                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                                                    ) : isCopied ? (
+                                                        <Check className="h-4 w-4 text-green-600" aria-hidden="true" />
+                                                    ) : (
+                                                        <Share2 className="h-4 w-4" aria-hidden="true" />
+                                                    )}
+                                                </Button>
+                                            </div>
+                                        )}
 
                                         <div className="absolute left-3 top-3 flex flex-col gap-1.5">
                                             <div className="flex flex-wrap gap-1.5">
