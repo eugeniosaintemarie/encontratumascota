@@ -240,6 +240,8 @@ export async function generateShareImage(
   const descStartY = imageSize + 36
   const descMaxWidth = CANVAS_WIDTH - descPadding * 2
   const lineHeight = 42
+  const domainRectHeight = 70
+  const domainRectMargin = 24
 
   const descripcion =
     mascota.descripcion.charAt(0).toUpperCase() +
@@ -250,8 +252,29 @@ export async function generateShareImage(
   ctx.textBaseline = "top"
   ctx.textAlign = "start"
 
-  const maxDescLines = Math.floor((CANVAS_HEIGHT - descStartY - 24) / lineHeight)
+  const maxDescLines = Math.floor((CANVAS_HEIGHT - descStartY - domainRectHeight - domainRectMargin) / lineHeight)
   wrapText(ctx, descripcion, descPadding, descStartY, descMaxWidth, lineHeight, maxDescLines)
+
+  // =====================
+  // 6. DOMAIN BADGE AT BOTTOM
+  // =====================
+  const domainText = "encontratumascota.ar"
+  const domainRectY = CANVAS_HEIGHT - domainRectHeight - domainRectMargin
+  const domainRectX = descPadding
+  const domainRectWidth = CANVAS_WIDTH - descPadding * 2
+
+  ctx.fillStyle = "rgba(245, 245, 245, 0.95)"
+  roundRect(ctx, domainRectX, domainRectY, domainRectWidth, domainRectHeight, domainRectHeight / 2)
+  ctx.fill()
+  ctx.strokeStyle = "rgba(0,0,0,0.1)"
+  ctx.lineWidth = 2
+  ctx.stroke()
+
+  ctx.fillStyle = COLORS.text
+  ctx.font = `600 36px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
+  ctx.textAlign = "center"
+  ctx.textBaseline = "middle"
+  ctx.fillText(domainText, CANVAS_WIDTH / 2, domainRectY + domainRectHeight / 2)
 
   // Convert to blob (JPEG for smaller file size)
   return new Promise((resolve, reject) => {
