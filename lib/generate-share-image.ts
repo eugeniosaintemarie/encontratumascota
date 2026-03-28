@@ -225,8 +225,22 @@ export async function generateShareImage(
     })
   }
 
-  // Bottom-right: date
-  const dateText = formatDate(publicacion.fechaEncuentro)
+  // Bottom-right: date or age
+  const getBottomRightText = () => {
+    if (publicacion.tipoPublicacion === "adopcion") {
+      const ageLabel = mascota.edad?.trim()
+      return ageLabel && ageLabel.length > 0 ? ageLabel : "Edad desconocida"
+    }
+
+    const referenceDate = publicacion.fechaEncuentro ?? publicacion.fechaPublicacion
+    if (referenceDate) {
+      return formatDate(referenceDate)
+    }
+
+    return "Fecha desconocida"
+  }
+
+  const dateText = getBottomRightText()
   ctx.font = `600 28px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
   const dateW = ctx.measureText(dateText).width
   drawBadge(ctx, dateText, imageSize - badgePad - dateW - 44, imageSize - badgePad - 56, {
