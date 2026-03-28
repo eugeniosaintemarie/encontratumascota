@@ -132,16 +132,17 @@ export const Header = memo(function Header({ isReadOnly = false }: HeaderProps) 
                   <>
                     <DropdownMenuItem asChild>
                       <a
-                        href="https://demo.encontratumascota.ar/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={() => {
-                          setMenuOpen(false)
-                        }}
-                      >
-                        <ExternalLink className="mr-2 h-4 w-4" />
-                        Demo
-                      </a>
+                          href="https://demo.encontratumascota.ar/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => {
+                            setMenuOpen(false)
+                          }}
+                          className="text-[#d66528]"
+                        >
+                          <ExternalLink className="mr-2 h-4 w-4 text-current" />
+                          Demo
+                        </a>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                   </>
