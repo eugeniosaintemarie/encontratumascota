@@ -261,13 +261,25 @@ export async function generateShareImage(
     mascota.descripcion.charAt(0).toUpperCase() +
     mascota.descripcion.slice(1).toLowerCase()
 
+  const tipoLabel = publicacion.tipoPublicacion === "adopcion"
+    ? "En adopción"
+    : publicacion.tipoPublicacion === "buscada"
+    ? "Perdida"
+    : "Encontrada"
+
   ctx.fillStyle = COLORS.text
-  ctx.font = `400 32px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
+  ctx.font = `600 32px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
   ctx.textBaseline = "top"
   ctx.textAlign = "start"
 
-  const maxDescLines = Math.floor((CANVAS_HEIGHT - descStartY - domainRectHeight - domainRectMargin) / lineHeight)
-  wrapText(ctx, descripcion, descPadding, descStartY, descMaxWidth, lineHeight, maxDescLines)
+  ctx.fillText(tipoLabel, descPadding, descStartY)
+
+  const tipoLabelWidth = ctx.measureText(tipoLabel).width
+
+  ctx.font = `400 32px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
+  
+  const maxDescLines = Math.floor((CANVAS_HEIGHT - descStartY - domainRectHeight - domainRectMargin - 40) / lineHeight)
+  wrapText(ctx, descripcion, descPadding, descStartY + 40, descMaxWidth, lineHeight, maxDescLines)
 
   // =====================
   // 6. DOMAIN BADGE AT BOTTOM

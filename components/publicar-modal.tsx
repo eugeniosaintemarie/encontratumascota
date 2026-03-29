@@ -532,11 +532,12 @@ export function PublicarModal({
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
               placeholder="Lo más detallada posible"
-              rows={3}
+              rows={8}
               required
               aria-required="true"
               maxLength={DESCRIPCION_MAX_LENGTH}
               aria-describedby="descripcion-counter"
+              className="min-h-[160px]"
             />
           </div>
 
