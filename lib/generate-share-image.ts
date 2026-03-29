@@ -267,12 +267,16 @@ export async function generateShareImage(
     ? "Perdida"
     : "Encontrada"
 
+  const tipoLabelWithColor = mascota.color 
+    ? `${tipoLabel}: ${mascota.color}` 
+    : tipoLabel
+
   ctx.fillStyle = COLORS.text
   ctx.font = `600 32px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
   ctx.textBaseline = "top"
   ctx.textAlign = "start"
 
-  ctx.fillText(tipoLabel, descPadding, descStartY)
+  ctx.fillText(tipoLabelWithColor, descPadding, descStartY)
 
   const tipoLabelWidth = ctx.measureText(tipoLabel).width
 

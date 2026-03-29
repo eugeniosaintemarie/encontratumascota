@@ -28,7 +28,7 @@ import { toast } from "sonner"
 import { sanitizeText, sanitizeRichText } from "@/lib/sanitize"
 import { isMestizoRaza, MESTIZO_RAZAS } from "@/lib/utils"
 
-const DESCRIPCION_MAX_LENGTH = 400
+const DESCRIPCION_MAX_LENGTH = 100
 
 interface PublicarModalProps {
   isOpen: boolean
@@ -531,13 +531,11 @@ export function PublicarModal({
               id="descripcion"
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
-              placeholder="Lo más detallada posible"
-              rows={8}
-              required
-              aria-required="true"
+              placeholder="No obligatoria, pero entre más detalles brindes, más chances hay de encontrar a la mascota o conseguirle un hogar"
+              rows={4}
               maxLength={DESCRIPCION_MAX_LENGTH}
               aria-describedby="descripcion-counter"
-              className="min-h-[160px]"
+              className="min-h-[80px]"
             />
           </div>
 

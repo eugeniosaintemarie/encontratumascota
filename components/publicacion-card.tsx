@@ -54,9 +54,9 @@ export const PublicacionCard = memo(function PublicacionCard({
     }
   }
 
-  // Limitar descripcion a 140 caracteres y capitalizar primera letra
-  const descripcionLimitada = mascota.descripcion.length > 140
-    ? mascota.descripcion.slice(0, 140).trim() + "..."
+  // Limitar descripcion a 100 caracteres y capitalizar primera letra
+  const descripcionLimitada = mascota.descripcion.length > 100
+    ? mascota.descripcion.slice(0, 100).trim() + "..."
     : mascota.descripcion
   const descripcionFormateada = descripcionLimitada.charAt(0).toUpperCase() + descripcionLimitada.slice(1).toLowerCase()
 
@@ -165,6 +165,7 @@ export const PublicacionCard = memo(function PublicacionCard({
               : publicacion.tipoPublicacion === "buscada" 
               ? "Perdida" 
               : "Encontrada"}
+            {mascota.color && `: ${mascota.color}`}
           </span>
           {descripcionFormateada}
         </p>
