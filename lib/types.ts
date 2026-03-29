@@ -29,6 +29,8 @@ export interface Mascota {
   id: string
   especie: Especie
   raza: Raza
+  padreRaza?: Raza | null
+  madreRaza?: Raza | null
   sexo: Sexo
   color: string
   descripcion: string
@@ -75,4 +77,8 @@ export interface Usuario {
   isReadOnly?: boolean // true para usuarios demo (modo solo lectura)
   esRefugio?: boolean
   nombreRefugio?: string | null
+  contactoNombre?: string | null
+  contactoTelefono?: string | null
+  contactoEmail?: string | null
+  mostrarContactoPublico?: boolean
 }

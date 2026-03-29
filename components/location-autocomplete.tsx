@@ -215,7 +215,7 @@ export default function LocationAutocomplete({ value, placeholder = '', onChange
         onFocus={() => { /* show predictions if any */ }}
       />
       {predictions.length > 0 && (
-        <ul className="absolute z-40 mt-1 w-full rounded-md bg-popover shadow-md max-h-52 overflow-auto">
+        <ul className="absolute z-[200] mt-1 w-full rounded-md bg-popover shadow-md max-h-52 overflow-auto">
           {predictions.map(p => (
             <li key={`${p.source}-${p.id}`} className="p-2 hover:bg-muted cursor-pointer text-sm text-foreground" onMouseDown={(e)=>{ e.preventDefault(); handleSelect(p); }}>
               {p.description}

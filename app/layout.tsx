@@ -9,6 +9,7 @@ import { PublicacionesProvider } from '@/lib/publicaciones-context'
 import { AuthProvider } from '@/lib/auth-context'
 import { ServiceWorkerRegistration } from '@/components/sw-registration'
 import { AppSplashScreen } from '@/components/app-splash-screen'
+import { GlobalModals } from '@/components/global-modals'
 import './globals.css'
 
 const inter = Inter({ subsets: ["latin"] });
@@ -163,6 +164,7 @@ export default function RootLayout({
         >
           <PublicacionesProvider>
             <AuthProvider>
+              <GlobalModals />
               {children}
             </AuthProvider>
           </PublicacionesProvider>

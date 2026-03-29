@@ -6,6 +6,10 @@ export interface RefugioProfile {
   authUserId: string
   esRefugio: boolean
   nombreRefugio?: string | null
+  contactoNombre?: string | null
+  contactoTelefono?: string | null
+  contactoEmail?: string | null
+  mostrarContactoPublico?: boolean
 }
 
 export async function setRefugioProfile(input: RefugioProfile) {
@@ -18,6 +22,10 @@ export async function setRefugioProfile(input: RefugioProfile) {
       authUserId: input.authUserId,
       esRefugio: input.esRefugio,
       nombreRefugio: input.nombreRefugio ?? null,
+      contactoNombre: input.contactoNombre ?? null,
+      contactoTelefono: input.contactoTelefono ?? null,
+      contactoEmail: input.contactoEmail ?? null,
+      mostrarContactoPublico: input.mostrarContactoPublico ?? false,
       updatedAt: new Date(),
     })
     .onConflictDoUpdate({
@@ -25,6 +33,10 @@ export async function setRefugioProfile(input: RefugioProfile) {
       set: {
         esRefugio: input.esRefugio,
         nombreRefugio: input.nombreRefugio ?? null,
+        contactoNombre: input.contactoNombre ?? null,
+        contactoTelefono: input.contactoTelefono ?? null,
+        contactoEmail: input.contactoEmail ?? null,
+        mostrarContactoPublico: input.mostrarContactoPublico ?? false,
         updatedAt: new Date(),
       },
     })
@@ -66,6 +78,10 @@ export async function getRefugioProfileMapByAuthUserIds(authUserIds: string[]) {
       authUserId: row.authUserId,
       esRefugio: row.esRefugio,
       nombreRefugio: row.nombreRefugio,
+      contactoNombre: row.contactoNombre,
+      contactoTelefono: row.contactoTelefono,
+      contactoEmail: row.contactoEmail,
+      mostrarContactoPublico: row.mostrarContactoPublico,
     })
   }
 

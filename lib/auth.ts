@@ -9,6 +9,10 @@ export function mapNeonUser(user: {
   isReadOnly?: boolean
   esRefugio?: boolean
   nombreRefugio?: string | null
+  contactoNombre?: string | null
+  contactoTelefono?: string | null
+  contactoEmail?: string | null
+  mostrarContactoPublico?: boolean
 }): Usuario {
   return {
     id: user.id,
@@ -18,5 +22,9 @@ export function mapNeonUser(user: {
     isReadOnly: user.isReadOnly,
     esRefugio: user.esRefugio,
     nombreRefugio: user.nombreRefugio,
+    contactoNombre: user.contactoNombre ?? null,
+    contactoTelefono: user.contactoTelefono ?? null,
+    contactoEmail: user.contactoEmail ?? null,
+    mostrarContactoPublico: user.mostrarContactoPublico ?? false,
   }
 }

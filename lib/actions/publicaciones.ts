@@ -1,7 +1,7 @@
 "use server"
 
 import { eq, and, or, ilike, desc } from "drizzle-orm"
-import type { Especie, Sexo } from "@/lib/types"
+import type { Especie, Sexo, Raza } from "@/lib/types"
 import { mockPublicaciones } from "@/lib/mock-data"
 import { isDemoHost } from "@/lib/env"
 import type { Publicacion } from "@/lib/types"
@@ -188,6 +188,8 @@ export async function crearPublicacion(data: {
   usuarioId: string
   transitoUrgente?: boolean
   esPrueba?: boolean
+  padreRaza?: string
+  madreRaza?: string
 }) {
   const { db } = await import("@/lib/db")
   const { publicaciones } = await import("@/lib/db/schema")
@@ -198,6 +200,8 @@ export async function crearPublicacion(data: {
       tipoPublicacion: data.tipoPublicacion,
       especie: data.especie,
       raza: data.raza,
+      padreRaza: data.padreRaza || null,
+      madreRaza: data.madreRaza || null,
       sexo: data.sexo,
       color: data.color,
       descripcion: data.descripcion,
@@ -319,6 +323,8 @@ function mapRowToPublicacion(row: typeof publicacionesTable.$inferSelect): Publi
       id: row.id, // Usamos el mismo ID ya que no hay tabla separada
       especie: row.especie as Especie,
       raza: row.raza as any,
+        padreRaza: row.padreRaza as Raza | undefined,
+        madreRaza: row.madreRaza as Raza | undefined,
       sexo: row.sexo as Sexo,
       color: row.color,
       descripcion: row.descripcion,

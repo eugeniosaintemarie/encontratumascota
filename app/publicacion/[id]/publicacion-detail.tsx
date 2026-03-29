@@ -1,92 +1,29 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { Header } from "@/components/header"
 import { PublicacionCard } from "@/components/publicacion-card"
-import { AuthModal } from "@/components/auth-modal"
-import { PublicarModal } from "@/components/publicar-modal"
-import { PerfilModal } from "@/components/perfil-modal"
 import { Footer } from "@/components/footer"
-import { fetchServerSession, logout } from "@/lib/auth/client"
-import { mapNeonUser } from "@/lib/auth"
+import { useAuth } from "@/lib/auth-context"
 import type { Publicacion } from "@/lib/types"
-import { ArrowLeft } from "lucide-react"
 
 interface PublicacionDetailProps {
   publicacion: Publicacion
 }
 
 export function PublicacionDetail({ publicacion }: PublicacionDetailProps) {
-  const router = useRouter()
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
-  const [isPublicarModalOpen, setIsPublicarModalOpen] = useState(false)
-  const [isPerfilModalOpen, setIsPerfilModalOpen] = useState(false)
-
-  const [currentUserRaw, setCurrentUserRaw] = useState<any | null>(null)
-
-  const isAuthenticated = !!currentUserRaw
-  const currentUser = currentUserRaw ? mapNeonUser(currentUserRaw) : null
-
-  // Resolve auth from server cookie-based session.
-  useEffect(() => {
-    void (async () => {
-      try {
-        const user = await fetchServerSession()
-        setCurrentUserRaw(user)
-      } catch {
-        setCurrentUserRaw(null)
-      }
-    })()
-  }, [])
-
-  const handleLogout = useCallback(() => {
-    logout()
-  }, [])
-
-  const handleAuthSuccess = useCallback(() => {
-    setIsAuthModalOpen(false)
-  }, [])
+  const { isAuthenticated, requireAuth } = useAuth()
 
   return (
     <div className="min-h-screen bg-background">
-      <Header
-        onPublicarClick={() => setIsPublicarModalOpen(true)}
-        onAccederClick={() => setIsAuthModalOpen(true)}
-        isAuthenticated={isAuthenticated}
-        onPerfilClick={() => setIsPerfilModalOpen(true)}
-        onLogout={handleLogout}
-      />
+      <Header />
       <main className="mx-auto max-w-lg px-4 pt-8 pb-8">
-
         <PublicacionCard
           publicacion={publicacion}
           isAuthenticated={isAuthenticated}
-          onRequireAuth={() => setIsAuthModalOpen(true)}
+          onRequireAuth={requireAuth}
         />
       </main>
-
       <Footer />
-
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        onAuthSuccess={handleAuthSuccess}
-      />
-
-      <PublicarModal
-        isOpen={isPublicarModalOpen}
-        onClose={() => setIsPublicarModalOpen(false)}
-        isAuthenticated={isAuthenticated}
-        onRequireAuth={() => setIsAuthModalOpen(true)}
-      />
-
-      <PerfilModal
-        isOpen={isPerfilModalOpen}
-        onClose={() => setIsPerfilModalOpen(false)}
-        currentUser={currentUser}
-        onLogout={handleLogout}
-      />
     </div>
   )
 }

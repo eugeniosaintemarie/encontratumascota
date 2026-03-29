@@ -7,7 +7,7 @@ import type { Publicacion } from "./types"
 interface PublicacionesContextType {
   publicaciones: Publicacion[]
   loading: boolean
-  cerrarPublicacion: (id: string, motivo: "encontrado_dueno" | "adoptado" | "en_transito" | "otro", transitoContacto?: { nombre: string; telefono: string; email: string }) => void
+  cerrarPublicacion: (id: string, motivo: "encontrado_dueno" | "adoptado" | "en_transito" | "otro", transitoContacto?: { nombre: string; telefono: string; email: string }, confirmarTransferenciaMultiple?: boolean) => void
   agregarPublicacion: (publicacion: Omit<Publicacion, "id" | "fechaPublicacion">) => void
   actualizarPublicacion: (id: string, datos: Partial<Publicacion>) => void
   refetch: () => Promise<void>
@@ -129,13 +129,11 @@ export function PublicacionesProvider({ children }: { children: ReactNode }) {
           sexo: publicacion.mascota.sexo,
           color: publicacion.mascota.color,
           descripcion: publicacion.mascota.descripcion,
+          padreRaza: publicacion.mascota.padreRaza,
+          madreRaza: publicacion.mascota.madreRaza,
           imagenUrl: publicacion.mascota.imagenUrl,
           ubicacion: publicacion.ubicacion,
           fechaEncuentro: publicacion.fechaEncuentro,
-          contactoNombre: publicacion.contactoNombre,
-          contactoTelefono: publicacion.contactoTelefono,
-          contactoEmail: publicacion.contactoEmail,
-          usuarioId: publicacion.usuarioId,
           transitoUrgente: publicacion.transitoUrgente ?? false,
         }),
       })

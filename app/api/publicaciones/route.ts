@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "@/lib/auth/server"
 import { isDemoRequest } from "@/lib/env"
-import { sanitizeObject } from "@/lib/sanitize-server"
+import { sanitizeObject, sanitizeEmail, sanitizePhone, sanitizeText } from "@/lib/sanitize-server"
 import { mockPublicaciones } from "@/lib/mock-data"
+import { isMestizoRaza } from "@/lib/utils"
 
 // GET /api/publicaciones - Listar publicaciones (publico)
 export async function GET(request: Request) {
@@ -68,9 +69,8 @@ export async function POST(request: Request) {
       descripcion: body.descripcion,
       edad: body.edad,
       ubicacion: body.ubicacion,
-      contactoNombre: body.contactoNombre,
-      contactoTelefono: body.contactoTelefono,
-      contactoEmail: body.contactoEmail,
+      padreRaza: body.padreRaza,
+      madreRaza: body.madreRaza,
     })
 
     // Validar campos obligatorios
@@ -82,6 +82,11 @@ export async function POST(request: Request) {
 
     if (!body.raza) {
       return NextResponse.json({ error: "La raza es obligatoria" }, { status: 400 })
+    }
+
+    const esRazaMestizo = isMestizoRaza(body.raza)
+    if (esRazaMestizo && (!datosSanitizados.padreRaza || !datosSanitizados.madreRaza)) {
+      return NextResponse.json({ error: "Madre y padre son obligatorios para mascotas mestizas" }, { status: 400 })
     }
 
     if (!body.sexo) {
@@ -116,11 +121,19 @@ export async function POST(request: Request) {
       }
     }
 
-    // Usar el usuarioId de la sesion, NO del body (previene suplantacion)
+    const { getRefugioProfileByAuthUserId } = await import("@/lib/actions/refugios")
+    const profile = await getRefugioProfileByAuthUserId(session.user.id)
+    const contactoNombre = sanitizeText(profile?.contactoNombre ?? sessionUser?.name ?? "")
+    const contactoTelefono = sanitizePhone(profile?.contactoTelefono ?? "")
+    const contactoEmail = sanitizeEmail(profile?.contactoEmail ?? sessionUser?.email ?? "")
+    const mostrarContactoPublico = profile?.mostrarContactoPublico ?? false
+
     const publicacion = await crearPublicacion({
       tipoPublicacion: body.tipoPublicacion as "perdida" | "adopcion" | "buscada",
       especie: body.especie,
       raza: body.raza,
+      padreRaza: datosSanitizados.padreRaza,
+      madreRaza: datosSanitizados.madreRaza,
       sexo: body.sexo,
       color: datosSanitizados.color,
       descripcion: datosSanitizados.descripcion,
@@ -128,10 +141,10 @@ export async function POST(request: Request) {
       imagenUrl: body.imagenUrl || "",
       ubicacion: datosSanitizados.ubicacion,
       fechaEncuentro: body.fechaEncuentro ? new Date(body.fechaEncuentro) : undefined,
-      contactoNombre: datosSanitizados.contactoNombre,
-      contactoTelefono: datosSanitizados.contactoTelefono,
-      contactoEmail: datosSanitizados.contactoEmail,
-      mostrarContactoPublico: !!body.mostrarContactoPublico,
+      contactoNombre,
+      contactoTelefono,
+      contactoEmail,
+      mostrarContactoPublico,
       usuarioId: session.user.id,
       transitoUrgente: !!body.transitoUrgente,
       esPrueba: !!body.esPrueba,

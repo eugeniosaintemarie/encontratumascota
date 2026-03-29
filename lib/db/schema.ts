@@ -19,6 +19,10 @@ export const usuariosPerfil = pgTable("usuarios_perfil", {
   authUserId: text("auth_user_id").primaryKey(),
   esRefugio: boolean("es_refugio").default(false).notNull(),
   nombreRefugio: text("nombre_refugio"),
+  contactoNombre: text("contacto_nombre"),
+  contactoTelefono: text("contacto_telefono"),
+  contactoEmail: text("contacto_email"),
+  mostrarContactoPublico: boolean("mostrar_contacto_publico").default(false).notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 })
 
@@ -29,6 +33,8 @@ export const publicaciones = pgTable("publicaciones", {
   // Datos de la mascota (inline, sin tabla separada para simplificar)
   especie: text("especie").notNull(), // "perro" | "gato" | "otro"
   raza: text("raza").notNull(),
+  padreRaza: text("padre_raza"),
+  madreRaza: text("madre_raza"),
   sexo: text("sexo").notNull(), // "macho" | "hembra" | "desconocido"
   color: text("color").notNull(),
   descripcion: text("descripcion").notNull(),

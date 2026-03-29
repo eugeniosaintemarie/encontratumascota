@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Plus, LogIn, Menu, Moon, Sun, User, LogOut, ExternalLink, Eye, HeartHandshake, SquareStack } from "lucide-react"
+import { Plus, LogIn, Menu, Moon, Sun, User, ExternalLink, Eye, HeartHandshake, SquareStack } from "lucide-react"
 import Image from "next/image"
 import { useTheme } from "next-themes"
 import { useAuth } from "@/lib/auth-context"
@@ -27,7 +27,6 @@ export const Header = memo(function Header({ isReadOnly = false }: HeaderProps) 
     openPublicarModal,
     openAuthModal,
     openPerfilModal,
-    logout,
   } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
   const [isSwipeOpen, setIsSwipeOpen] = useState(false)
@@ -49,6 +48,14 @@ export const Header = memo(function Header({ isReadOnly = false }: HeaderProps) 
   const handleThemeToggle = useCallback(() => {
     setTheme(isDark ? "light" : "dark")
   }, [isDark, setTheme])
+
+  const handleOpenPublicar = useCallback(() => {
+    if (isAuthenticated) {
+      openPublicarModal()
+    } else {
+      openAuthModal()
+    }
+  }, [isAuthenticated, openAuthModal, openPublicarModal])
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
@@ -99,7 +106,7 @@ export const Header = memo(function Header({ isReadOnly = false }: HeaderProps) 
               Solo lectura
             </Button>
           ) : (
-            <Button variant="outline" size="sm" onClick={() => (isAuthenticated ? openPublicarModal() : openAuthModal())}>
+            <Button variant="outline" size="sm" onClick={handleOpenPublicar}>
               <Plus className="mr-1.5 h-4 w-4" />
               Publicar
             </Button>
@@ -168,9 +175,9 @@ export const Header = memo(function Header({ isReadOnly = false }: HeaderProps) 
                 </DropdownMenuItem>
               ) : (
                 <DropdownMenuItem
-                  onClick={() => {
+                  onSelect={() => {
                     setMenuOpen(false)
-                    isAuthenticated ? openPublicarModal() : openAuthModal()
+                    handleOpenPublicar()
                   }}
                 >
                   <Plus className="mr-2 h-4 w-4" />
@@ -199,7 +206,6 @@ export const Header = memo(function Header({ isReadOnly = false }: HeaderProps) 
                   Acceder
                 </DropdownMenuItem>
               )}
-              <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleThemeToggle}>
                 {isDark ? (
                   <>

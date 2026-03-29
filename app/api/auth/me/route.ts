@@ -41,11 +41,20 @@ export async function GET(request: Request) {
       console.error("[api/auth/me] failed to fetch refugio profile", error)
     }
 
+    const contactoNombre = profile?.contactoNombre ?? sessionUser?.name ?? null
+    const contactoTelefono = profile?.contactoTelefono ?? null
+    const contactoEmail = profile?.contactoEmail ?? sessionUser?.email ?? null
+    const mostrarContactoPublico = profile?.mostrarContactoPublico ?? false
+
     return NextResponse.json({
       user: {
         ...session.user,
         esRefugio: profile?.esRefugio ?? false,
         nombreRefugio: profile?.nombreRefugio ?? null,
+        contactoNombre,
+        contactoTelefono,
+        contactoEmail,
+        mostrarContactoPublico,
       },
     })
   } catch (e) {

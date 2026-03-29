@@ -38,6 +38,11 @@ export const PublicacionCard = memo(function PublicacionCard({
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
 
+  const parentBreedBadges = [
+    mascota.padreRaza ? `Padre: ${razasLabels[mascota.padreRaza]}` : null,
+    mascota.madreRaza ? `Madre: ${razasLabels[mascota.madreRaza]}` : null,
+  ].filter(Boolean) as string[]
+
   // Obtener el historial anterior (del array historialTransferencias)
   const historialTransferencias = (publicacion.historialTransferencias as any[]) || []
   const tieneHistorial = historialTransferencias.length > 0
@@ -115,9 +120,21 @@ export const PublicacionCard = memo(function PublicacionCard({
               {generoLabels[mascota.sexo]}
             </Badge>
           </div>
-          <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0">
-            {razasLabels[mascota.raza]}
-          </Badge>
+          {parentBreedBadges.length > 0 ? (
+            parentBreedBadges.map((label) => (
+              <Badge
+                key={label}
+                variant="secondary"
+                className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0"
+              >
+                {label}
+              </Badge>
+            ))
+          ) : (
+            <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0">
+              {razasLabels[mascota.raza]}
+            </Badge>
+          )}
         </div>
         <div className="absolute left-3 bottom-3 flex flex-col gap-1.5">
           {publicacion.transitoUrgente && (

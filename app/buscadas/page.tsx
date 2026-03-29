@@ -1,19 +1,14 @@
 "use client"
 
-import { useState, useMemo, useCallback, useEffect } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { useItemsPerPage } from "@/hooks/use-items-per-page"
 import { PublicacionCard } from "@/components/publicacion-card"
 import { FiltrosPublicaciones } from "@/components/filtros-publicaciones"
 import { Header } from "@/components/header"
-import { AuthModal } from "@/components/auth-modal"
-import { PublicarModal } from "@/components/publicar-modal"
-import { PerfilModal } from "@/components/perfil-modal"
 import { PawPrint, ChevronLeft, ChevronRight } from "lucide-react"
 import { Footer } from "@/components/footer"
 import { usePublicaciones } from "@/lib/publicaciones-context"
-import { logout } from "@/lib/auth/client"
-import { mapNeonUser } from "@/lib/auth"
-import { useDemoSession } from "@/hooks/use-demo-session"
+import { useAuth } from "@/lib/auth-context"
 import type { Especie, Sexo } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 
@@ -25,14 +20,7 @@ export default function BuscadosPage() {
   const [fechaDesde, setFechaDesde] = useState<string | undefined>(undefined)
   const [currentPage, setCurrentPage] = useState(1)
 
-  // Auth state via Neon Auth
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
-  const [isPublicarModalOpen, setIsPublicarModalOpen] = useState(false)
-  const [isPerfilModalOpen, setIsPerfilModalOpen] = useState(false)
-
-  const { user, isAuthenticated } = useDemoSession()
-
-  const currentUser = user ? mapNeonUser(user) : null
+  const { isAuthenticated, requireAuth } = useAuth()
 
   const { publicaciones } = usePublicaciones()
   const { itemsPerPage, columns } = useItemsPerPage()
@@ -68,22 +56,10 @@ export default function BuscadosPage() {
     return publicacionesBuscadas.slice(startIndex, startIndex + itemsPerPage)
   }, [publicacionesBuscadas, currentPage, itemsPerPage])
 
-  const handlePublicarClick = useCallback(() => {
-    if (isAuthenticated) {
-      setIsPublicarModalOpen(true)
-    } else {
-      setIsAuthModalOpen(true)
-    }
-  }, [isAuthenticated])
-
   // Reset page when itemsPerPage changes (responsive)
   useEffect(() => {
     setCurrentPage(1)
   }, [itemsPerPage])
-
-  const handleLogout = useCallback(() => {
-    logout()
-  }, [])
 
   const hasActiveFilters =
     especie !== "todos" || raza !== "todos" || sexo !== "todos" || ubicacion !== "" || !!fechaDesde
@@ -138,7 +114,7 @@ export default function BuscadosPage() {
                     key={pub.id}
                     publicacion={pub}
                     isAuthenticated={isAuthenticated}
-                    onRequireAuth={() => setIsAuthModalOpen(true)}
+                    onRequireAuth={requireAuth}
                   />
                 ))}
               </div>
@@ -185,26 +161,6 @@ export default function BuscadosPage() {
       </main>
 
       <Footer />
-
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        onAuthSuccess={() => setIsAuthModalOpen(false)}
-      />
-
-      <PublicarModal
-        isOpen={isPublicarModalOpen}
-        onClose={() => setIsPublicarModalOpen(false)}
-        isAuthenticated={isAuthenticated}
-        onRequireAuth={() => setIsAuthModalOpen(true)}
-      />
-
-      <PerfilModal
-        isOpen={isPerfilModalOpen}
-        onClose={() => setIsPerfilModalOpen(false)}
-        currentUser={currentUser}
-        onLogout={handleLogout}
-      />
     </div>
   )
 }

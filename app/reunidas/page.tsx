@@ -1,19 +1,14 @@
 "use client"
 
-import { useState, useMemo, useCallback } from "react"
+import { useState, useMemo } from "react"
 import { useItemsPerPage } from "@/hooks/use-items-per-page"
 import { PublicacionCard } from "@/components/publicacion-card"
 import { FiltrosPublicaciones } from "@/components/filtros-publicaciones"
 import { Header } from "@/components/header"
-import { AuthModal } from "@/components/auth-modal"
-import { PublicarModal } from "@/components/publicar-modal"
-import { PerfilModal } from "@/components/perfil-modal"
 import { PawPrint } from "lucide-react"
 import { Footer } from "@/components/footer"
 import { usePublicaciones } from "@/lib/publicaciones-context"
-import { logout } from "@/lib/auth/client"
-import { mapNeonUser } from "@/lib/auth"
-import { useDemoSession } from "@/hooks/use-demo-session"
+import { useAuth } from "@/lib/auth-context"
 import type { Especie, Sexo } from "@/lib/types"
 
 export default function ReunidasPage() {
@@ -22,14 +17,7 @@ export default function ReunidasPage() {
   const [ubicacion, setUbicacion] = useState("")
   const [raza, setRaza] = useState<string | "todos">("todos")
 
-  // Auth state via Neon Auth
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
-  const [isPublicarModalOpen, setIsPublicarModalOpen] = useState(false)
-  const [isPerfilModalOpen, setIsPerfilModalOpen] = useState(false)
-
-  const { user, isAuthenticated } = useDemoSession()
-
-  const currentUser = user ? mapNeonUser(user) : null
+  const { isAuthenticated, requireAuth } = useAuth()
 
   const { publicaciones } = usePublicaciones()
   const { itemsPerPage, columns } = useItemsPerPage()
@@ -48,18 +36,6 @@ export default function ReunidasPage() {
       return pub.activa === false
     })
   }, [especie, raza, sexo, ubicacion, publicaciones])
-
-  const handlePublicarClick = useCallback(() => {
-    if (isAuthenticated) {
-      setIsPublicarModalOpen(true)
-    } else {
-      setIsAuthModalOpen(true)
-    }
-  }, [isAuthenticated])
-
-  const handleLogout = useCallback(() => {
-    logout()
-  }, [])
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -101,7 +77,7 @@ export default function ReunidasPage() {
                   key={publicacion.id}
                   publicacion={publicacion}
                   isAuthenticated={isAuthenticated}
-                  onRequireAuth={() => setIsAuthModalOpen(true)}
+                  onRequireAuth={requireAuth}
                 />
               ))}
 
@@ -132,26 +108,6 @@ export default function ReunidasPage() {
       </main>
 
       <Footer />
-
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        onAuthSuccess={() => setIsAuthModalOpen(false)}
-      />
-
-      <PublicarModal
-        isOpen={isPublicarModalOpen}
-        onClose={() => setIsPublicarModalOpen(false)}
-        isAuthenticated={isAuthenticated}
-        onRequireAuth={() => setIsAuthModalOpen(true)}
-      />
-
-      <PerfilModal
-        isOpen={isPerfilModalOpen}
-        onClose={() => setIsPerfilModalOpen(false)}
-        currentUser={currentUser}
-        onLogout={handleLogout}
-      />
     </div>
   )
 }
