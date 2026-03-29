@@ -59,3 +59,37 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: "Error interno" }, { status: 500 })
   }
 }
+
+// DELETE /api/publicaciones/[id] - Eliminar publicacion (requiere ser el dueno)
+export async function DELETE(request: Request, { params }: RouteParams) {
+  const { id } = await params
+
+  try {
+    const session = await getServerSession(request)
+    if (!session?.user) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 })
+    }
+
+    // Verificar que la publicacion pertenece al usuario
+    const { getPublicacionById, eliminarPublicacionDB } = await import("@/lib/actions/publicaciones")
+    const { isDemoRequest } = await import("@/lib/env")
+    const existing = await getPublicacionById(id, { forceDemo: isDemoRequest(request) })
+    if (!existing) {
+      return NextResponse.json({ error: "Publicacion no encontrada" }, { status: 404 })
+    }
+    if (existing.usuarioId !== session.user.id) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 403 })
+    }
+
+    const publicacion = await eliminarPublicacionDB(id)
+
+    if (!publicacion) {
+      return NextResponse.json({ error: "Publicacion no encontrada" }, { status: 404 })
+    }
+
+    return NextResponse.json({ message: "Publicacion eliminada" })
+  } catch (error) {
+    console.error("Error deleting publicacion:", error)
+    return NextResponse.json({ error: "Error interno" }, { status: 500 })
+  }
+}

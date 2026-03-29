@@ -1,4 +1,5 @@
-import type { Raza, Especie, Sexo } from "./types"
+import type { Raza, Especie, Sexo, TipoMascota } from "./types"
+import { tipoMascotaToEspecie } from "./types"
 
 export const razasPorEspecie: Record<Especie, { value: Raza; label: string }[]> = {
   perro: [
@@ -24,6 +25,11 @@ export const razasPorEspecie: Record<Especie, { value: Raza; label: string }[]> 
   otro: [
     { value: "otro_animal", label: "Otro animal" },
   ],
+}
+
+// Helper para obtener razas por TipoMascota
+export function getRazasPorTipoMascota(tipo: TipoMascota) {
+  return razasPorEspecie[tipoMascotaToEspecie(tipo)]
 }
 
 export const razasLabels: Record<Raza, string> = {
@@ -59,4 +65,12 @@ export const generoLabels: Record<Sexo, string> = {
   macho: "Macho",
   hembra: "Hembra",
   desconocido: "Desconocido",
+}
+
+export const tipoMascotaLabels: Record<TipoMascota, string> = {
+  perro: "Perro",
+  perra: "Perra",
+  gato: "Gato",
+  gata: "Gata",
+  otro: "Otro",
 }

@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useSharePublicacion } from "@/hooks/use-share-publicacion"
 import { usePublicaciones } from "@/lib/publicaciones-context"
-import { especieLabels, generoLabels, razasLabels } from "@/lib/labels"
+import { razasLabels, tipoMascotaLabels } from "@/lib/labels"
+import { especieSexoToTipo } from "@/lib/types"
 import { X, MapPin, RotateCcw, Share2, Check, Loader2 } from "lucide-react"
 
 interface SwipeExplorerModalProps {
@@ -23,6 +24,22 @@ function formatDate(date: Date): string {
     const month = (date.getMonth() + 1).toString().padStart(2, "0")
     const year = date.getFullYear().toString().slice(-2)
     return `${day}/${month}/${year}`
+}
+
+function formatEdad(edad?: string | null): string {
+    if (!edad) return ""
+    const parts = edad.trim().split(/\s+/)
+    if (parts.length < 2) return edad
+    const num = parseInt(parts[0], 10)
+    if (isNaN(num)) return edad
+    const unidad = parts[1].toLowerCase()
+    if (unidad.startsWith("año")) {
+        return num === 1 ? "1 año" : `${num} años`
+    }
+    if (unidad.startsWith("día") || unidad.startsWith("dia")) {
+        return num === 1 ? "1 día" : `${num} días`
+    }
+    return edad
 }
 
 export function SwipeExplorerModal({ isOpen, onClose }: SwipeExplorerModalProps) {
@@ -124,8 +141,6 @@ export function SwipeExplorerModal({ isOpen, onClose }: SwipeExplorerModalProps)
         setDragX(0)
     }
 
-    const rightLabel = current?.tipoPublicacion === "adopcion" ? "En adopción" : "Mascota encontrada"
-
     return (
         <Dialog
             open={isOpen}
@@ -185,7 +200,7 @@ export function SwipeExplorerModal({ isOpen, onClose }: SwipeExplorerModalProps)
                                     <div className="relative h-[72%]">
                                         <Image
                                             src={current?.mascota.imagenUrl || "/placeholder.svg"}
-                                            alt={current ? `${especieLabels[current.mascota.especie]} ${razasLabels[current.mascota.raza]}` : "Mascota"}
+                                            alt={current ? `${tipoMascotaLabels[especieSexoToTipo(current.mascota.especie, current.mascota.sexo)]} ${razasLabels[current.mascota.raza]}` : "Mascota"}
                                             fill
                                             className="object-cover"
                                             sizes="(max-width: 768px) 92vw, 390px"
@@ -224,29 +239,23 @@ export function SwipeExplorerModal({ isOpen, onClose }: SwipeExplorerModalProps)
                                         <div className="absolute left-3 top-3 flex flex-col gap-1.5">
                                             <div className="flex flex-wrap gap-1.5">
                                                 <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm border-0">
-                                                    {current ? especieLabels[current.mascota.especie] : ""}
-                                                </Badge>
-                                                <Badge variant="outline" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm border-0">
-                                                    {current ? generoLabels[current.mascota.sexo] : ""}
+                                                    {current ? tipoMascotaLabels[especieSexoToTipo(current.mascota.especie, current.mascota.sexo)] : ""}
                                                 </Badge>
                                             </div>
-                                            <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0">
-                                                {current ? razasLabels[current.mascota.raza] : ""}
-                                            </Badge>
                                         </div>
 
                                         <div className="absolute left-3 bottom-3">
                                             <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm text-xs flex items-center gap-1 border-0">
                                                 <MapPin className="h-4 w-4" />
-                                                {current?.ubicacion}
+                                                {current?.ubicacion?.slice(0, 25)}
                                             </Badge>
                                         </div>
 
                                         <div className="absolute right-3 bottom-3">
                                             <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm text-xs border-0">
                                                 {current?.tipoPublicacion === "adopcion"
-                                                    ? `${current?.mascota.edad ?? ""}`
-                                                    : current?.fechaEncuentro
+                                                    ? formatEdad(current?.mascota.edad)
+                                                    : current?.fechaEncuentro && current.fechaEncuentro.getFullYear() > 1970
                                                         ? formatDate(current.fechaEncuentro)
                                                         : ""}
                                             </Badge>
@@ -254,12 +263,20 @@ export function SwipeExplorerModal({ isOpen, onClose }: SwipeExplorerModalProps)
                                     </div>
 
                                     <div className="flex h-[28%] flex-col justify-between p-4 text-card-foreground">
-                                        <p className="line-clamp-3 text-sm text-muted-foreground">
-                                            {current?.mascota.descripcion}
+                                        <p className="text-sm text-foreground/80 line-clamp-6">
+                                            <span className="font-semibold block">
+                                                {current?.tipoPublicacion === "adopcion"
+                                                    ? "En adopción"
+                                                    : current?.tipoPublicacion === "buscada"
+                                                        ? current?.mascota.sexo === "hembra" ? "Buscada" : "Buscado"
+                                                        : current?.mascota.sexo === "hembra" ? "Encontrada" : "Encontrado"}
+                                            </span>
+                                            {current?.mascota.color && <span className="block">{current.mascota.color}</span>}
+                                            {current?.mascota.descripcion && <span className="italic">{current.mascota.descripcion}</span>}
                                         </p>
 
                                         <div className="mt-3 flex items-center justify-between gap-2 text-xs">
-                                            <p className="text-xs font-medium text-muted-foreground italic">{rightLabel}</p>
+                                            <p className="text-xs font-medium text-muted-foreground"></p>
                                             <button
                                                 type="button"
                                                 onPointerDown={(event) => event.stopPropagation()}

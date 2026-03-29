@@ -21,11 +21,13 @@ export async function PATCH(request: Request) {
     const mostrarContactoPublico = Boolean(
       body?.mostrarContactoPublico ?? existingProfile?.mostrarContactoPublico ?? false
     )
+    const ubicacion = sanitizeText(body?.ubicacion ?? existingProfile?.ubicacion ?? "")
 
     const updatedProfile = await setRefugioProfile({
       authUserId,
       esRefugio: existingProfile?.esRefugio ?? false,
       nombreRefugio: existingProfile?.nombreRefugio ?? null,
+      ubicacion: ubicacion || null,
       contactoNombre: contactoNombre || null,
       contactoTelefono: contactoTelefono || null,
       contactoEmail: contactoEmail || null,

@@ -9,11 +9,11 @@ import { PawPrint } from "lucide-react"
 import { Footer } from "@/components/footer"
 import { usePublicaciones } from "@/lib/publicaciones-context"
 import { useAuth } from "@/lib/auth-context"
-import type { Especie, Sexo } from "@/lib/types"
+import type { TipoMascota } from "@/lib/types"
+import { tipoMascotaToEspecie, tipoMascotaToSexo } from "@/lib/types"
 
 export default function ReunidasPage() {
-  const [especie, setEspecie] = useState<Especie | "todos">("todos")
-  const [sexo, setSexo] = useState<Sexo | "todos">("todos")
+  const [tipoMascota, setTipoMascota] = useState<TipoMascota | "todos">("todos")
   const [ubicacion, setUbicacion] = useState("")
   const [raza, setRaza] = useState<string | "todos">("todos")
 
@@ -24,9 +24,12 @@ export default function ReunidasPage() {
 
   const publicacionesReunidas = useMemo(() => {
     return publicaciones.filter((pub) => {
-      if (especie !== "todos" && pub.mascota.especie !== especie) return false
+      if (tipoMascota !== "todos") {
+        const especieFiltro = tipoMascotaToEspecie(tipoMascota)
+        const sexoFiltro = tipoMascotaToSexo(tipoMascota)
+        if (pub.mascota.especie !== especieFiltro || pub.mascota.sexo !== sexoFiltro) return false
+      }
       if (raza !== "todos" && pub.mascota.raza !== raza) return false
-      if (sexo !== "todos" && pub.mascota.sexo !== sexo) return false
       if (
         ubicacion &&
         !pub.ubicacion.toLowerCase().includes(ubicacion.toLowerCase())
@@ -35,7 +38,7 @@ export default function ReunidasPage() {
       // Reunidas = publicacion cerrada (no activa)
       return pub.activa === false
     })
-  }, [especie, raza, sexo, ubicacion, publicaciones])
+  }, [tipoMascota, raza, ubicacion, publicaciones])
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -45,29 +48,26 @@ export default function ReunidasPage() {
         <div className="space-y-4">
           <FiltrosPublicaciones
             tipoPublicacion={"adopcion"}
-            especie={especie}
+            tipoMascota={tipoMascota}
             raza={raza}
-            sexo={sexo}
             ubicacion={ubicacion}
             fechaDesde={undefined}
             transitoUrgente={false}
             onTipoPublicacionChange={() => { /* noop: fixed to adopcion */ }}
             hideTipoSelector={true}
             wideUbicacion={true}
-            onEspecieChange={(v) => setEspecie(v)}
+            onTipoMascotaChange={(v) => setTipoMascota(v)}
             onRazaChange={(v) => setRaza(v)}
-            onSexoChange={(v) => setSexo(v)}
             onUbicacionChange={(v) => setUbicacion(v)}
             onFechaDesdeChange={() => {}}
             onTransitoUrgenteChange={() => {}}
             onClearFilters={() => {
-              setEspecie("todos")
+              setTipoMascota("todos")
               setRaza("todos")
-              setSexo("todos")
               setUbicacion("")
             }}
             onSearch={() => {}}
-            hasActiveFilters={especie !== "todos" || raza !== "todos" || sexo !== "todos" || ubicacion !== ""}
+            hasActiveFilters={tipoMascota !== "todos" || raza !== "todos" || ubicacion !== ""}
           />
 
           {publicacionesReunidas.length > 0 ? (

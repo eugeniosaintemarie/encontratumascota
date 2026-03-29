@@ -10,6 +10,7 @@ interface PublicacionesContextType {
   cerrarPublicacion: (id: string, motivo: "encontrado_dueno" | "adoptado" | "en_transito" | "otro", transitoContacto?: { nombre: string; telefono: string; email: string }, confirmarTransferenciaMultiple?: boolean) => void
   agregarPublicacion: (publicacion: Omit<Publicacion, "id" | "fechaPublicacion">) => void
   actualizarPublicacion: (id: string, datos: Partial<Publicacion>) => void
+  eliminarPublicacion: (id: string) => Promise<void>
   refetch: () => Promise<void>
 }
 
@@ -175,6 +176,24 @@ export function PublicacionesProvider({ children }: { children: ReactNode }) {
     }
   }, [fetchPublicaciones])
 
+  const eliminarPublicacion = useCallback(async (id: string) => {
+    try {
+      const res = await fetch(`/api/publicaciones/${id}`, {
+        method: "DELETE",
+      })
+      if (res.ok) {
+        await fetchPublicaciones({ skipShuffle: true })
+      } else {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error || "Error al eliminar la publicación")
+      }
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Error de conexión"
+      console.error("Error eliminando publicacion:", e)
+      throw e
+    }
+  }, [fetchPublicaciones])
+
   return (
     <PublicacionesContext.Provider
       value={{
@@ -183,6 +202,7 @@ export function PublicacionesProvider({ children }: { children: ReactNode }) {
         cerrarPublicacion,
         agregarPublicacion,
         actualizarPublicacion,
+        eliminarPublicacion,
         refetch: fetchPublicaciones,
       }}
     >

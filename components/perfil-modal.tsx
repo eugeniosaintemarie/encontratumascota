@@ -24,13 +24,20 @@ import {
   UserPlus,
   Save,
   X,
+  Pencil,
+  Trash2,
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import LocationAutocomplete from "@/components/location-autocomplete"
 import { usePublicaciones } from "@/lib/publicaciones-context"
-import { especieLabels, generoLabels, razasLabels } from "@/lib/labels"
+import { useAuth } from "@/lib/auth-context"
+import { tipoMascotaLabels, razasLabels } from "@/lib/labels"
+import { especieSexoToTipo } from "@/lib/types"
+import { isMestizoRaza } from "@/lib/utils"
 import { authClient, logout } from "@/lib/auth/client"
 import type { Usuario } from "@/lib/types"
 import { sanitizeText, sanitizePhone, sanitizeEmail } from "@/lib/sanitize"
+import { toast } from "sonner"
 
 interface PerfilModalProps {
   isOpen: boolean
@@ -105,6 +112,7 @@ export function PerfilModal({
   onPasswordChange,
 }: PerfilModalProps) {
   const [activeTab, setActiveTab] = useState("publicaciones")
+  const [ubicacionPerfil, setUbicacionPerfil] = useState("")
   const [contactoTelefonoPerfil, setContactoTelefonoPerfil] = useState("")
   const [mostrarContactoPerfil, setMostrarContactoPerfil] = useState(false)
   const [perfilSaving, setPerfilSaving] = useState(false)
@@ -113,6 +121,7 @@ export function PerfilModal({
 
   useEffect(() => {
     if (!currentUser) return
+    setUbicacionPerfil(currentUser.ubicacion ?? "")
     setContactoTelefonoPerfil(currentUser.contactoTelefono ?? "")
     setMostrarContactoPerfil(currentUser.mostrarContactoPublico ?? false)
   }, [currentUser])
@@ -133,6 +142,7 @@ export function PerfilModal({
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          ubicacion: sanitizeText(ubicacionPerfil),
           contactoTelefono: sanitizePhone(contactoTelefonoPerfil),
           mostrarContactoPublico: mostrarContactoPerfil,
         }),
@@ -159,6 +169,8 @@ export function PerfilModal({
   const [selectedPublicacion, setSelectedPublicacion] = useState<string>("")
   const [closeReason, setCloseReason] = useState<"ubicada" | "transitada" | "">("")
   const [closeSuccess, setCloseSuccess] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const [transitoNombre, setTransitoNombre] = useState("")
   const [transitoTelefono, setTransitoTelefono] = useState("")
@@ -175,11 +187,35 @@ export function PerfilModal({
   const [passwordSuccess, setPasswordSuccess] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
-  const { publicaciones, cerrarPublicacion } = usePublicaciones()
+  const { publicaciones, cerrarPublicacion, eliminarPublicacion } = usePublicaciones()
+  const { openPublicarModalForEdit, closePerfilModal } = useAuth()
 
   const userPublicaciones = publicaciones.filter(
     (pub) => pub.usuarioId === currentUser?.id && pub.activa
   )
+
+  const handleEditPublicacion = () => {
+    const pub = publicaciones.find((p) => p.id === selectedPublicacion)
+    if (!pub) return
+    closePerfilModal()
+    openPublicarModalForEdit(pub)
+  }
+
+  const handleDeletePublicacion = async () => {
+    if (!selectedPublicacion) return
+    setIsDeleting(true)
+    try {
+      await eliminarPublicacion(selectedPublicacion)
+      setSelectedPublicacion("")
+      setShowDeleteConfirm(false)
+      toast.success("Publicación eliminada exitosamente")
+    } catch (error) {
+      console.error("Error eliminando publicación:", error)
+      toast.error("Error al eliminar la publicación")
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   const handleClosePublicacion = async () => {
     if (!selectedPublicacion || !closeReason) return
@@ -312,6 +348,7 @@ export function PerfilModal({
     setPasswordSuccess(false)
     setPerfilError(null)
     setPerfilSuccess(false)
+    setShowDeleteConfirm(false)
     onClose()
   }
 
@@ -384,16 +421,77 @@ export function PerfilModal({
                     <SelectValue placeholder="Elegir publicacion..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {userPublicaciones.map((pub) => (
-                      <SelectItem key={pub.id} value={pub.id}>
-                        {especieLabels[pub.mascota.especie]} - {generoLabels[pub.mascota.sexo]} - {razasLabels[pub.mascota.raza]} / {pub.ubicacion} ({pub.fechaEncuentro?.toLocaleDateString() ?? 'N/A'})
-                      </SelectItem>
-                    ))}
+                    {userPublicaciones.map((pub) => {
+                      const tipo = tipoMascotaLabels[especieSexoToTipo(pub.mascota.especie, pub.mascota.sexo)]
+                      const raza = isMestizoRaza(pub.mascota.raza)
+                        ? `Mestizo (${pub.mascota.madreRaza ? razasLabels[pub.mascota.madreRaza] : "?"} + ${pub.mascota.padreRaza ? razasLabels[pub.mascota.padreRaza] : "?"})`
+                        : razasLabels[pub.mascota.raza]
+                      const color = pub.mascota.color ? ` ${pub.mascota.color}` : ""
+                      return (
+                        <SelectItem key={pub.id} value={pub.id}>
+                          {tipo} {raza}{color}
+                        </SelectItem>
+                      )
+                    })}
                   </SelectContent>
                 </Select>
               )}
 
               {!currentUser?.isReadOnly && selectedPublicacion && (
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={handleEditPublicacion}
+                  >
+                    <Pencil className="mr-1.5 h-3.5 w-3.5" />
+                    Editar
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 text-destructive hover:text-destructive"
+                    onClick={() => setShowDeleteConfirm(true)}
+                  >
+                    <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                    Borrar
+                  </Button>
+                </div>
+              )}
+
+              {showDeleteConfirm && (
+                <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-3 space-y-3">
+                  <div className="flex items-center gap-2 text-sm font-medium text-destructive">
+                    <AlertTriangle className="h-4 w-4" />
+                    Confirmar eliminación
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    ¿Estás seguro de que querés eliminar esta publicación? Esta acción no se puede deshacer.
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => setShowDeleteConfirm(false)}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="flex-1"
+                      onClick={handleDeletePublicacion}
+                      disabled={isDeleting}
+                    >
+                      {isDeleting ? "Eliminando..." : "Confirmar"}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {!currentUser?.isReadOnly && selectedPublicacion && !showDeleteConfirm && (
                 <Select value={closeReason} onValueChange={(v) => setCloseReason(v as "ubicada" | "transitada")}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Seleccionar motivo de cierre..." />
@@ -523,6 +621,16 @@ export function PerfilModal({
               </Alert>
             )}
             <form onSubmit={handleSaveContacto} className="space-y-3">
+              <div className="space-y-2">
+                <Label htmlFor="perfil-ubicacion">Ubicación</Label>
+                <LocationAutocomplete
+                  value={ubicacionPerfil}
+                  onChange={(v) => setUbicacionPerfil(v)}
+                  onSelect={(place) => setUbicacionPerfil(place.address)}
+                  placeholder="Ejemplo: Almagro"
+                  className="!bg-transparent dark:!bg-transparent placeholder:text-muted-foreground text-foreground"
+                />
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="perfil-contacto-telefono">Teléfono</Label>
                 <Input

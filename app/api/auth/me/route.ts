@@ -45,12 +45,14 @@ export async function GET(request: Request) {
     const contactoTelefono = profile?.contactoTelefono ?? null
     const contactoEmail = profile?.contactoEmail ?? sessionUser?.email ?? null
     const mostrarContactoPublico = profile?.mostrarContactoPublico ?? false
+    const ubicacion = profile?.ubicacion ?? null
 
     return NextResponse.json({
       user: {
         ...session.user,
         esRefugio: profile?.esRefugio ?? false,
         nombreRefugio: profile?.nombreRefugio ?? null,
+        ubicacion,
         contactoNombre,
         contactoTelefono,
         contactoEmail,

@@ -239,14 +239,16 @@ export function ImageCropEditor({
         <ZoomIn className="h-4 w-4 text-muted-foreground shrink-0" />
       </div>
 
-      <div className="flex gap-2 justify-center">
-        <Button type="button" variant="ghost" size="sm" onClick={handleReset}>
-          <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
-          Restablecer
-        </Button>
-        <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
-          Cancelar
-        </Button>
+      <div className="flex flex-col sm:flex-row gap-2 justify-center items-center mb-4">
+        <div className="flex gap-2">
+          <Button type="button" variant="ghost" size="sm" onClick={handleReset}>
+            <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
+            Restablecer
+          </Button>
+          <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
+            Cancelar
+          </Button>
+        </div>
         <Button type="button" size="sm" onClick={handleConfirm}>
           <Check className="mr-1.5 h-3.5 w-3.5" />
           Confirmar recorte

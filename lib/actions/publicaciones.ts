@@ -290,6 +290,19 @@ export async function actualizarPublicacionDB(
   return row ? mapRowToPublicacion(row) : null
 }
 
+// ─── DELETE: Eliminar publicacion ──────────────────────────
+export async function eliminarPublicacionDB(id: string) {
+  const { db } = await import("@/lib/db")
+  const { publicaciones } = await import("@/lib/db/schema")
+
+  const [row] = await db
+    .delete(publicaciones)
+    .where(eq(publicaciones.id, id))
+    .returning()
+
+  return row ? mapRowToPublicacion(row) : null
+}
+
 // ─── Contador de mascotas reunidas ──────────────────────────
 export async function contarMascotasReunidas() {
   const conditions = [
