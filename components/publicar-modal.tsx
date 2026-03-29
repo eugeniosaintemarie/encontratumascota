@@ -325,9 +325,6 @@ export function PublicarModal({
       </button>
 
       <h2 className="text-lg font-semibold -mt-1">Publicar mascota</h2>
-      <p className="text-sm text-muted-foreground -mt-1">
-        Seleccioná el tipo de publicación y completá los datos de la mascota.
-      </p>
 
       {paso === 1 && (
         <div className="flex flex-col gap-4">
