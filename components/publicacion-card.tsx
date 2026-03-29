@@ -159,15 +159,15 @@ export const PublicacionCard = memo(function PublicacionCard({
 
       <CardContent className="flex flex-1 flex-col px-3 py-3">
         <p className="text-sm text-foreground/80 line-clamp-3 mb-[10px] min-h-[60px]">
-          <span className="font-semibold block mb-1">
+          <span className="font-semibold block">
             {publicacion.tipoPublicacion === "adopcion" 
               ? "En adopción" 
               : publicacion.tipoPublicacion === "buscada" 
               ? "Perdida" 
               : "Encontrada"}
-            {mascota.color && `: ${mascota.color}`}
           </span>
-          {descripcionFormateada}
+          {mascota.color && <span className="block">{mascota.color}</span>}
+          {descripcionFormateada && <span className="italic">{descripcionFormateada}</span>}
         </p>
 
         <div className="mt-auto">

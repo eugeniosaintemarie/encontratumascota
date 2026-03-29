@@ -267,23 +267,26 @@ export async function generateShareImage(
     ? "Perdida"
     : "Encontrada"
 
-  const tipoLabelWithColor = mascota.color 
-    ? `${tipoLabel}: ${mascota.color}` 
-    : tipoLabel
+  let currentY = descStartY
 
   ctx.fillStyle = COLORS.text
   ctx.font = `600 32px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
   ctx.textBaseline = "top"
   ctx.textAlign = "start"
 
-  ctx.fillText(tipoLabelWithColor, descPadding, descStartY)
+  ctx.fillText(tipoLabel, descPadding, currentY)
+  currentY += 40
 
-  const tipoLabelWidth = ctx.measureText(tipoLabel).width
+  if (mascota.color) {
+    ctx.font = `400 32px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
+    ctx.fillText(mascota.color, descPadding, currentY)
+    currentY += 40
+  }
 
-  ctx.font = `400 32px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
+  ctx.font = `italic 32px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
   
-  const maxDescLines = Math.floor((CANVAS_HEIGHT - descStartY - domainRectHeight - domainRectMargin - 40) / lineHeight)
-  wrapText(ctx, descripcion, descPadding, descStartY + 40, descMaxWidth, lineHeight, maxDescLines)
+  const maxDescLines = Math.floor((CANVAS_HEIGHT - currentY - domainRectHeight - domainRectMargin) / lineHeight)
+  wrapText(ctx, descripcion, descPadding, currentY, descMaxWidth, lineHeight, maxDescLines)
 
   // =====================
   // 6. DOMAIN BADGE AT BOTTOM
