@@ -123,9 +123,9 @@ export async function POST(request: Request) {
 
     const { getRefugioProfileByAuthUserId } = await import("@/lib/actions/refugios")
     const profile = await getRefugioProfileByAuthUserId(session.user.id)
-    const contactoNombre = sanitizeText(profile?.contactoNombre ?? sessionUser?.name ?? "")
+    const contactoNombre = sanitizeText(profile?.contactoNombre ?? session.user.name ?? "")
     const contactoTelefono = sanitizePhone(profile?.contactoTelefono ?? "")
-    const contactoEmail = sanitizeEmail(profile?.contactoEmail ?? sessionUser?.email ?? "")
+    const contactoEmail = sanitizeEmail(profile?.contactoEmail ?? session.user.email ?? "")
     const mostrarContactoPublico = profile?.mostrarContactoPublico ?? false
 
     const publicacion = await crearPublicacion({
@@ -148,7 +148,7 @@ export async function POST(request: Request) {
       usuarioId: session.user.id,
       transitoUrgente: !!body.transitoUrgente,
       esPrueba: !!body.esPrueba,
-    }, { forceDemo: isDemoRequest(request) })
+    })
 
     return NextResponse.json({ publicacion }, { status: 201 })
   } catch (error) {
