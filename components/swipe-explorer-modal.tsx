@@ -156,7 +156,7 @@ export function SwipeExplorerModal({ isOpen, onClose }: SwipeExplorerModalProps)
                         {loading ? (
                             <p className="text-foreground/80">Cargando publicaciones...</p>
                         ) : deck.length === 0 ? (
-                            <p className="text-foreground/80">No hay publicaciones activas para mostrar</p>
+                            <p className="text-foreground/80">No hay mascotas publicadas para mostrar</p>
                         ) : index >= deck.length ? (
                             <div className="text-center text-foreground">
                                 <p className="text-lg font-semibold">Ya viste todas las publicaciones</p>
