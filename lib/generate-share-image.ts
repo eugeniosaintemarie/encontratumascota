@@ -3,7 +3,7 @@ import { razasLabels, especieLabels, generoLabels } from "./labels"
 
 // 4:5 aspect ratio (optimal for Instagram feed / sharing)
 const CANVAS_WIDTH = 1080
-const CANVAS_HEIGHT = 1350
+const CANVAS_HEIGHT = 1500
 
 const COLORS = {
   white: "#FAFAFA",

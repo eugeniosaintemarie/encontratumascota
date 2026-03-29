@@ -158,7 +158,7 @@ export const PublicacionCard = memo(function PublicacionCard({
       </div>
 
       <CardContent className="flex flex-1 flex-col px-3 py-3">
-        <p className="text-sm text-foreground/80 line-clamp-3 mb-[10px] min-h-[60px]">
+        <p className="text-sm text-foreground/80 line-clamp-6 mb-[10px] min-h-[120px]">
           <span className="font-semibold block">
             {publicacion.tipoPublicacion === "adopcion" 
               ? "En adopción" 
