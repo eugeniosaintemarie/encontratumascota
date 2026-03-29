@@ -26,8 +26,8 @@ export function ListadoPublicaciones({
   publicacionesBase,
   fixedTipoPublicacion,
   hideTipoSelector = false,
-  emptyTitle = "Todavía no hay mascotas perdidas",
-  emptyDescription = "Las publicaciones de mascotas perdidas aparecerán aquí",
+  emptyTitle = "Todavía no hay publicaciones",
+  emptyDescription = "",
 }: ListadoPublicacionesProps) {
   const [tipoPublicacion, setTipoPublicacion] = useState<TipoPublicacion | undefined>(fixedTipoPublicacion)
   const [especie, setEspecie] = useState<Especie | "todos">("todos")
