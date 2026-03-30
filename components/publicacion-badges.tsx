@@ -14,28 +14,21 @@ export function PublicacionBadges({ publicacion, className = "", badgeClassName 
 
   return (
     <>
-      {/* Esquina superior izquierda: Tipo + Raza */}
-      <div className={`absolute left-3 top-3 flex flex-col gap-1.5 ${className}`}>
+      {/* Arriba a la izquierda: Tipo (Perro/a/etc) */}
+      <div className={`absolute left-3 top-3 ${className}`}>
         <Badge variant="secondary" className={`bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm border-0 ${badgeClassName}`}>
           {info.tipo}
         </Badge>
-        {info.esMestizo ? (
-          <>
-            <Badge variant="secondary" className={`bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0 ${badgeClassName}`}>
-              {info.razaDetalle?.split("\n")[0]}
-            </Badge>
-            <Badge variant="secondary" className={`bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0 ${badgeClassName}`}>
-              {info.razaDetalle?.split("\n")[1]}
-            </Badge>
-          </>
-        ) : info.raza ? (
-          <Badge variant="secondary" className={`bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0 ${badgeClassName}`}>
-            {info.raza}
-          </Badge>
-        ) : null}
       </div>
 
-      {/* Esquina inferior izquierda: ubicación */}
+      {/* Centro superior: edad/fecha en que se perdió/encontró */}
+      <div className={`absolute left-1/2 top-3 -translate-x-1/2 ${className}`}>
+        <Badge variant="secondary" className={`bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm text-xs border-0 ${badgeClassName}`}>
+          {info.edadOFecha}
+        </Badge>
+      </div>
+
+      {/* Abajo a la izquierda: raza */}
       <div className={`absolute left-3 bottom-3 flex flex-col gap-1.5 ${className}`}>
         {info.transitoUrgente && (
           <Badge variant="secondary" className={`text-white backdrop-blur-sm text-xs flex items-center gap-1 border-0 w-fit ${badgeClassName}`} style={{ backgroundColor: "#F44336" }}>
@@ -43,16 +36,27 @@ export function PublicacionBadges({ publicacion, className = "", badgeClassName 
             Tránsito urgente
           </Badge>
         )}
+        {info.esMestizo ? (
+          <>
+            <Badge variant="secondary" className={`bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0 text-xs ${badgeClassName}`}>
+              {info.razaDetalle?.split("\n")[0]}
+            </Badge>
+            <Badge variant="secondary" className={`bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0 text-xs ${badgeClassName}`}>
+              {info.razaDetalle?.split("\n")[1]}
+            </Badge>
+          </>
+        ) : info.raza ? (
+          <Badge variant="secondary" className={`bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0 text-xs ${badgeClassName}`}>
+            {info.raza}
+          </Badge>
+        ) : null}
+      </div>
+
+      {/* Abajo a la derecha: ubicación */}
+      <div className={`absolute right-3 bottom-3 ${className}`}>
         <Badge variant="secondary" className={`bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm text-xs flex items-center gap-1 border-0 ${badgeClassName}`}>
           <MapPin className="h-3 w-3" />
           {info.ubicacionCorta}
-        </Badge>
-      </div>
-
-      {/* Esquina inferior derecha: edad o fecha */}
-      <div className={`absolute right-3 bottom-3 ${className}`}>
-        <Badge variant="secondary" className={`bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm text-xs border-0 ${badgeClassName}`}>
-          {info.edadOFecha}
         </Badge>
       </div>
     </>
