@@ -194,44 +194,35 @@ export async function generateShareImage(
   // =====================
   const badgePad = 30
   let badgeY = badgePad
+  const badgeH = 56
 
-  // Esquina superior izquierda: Tipo
-  let badgeX = drawBadge(ctx, info.tipo, badgePad, badgeY)
-  badgeX += 15
+  // Arriba a la izquierda: Tipo
+  drawBadge(ctx, info.tipo, badgePad, badgeY)
 
-  // Esquina superior izquierda: Raza (si es mestizo, mostrar madre y padre)
+  // Centro arriba: Edad o fecha
+  const dateText = info.edadOFecha || (info.esAdopcion ? "Edad desconocida" : "Fecha desconocida")
+  ctx.font = `600 28px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
+  const dateTextW = ctx.measureText(dateText).width
+  const centerX = (CANVAS_WIDTH - dateTextW) / 2 - badgePad
+  drawBadge(ctx, dateText, centerX, badgeY, { fontSize: 28 })
+
+  // Abajo a la izquierda: Raza (si es mestizo, mostrar madre y padre)
+  ctx.font = `600 30px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
+  let bottomY = imageSize - badgePad - badgeH
   if (info.esMestizo && info.razaDetalle) {
     const lineas = info.razaDetalle.split("\n")
     lineas.forEach((linea) => {
-      drawBadge(ctx, linea, badgeX, badgeY)
-      badgeY += 56
+      drawBadge(ctx, linea, badgePad, bottomY, { fontSize: 28 })
+      bottomY -= badgeH + 10
     })
-    badgeY = badgePad
   } else if (info.raza) {
-    drawBadge(ctx, info.raza, badgeX, badgeY)
+    drawBadge(ctx, info.raza, badgePad, bottomY, { fontSize: 28 })
   }
 
-  // Esquina inferior izquierda: ubicación
-  let bottomY = imageSize - badgePad
-  bottomY -= 56
-  drawBadge(ctx, `📍 ${info.ubicacionCorta}`, badgePad, bottomY, { fontSize: 28 })
-
-  if (info.transitoUrgente) {
-    bottomY -= 56 + 10
-    drawBadge(ctx, "⚠️ Tránsito urgente", badgePad, bottomY, {
-      bgColor: COLORS.urgentBg,
-      textColor: COLORS.urgentText,
-      fontSize: 28,
-    })
-  }
-
-  // Esquina inferior derecha: edad o fecha
-  const dateText = info.edadOFecha || (info.esAdopcion ? "Edad desconocida" : "Fecha desconocida")
-  ctx.font = `600 28px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
-  const dateW = ctx.measureText(dateText).width
-  drawBadge(ctx, dateText, imageSize - badgePad - dateW - 44, imageSize - badgePad - 56, {
-    fontSize: 28,
-  })
+  // Abajo a la derecha: ubicación
+  const ubicacionText = `📍 ${info.ubicacionCorta}`
+  const ubicacionW = ctx.measureText(ubicacionText).width
+  drawBadge(ctx, ubicacionText, CANVAS_WIDTH - badgePad - ubicacionW - 44, imageSize - badgePad - badgeH, { fontSize: 28 })
 
   // =====================
   // 5. DESCRIPTION (below image, white bg)
