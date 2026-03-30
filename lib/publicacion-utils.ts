@@ -34,8 +34,8 @@ export function getPublicacionInfo(publicacion: Publicacion): PublicacionInfo {
     raza = esHembra ? "Mestiza" : "Mestizo"
     const padre = mascota.padreRaza ? razasLabels[mascota.padreRaza] || mascota.padreRaza : "?"
     const madre = mascota.madreRaza ? razasLabels[mascota.madreRaza] || mascota.madreRaza : "?"
-    madreRaza = `♀${madre}`
-    padreRaza = `♂${padre}`
+    madreRaza = `♀ ${madre}`
+    padreRaza = `♂ ${padre}`
     razaDetalle = `(${madreRaza} ${padreRaza})`
   } else {
     raza =razasLabels[mascota.raza] || mascota.raza

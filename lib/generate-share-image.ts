@@ -220,12 +220,12 @@ export async function generateShareImage(
   // Abajo a la derecha: tránsito urgente (arriba) y ubicación (abajo)
   let rightBottomY = imageSize - badgePad - badgeH
   if (info.transitoUrgente) {
-    const transitoText = "⚠️ Tránsito urgente"
+    const transitoText = "⚠ Tránsito urgente"
     const transitoW = ctx.measureText(transitoText).width
     drawBadge(ctx, transitoText, CANVAS_WIDTH - badgePad - transitoW - 44, rightBottomY, { fontSize: 28, bgColor: "#F44336", textColor: "#FFFFFF" })
     rightBottomY -= badgeH + 10
   }
-  const ubicacionText = `📍 ${info.ubicacionCorta}`
+  const ubicacionText = `📍${info.ubicacionCorta}`
   const ubicacionW = ctx.measureText(ubicacionText).width
   drawBadge(ctx, ubicacionText, CANVAS_WIDTH - badgePad - ubicacionW - 44, rightBottomY, { fontSize: 28 })
 
