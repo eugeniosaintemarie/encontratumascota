@@ -220,13 +220,13 @@ export async function generateShareImage(
   // Abajo a la derecha: tránsito urgente (arriba) y ubicación (abajo) - solo para no-adopciones
   let rightBottomY = imageSize - badgePad - badgeH
   if (info.transitoUrgente) {
-    const transitoText = "⚠ Trnsito urgente"
+    const transitoText = "⚠ Tránsito urgente"
     const transitoW = ctx.measureText(transitoText).width
     drawBadge(ctx, transitoText, CANVAS_WIDTH - badgePad - transitoW - 44, rightBottomY, { fontSize: 28, bgColor: "#F44336", textColor: "#FFFFFF" })
     rightBottomY -= badgeH + 10
   }
   if (!info.esAdopcion) {
-    const ubicacionText = `📍 ${info.ubicacionCorta}`
+    const ubicacionText = `⚲ ${info.ubicacionCorta}`
     const ubicacionW = ctx.measureText(ubicacionText).width
     drawBadge(ctx, ubicacionText, CANVAS_WIDTH - badgePad - ubicacionW - 44, rightBottomY, { fontSize: 28 })
   }
@@ -266,7 +266,7 @@ export async function generateShareImage(
   // =====================
   // 6. ENCONTRA TU MASCOTA AT BOTTOM
   // =====================
-  const domainText = "Encontra tu mascota"
+  const domainText = "EncontraTuMascota.ar"
   const domainRectY = CANVAS_HEIGHT - domainRectHeight - domainRectMargin
   const domainRectX = descPadding
   const domainRectWidth = CANVAS_WIDTH - descPadding * 2

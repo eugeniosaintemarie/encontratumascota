@@ -128,7 +128,7 @@ export function formatDate(date: Date): string {
 
 export function getShareText(publicacion: Publicacion): string {
   const info = getPublicacionInfo(publicacion)
-  const transitoTag = info.transitoUrgente ? " ¡Trnsito urgente!" : ""
+  const transitoTag = info.transitoUrgente ? " ¡Tránsito urgente!" : ""
   
   let title: string
   if (info.esAdopcion) {

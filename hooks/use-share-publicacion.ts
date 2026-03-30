@@ -25,7 +25,7 @@ export function useSharePublicacion(publicacion: Publicacion | null) {
     const url = `${window.location.origin}/publicacion/${publicacion.id}`
     const info = getPublicacionInfo(publicacion)
     const razaDetalle = info.razaDetalle
-      ? ` (${info.razaDetalle.replace(/\n/g, " + ")})`
+      ? ` ${info.razaDetalle.replace(/\n/g, " + ")}`
       : ""
     const color = info.color ? ` ${info.color}` : ""
     const transitoTag = info.transitoUrgente ? " ¡Tránsito urgente! ⚠️" : ""
