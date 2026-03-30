@@ -129,7 +129,13 @@ export function formatDate(date: Date): string {
 export function getShareText(publicacion: Publicacion): string {
   const info = getPublicacionInfo(publicacion)
   const transitoTag = info.transitoUrgente ? " ¡Trnsito urgente!" : ""
-  const ubicacionPrep = info.esAdopcion ? "de" : "en"
-  const title = `${info.tipo} ${info.raza}${info.razaDetalle ? ` ${info.razaDetalle}` : ""}${info.color ? ` ${info.color}` : ""} ${info.categoria.toLowerCase()} ${ubicacionPrep} ${info.ubicacionCorta}${transitoTag}`
+  
+  let title: string
+  if (info.esAdopcion) {
+    title = `${info.tipo} ${info.raza}${info.razaDetalle ? ` ${info.razaDetalle}` : ""}${info.color ? ` ${info.color}` : ""} ${info.categoria.toLowerCase()}${transitoTag}`
+  } else {
+    title = `${info.tipo} ${info.raza}${info.razaDetalle ? ` ${info.razaDetalle}` : ""}${info.color ? ` ${info.color}` : ""} ${info.categoria.toLowerCase()} en ${info.ubicacionCorta}${transitoTag}`
+  }
+  
   return `${title}\n\n${info.descripcion}\n\n${typeof window !== "undefined" ? window.location.origin : ""}/publicacion/${publicacion.id}`
 }

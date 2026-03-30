@@ -217,7 +217,7 @@ export async function generateShareImage(
     drawBadge(ctx, info.raza, badgePad, bottomY, { fontSize: 28 })
   }
 
-  // Abajo a la derecha: tránsito urgente (arriba) y ubicación (abajo)
+  // Abajo a la derecha: tránsito urgente (arriba) y ubicación (abajo) - solo para no-adopciones
   let rightBottomY = imageSize - badgePad - badgeH
   if (info.transitoUrgente) {
     const transitoText = "⚠ Trnsito urgente"
@@ -225,9 +225,11 @@ export async function generateShareImage(
     drawBadge(ctx, transitoText, CANVAS_WIDTH - badgePad - transitoW - 44, rightBottomY, { fontSize: 28, bgColor: "#F44336", textColor: "#FFFFFF" })
     rightBottomY -= badgeH + 10
   }
-  const ubicacionText = `📍 ${info.ubicacionCorta}`
-  const ubicacionW = ctx.measureText(ubicacionText).width
-  drawBadge(ctx, ubicacionText, CANVAS_WIDTH - badgePad - ubicacionW - 44, rightBottomY, { fontSize: 28 })
+  if (!info.esAdopcion) {
+    const ubicacionText = `📍 ${info.ubicacionCorta}`
+    const ubicacionW = ctx.measureText(ubicacionText).width
+    drawBadge(ctx, ubicacionText, CANVAS_WIDTH - badgePad - ubicacionW - 44, rightBottomY, { fontSize: 28 })
+  }
 
   // =====================
   // 5. DESCRIPTION (below image, white bg)

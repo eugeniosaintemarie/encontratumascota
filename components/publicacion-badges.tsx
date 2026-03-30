@@ -11,6 +11,7 @@ interface PublicacionBadgesProps {
 
 export function PublicacionBadges({ publicacion, className = "", badgeClassName = "" }: PublicacionBadgesProps) {
   const info = getPublicacionInfo(publicacion)
+  const mostrarUbicacion = !info.esAdopcion
 
   return (
     <>
@@ -50,19 +51,21 @@ export function PublicacionBadges({ publicacion, className = "", badgeClassName 
         ) : null}
       </div>
 
-      {/* Abajo a la derecha: tránsito urgente + ubicación */}
-      <div className={`absolute right-3 bottom-3 flex flex-col gap-1.5 items-end ${className}`}>
-        {info.transitoUrgente && (
-          <Badge variant="secondary" className={`text-white backdrop-blur-sm text-xs flex items-center gap-1 border-0 w-fit ${badgeClassName}`} style={{ backgroundColor: "#F44336" }}>
-            <AlertTriangle className="h-3 w-3" />
-            Tránsito urgente
+      {/* Abajo a la derecha: tránsito urgente + ubicación - solo para no-adopciones */}
+      {mostrarUbicacion && (
+        <div className={`absolute right-3 bottom-3 flex flex-col gap-1.5 items-end ${className}`}>
+          {info.transitoUrgente && (
+            <Badge variant="secondary" className={`text-white backdrop-blur-sm text-xs flex items-center gap-1 border-0 w-fit ${badgeClassName}`} style={{ backgroundColor: "#F44336" }}>
+              <AlertTriangle className="h-3 w-3" />
+              Tránsito urgente
+            </Badge>
+          )}
+          <Badge variant="secondary" className={`bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm text-xs flex items-center gap-1 border-0 ${badgeClassName}`}>
+            <MapPin className="h-3 w-3" />
+            {info.ubicacionCorta}
           </Badge>
-        )}
-        <Badge variant="secondary" className={`bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm text-xs flex items-center gap-1 border-0 ${badgeClassName}`}>
-          <MapPin className="h-3 w-3" />
-          {info.ubicacionCorta}
-        </Badge>
-      </div>
+        </div>
+      )}
     </>
   )
 }
