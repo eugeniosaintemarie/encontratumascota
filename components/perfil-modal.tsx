@@ -423,8 +423,9 @@ export function PerfilModal({
                   <SelectContent>
                     {userPublicaciones.map((pub) => {
                       const tipo = tipoMascotaLabels[especieSexoToTipo(pub.mascota.especie, pub.mascota.sexo)]
+                      const esHembraMascota = pub.mascota.sexo === "hembra"
                       const raza = isMestizoRaza(pub.mascota.raza)
-                        ? `Mestizo (${pub.mascota.madreRaza ? razasLabels[pub.mascota.madreRaza] : "?"} + ${pub.mascota.padreRaza ? razasLabels[pub.mascota.padreRaza] : "?"})`
+                        ? `${esHembraMascota ? "Mestiza" : "Mestizo"} (♀️${pub.mascota.madreRaza ? razasLabels[pub.mascota.madreRaza] : "?"} + ♂️${pub.mascota.padreRaza ? razasLabels[pub.mascota.padreRaza] : "?"})`
                         : razasLabels[pub.mascota.raza]
                       const color = pub.mascota.color ? ` ${pub.mascota.color}` : ""
                       return (

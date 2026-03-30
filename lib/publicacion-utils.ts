@@ -30,12 +30,11 @@ export function getPublicacionInfo(publicacion: Publicacion): PublicacionInfo {
     raza = esHembra ? "Mestiza" : "Mestizo"
     const padre = mascota.padreRaza ? razasLabels[mascota.padreRaza] || mascota.padreRaza : "?"
     const madre = mascota.madreRaza ? razasLabels[mascota.madreRaza] || mascota.madreRaza : "?"
-    razaDetalle = `♀️ ${madre}\n️ ${padre}`
+    razaDetalle = `${raza} (♀️${madre} + ♂️${padre})`
   } else {
     raza =razasLabels[mascota.raza] || mascota.raza
   }
 
-  // Si es mestizo, no mostrar "Mestiza/o" como razaDetalle, solo mostrar madre y padre
   if (esMestizo) {
     raza = ""
   }
@@ -101,6 +100,6 @@ export function getShareText(publicacion: Publicacion): string {
   const info = getPublicacionInfo(publicacion)
   const transitoTag = info.transitoUrgente ? " ¡Trnsito urgente!" : ""
   const ubicacionPrep = info.esAdopcion ? "de" : "en"
-  const title = `${info.tipo} ${info.raza}${info.razaDetalle ? ` (${info.razaDetalle.replace(/\n/g, " + ")})` : ""}${info.color ? ` ${info.color}` : ""} ${info.categoria.toLowerCase()} ${ubicacionPrep} ${info.ubicacionCorta}${transitoTag}`
+  const title = `${info.tipo} ${info.raza}${info.razaDetalle ? ` ${info.razaDetalle}` : ""}${info.color ? ` ${info.color}` : ""} ${info.categoria.toLowerCase()} ${ubicacionPrep} ${info.ubicacionCorta}${transitoTag}`
   return `${title}\n\n${info.descripcion}\n\n${typeof window !== "undefined" ? window.location.origin : ""}/publicacion/${publicacion.id}`
 }
