@@ -597,7 +597,7 @@ export function PublicarModal({
                   value={fechaNacimiento}
                   onChange={(e) => setFechaNacimiento(e.target.value)}
                   required
-                  className="w-full"
+                  className="w-full text-foreground [&::-webkit-calendar-picker-indicator]:opacity-50"
                   max={new Date().toISOString().split("T")[0]}
                 />
               </div>
