@@ -10,6 +10,7 @@ import { MapPin, Lock, Share2, Check, Loader2, AlertTriangle, UserPlus, User, Zo
 import type { Publicacion } from "@/lib/types"
 import { especieSexoToTipo } from "@/lib/types"
 import { razasLabels, tipoMascotaLabels } from "@/lib/labels"
+import { isMestizoRaza, truncateUbicacion } from "@/lib/utils"
 import { ImageViewerModal } from "@/components/image-viewer-modal"
 import { formatHeartEmojiSpacing } from "@/lib/utils"
 import { useSharePublicacion } from "@/hooks/use-share-publicacion"
@@ -156,7 +157,7 @@ export const PublicacionCard = memo(function PublicacionCard({
           )}
           <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm text-xs flex items-center gap-1 border-0">
             <MapPin className="h-3 w-3" />
-            {publicacion.ubicacion}
+            {truncateUbicacion(publicacion.ubicacion)}
           </Badge>
         </div>
         <div className="absolute right-3 bottom-3">

@@ -6,7 +6,7 @@ import { generateShareImage } from "@/lib/generate-share-image"
 import { razasLabels, tipoMascotaLabels } from "@/lib/labels"
 import type { Publicacion } from "@/lib/types"
 import { especieSexoToTipo } from "@/lib/types"
-import { isMestizoRaza } from "@/lib/utils"
+import { isMestizoRaza, truncateUbicacion } from "@/lib/utils"
 
 export function useSharePublicacion(publicacion: Publicacion | null) {
   const [isSharing, setIsSharing] = useState(false)
@@ -43,7 +43,7 @@ export function useSharePublicacion(publicacion: Publicacion | null) {
           ? "en adopción"
           : "encontrado"
     const transitoTag = publicacion.transitoUrgente ? " ¡Tránsito urgente!" : ""
-    const title = `${tipo} ${raza}${color} ${tipoTexto} en ${publicacion.ubicacion}${transitoTag}`
+    const title = `${tipo} ${raza}${color} ${tipoTexto} en ${truncateUbicacion(publicacion.ubicacion)}${transitoTag}`
     const shareText = `${title}\n\n${mascota.descripcion}\n\n${url}`
 
     try {

@@ -10,6 +10,7 @@ import { useSharePublicacion } from "@/hooks/use-share-publicacion"
 import { usePublicaciones } from "@/lib/publicaciones-context"
 import { razasLabels, tipoMascotaLabels } from "@/lib/labels"
 import { especieSexoToTipo } from "@/lib/types"
+import { isMestizoRaza, truncateUbicacion } from "@/lib/utils"
 import { X, MapPin, RotateCcw, Share2, Check, Loader2 } from "lucide-react"
 
 interface SwipeExplorerModalProps {
@@ -242,12 +243,31 @@ export function SwipeExplorerModal({ isOpen, onClose }: SwipeExplorerModalProps)
                                                     {current ? tipoMascotaLabels[especieSexoToTipo(current.mascota.especie, current.mascota.sexo)] : ""}
                                                 </Badge>
                                             </div>
+                                            {current && isMestizoRaza(current.mascota.raza) && (
+                                                <>
+                                                    {current.mascota.madreRaza && (
+                                                        <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0">
+                                                            Madre: {razasLabels[current.mascota.madreRaza]}
+                                                        </Badge>
+                                                    )}
+                                                    {current.mascota.padreRaza && (
+                                                        <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0">
+                                                            Padre: {razasLabels[current.mascota.padreRaza]}
+                                                        </Badge>
+                                                    )}
+                                                </>
+                                            )}
+                                            {current && !isMestizoRaza(current.mascota.raza) && (
+                                                <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0">
+                                                    {razasLabels[current.mascota.raza]}
+                                                </Badge>
+                                            )}
                                         </div>
 
                                         <div className="absolute left-3 bottom-3">
                                             <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm text-xs flex items-center gap-1 border-0">
                                                 <MapPin className="h-4 w-4" />
-                                                {current?.ubicacion?.slice(0, 25)}
+                                                {truncateUbicacion(current?.ubicacion)}
                                             </Badge>
                                         </div>
 

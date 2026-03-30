@@ -1,7 +1,7 @@
 import type { Publicacion } from "./types"
 import { especieSexoToTipo } from "./types"
 import { razasLabels, tipoMascotaLabels } from "./labels"
-import { isMestizoRaza } from "./utils"
+import { isMestizoRaza, truncateUbicacion } from "./utils"
 
 // 4:5 aspect ratio (optimal for Instagram feed / sharing)
 const CANVAS_WIDTH = 1080
@@ -223,10 +223,10 @@ export async function generateShareImage(
   // Top-left: Tipo (Perro/Perra/Gato/Gata/Otro)
   drawBadge(ctx, tipoMascotaLabels[especieSexoToTipo(mascota.especie, mascota.sexo)], badgePad, badgeY)
 
-  // Bottom-left: ubicación (max 25 chars)
+  // Bottom-left: ubicación
   let bottomY = imageSize - badgePad
   bottomY -= 56
-  const ubicacionText = publicacion.ubicacion?.slice(0, 25) || ""
+  const ubicacionText = truncateUbicacion(publicacion.ubicacion)
   drawBadge(ctx, `📍 ${ubicacionText}`, badgePad, bottomY, { fontSize: 28 })
 
   if (publicacion.transitoUrgente) {
