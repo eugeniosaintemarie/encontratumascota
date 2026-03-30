@@ -11,6 +11,8 @@ export type Raza =
   | "golden"
   | "bulldog"
   | "pastor_aleman"
+  | "pastor_australiano"
+  | "shar_pei"
   | "caniche"
   | "beagle"
   | "otro_perro"
@@ -56,11 +58,10 @@ export interface Publicacion {
   esPrueba?: boolean
   transitoUrgente?: boolean
   esRefugio?: boolean
-  // Contacto de la persona que tiene la mascota en transito
+  enTransito?: boolean
   transitoContactoNombre?: string | null
   transitoContactoTelefono?: string | null
   transitoContactoEmail?: string | null
-  // Historial de transferencias (cuidadores anteriores)
   historialTransferencias?: Array<{
     nombre: string
     telefono: string

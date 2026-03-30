@@ -1,5 +1,5 @@
 import type { Publicacion } from "./types"
-import { razasLabels, especieLabels, generoLabels } from "./labels"
+import { getRazaLabel, especieLabels, generoLabels } from "./labels"
 
 // 4:5 aspect ratio (optimal for Instagram feed / sharing)
 const CANVAS_WIDTH = 1080
@@ -208,7 +208,20 @@ export async function generateShareImage(
   drawBadge(ctx, generoLabels[mascota.sexo], cx, badgeY)
   badgeY += 56 + 10
 
-  drawBadge(ctx, razasLabels[mascota.raza], badgePad, badgeY)
+  drawBadge(ctx, getRazaLabel(mascota.raza, mascota.sexo), badgePad, badgeY)
+
+  const parentBreedBadges = [
+    mascota.padreRaza ? `Padre: ${getRazaLabel(mascota.padreRaza)}` : null,
+    mascota.madreRaza ? `Madre: ${getRazaLabel(mascota.madreRaza)}` : null,
+  ].filter(Boolean) as string[]
+
+  if (parentBreedBadges.length > 0) {
+    badgeY += 56 + 10
+    parentBreedBadges.forEach((label) => {
+      drawBadge(ctx, label, badgePad, badgeY, { fontSize: 26 })
+      badgeY += 56 + 10
+    })
+  }
 
   // Bottom-left: tránsito urgente + ubicación
   let bottomY = imageSize - badgePad

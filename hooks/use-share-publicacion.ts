@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { generateShareImage } from "@/lib/generate-share-image"
-import { razasLabels, especieLabels, generoLabels } from "@/lib/labels"
+import { getRazaLabel, especieLabels, generoLabels } from "@/lib/labels"
 import type { Publicacion } from "@/lib/types"
 
 export function useSharePublicacion(publicacion: Publicacion | null) {
@@ -28,7 +28,7 @@ export function useSharePublicacion(publicacion: Publicacion | null) {
       : publicacion.tipoPublicacion === "adopcion"
         ? "en adopción"
         : "encontrado"
-    const title = `${especieLabels[publicacion.mascota.especie]} ${generoLabels[publicacion.mascota.sexo].toLowerCase()} ${razasLabels[publicacion.mascota.raza]} ${tipoTexto} en ${publicacion.ubicacion}`
+    const title = `${especieLabels[publicacion.mascota.especie]} ${generoLabels[publicacion.mascota.sexo].toLowerCase()} ${getRazaLabel(publicacion.mascota.raza, publicacion.mascota.sexo)} ${tipoTexto} en ${publicacion.ubicacion}`
     const transitoTag = publicacion.transitoUrgente ? " ¡Tránsito urgente!" : ""
     const shareText = `${title}${transitoTag}\n\n${publicacion.mascota.descripcion}\n\n${url}`
 

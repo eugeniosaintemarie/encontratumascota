@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useSharePublicacion } from "@/hooks/use-share-publicacion"
 import { usePublicaciones } from "@/lib/publicaciones-context"
-import { especieLabels, generoLabels, razasLabels } from "@/lib/labels"
+import { especieLabels, generoLabels, getRazaLabel } from "@/lib/labels"
 import { X, MapPin, RotateCcw, Share2, Check, Loader2 } from "lucide-react"
 
 interface SwipeExplorerModalProps {
@@ -68,7 +68,6 @@ export function SwipeExplorerModal({ isOpen, onClose }: SwipeExplorerModalProps)
             return
         }
 
-        // Avoid background scroll while user swipes cards.
         document.body.style.overflow = "hidden"
         return () => {
             document.body.style.overflow = "unset"
@@ -185,7 +184,7 @@ export function SwipeExplorerModal({ isOpen, onClose }: SwipeExplorerModalProps)
                                     <div className="relative h-[72%]">
                                         <Image
                                             src={current?.mascota.imagenUrl || "/placeholder.svg"}
-                                            alt={current ? `${especieLabels[current.mascota.especie]} ${razasLabels[current.mascota.raza]}` : "Mascota"}
+                                            alt={current ? `${especieLabels[current.mascota.especie]} ${getRazaLabel(current.mascota.raza, current.mascota.sexo)}` : "Mascota"}
                                             fill
                                             className="object-cover"
                                             sizes="(max-width: 768px) 92vw, 390px"
@@ -231,8 +230,18 @@ export function SwipeExplorerModal({ isOpen, onClose }: SwipeExplorerModalProps)
                                                 </Badge>
                                             </div>
                                             <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0">
-                                                {current ? razasLabels[current.mascota.raza] : ""}
+                                                {current ? getRazaLabel(current.mascota.raza, current.mascota.sexo) : ""}
                                             </Badge>
+                                            {current?.mascota.raza === "mestizo" && current.mascota.madreRaza && (
+                                                <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0">
+                                                    Madre: {getRazaLabel(current.mascota.madreRaza, "hembra")}
+                                                </Badge>
+                                            )}
+                                            {current?.mascota.raza === "mestizo" && current.mascota.padreRaza && (
+                                                <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0">
+                                                    Padre: {getRazaLabel(current.mascota.padreRaza, "macho")}
+                                                </Badge>
+                                            )}
                                         </div>
 
                                         <div className="absolute left-3 bottom-3">

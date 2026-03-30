@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { MapPin, Lock, Share2, Check, Loader2, AlertTriangle, UserPlus, User, ZoomIn, History } from "lucide-react"
 import type { Publicacion } from "@/lib/types"
-import { razasLabels, especieLabels, generoLabels } from "@/lib/labels"
+import { getRazaLabel, especieLabels, generoLabels } from "@/lib/labels"
 import { ImageViewerModal } from "@/components/image-viewer-modal"
 import { formatHeartEmojiSpacing } from "@/lib/utils"
 import { useSharePublicacion } from "@/hooks/use-share-publicacion"
@@ -39,11 +39,10 @@ export const PublicacionCard = memo(function PublicacionCard({
   const [showHistory, setShowHistory] = useState(false)
 
   const parentBreedBadges = [
-    mascota.padreRaza ? `Padre: ${razasLabels[mascota.padreRaza]}` : null,
-    mascota.madreRaza ? `Madre: ${razasLabels[mascota.madreRaza]}` : null,
+    mascota.padreRaza ? `Padre: ${getRazaLabel(mascota.padreRaza)}` : null,
+    mascota.madreRaza ? `Madre: ${getRazaLabel(mascota.madreRaza)}` : null,
   ].filter(Boolean) as string[]
 
-  // Obtener el historial anterior (del array historialTransferencias)
   const historialTransferencias = (publicacion.historialTransferencias as any[]) || []
   const tieneHistorial = historialTransferencias.length > 0
   const contactoAnterior = tieneHistorial ? historialTransferencias[historialTransferencias.length - 1] : null
@@ -54,7 +53,6 @@ export const PublicacionCard = memo(function PublicacionCard({
     }
   }
 
-  // Limitar descripcion a 100 caracteres y capitalizar primera letra
   const descripcionLimitada = mascota.descripcion.length > 100
     ? mascota.descripcion.slice(0, 100).trim() + "..."
     : mascota.descripcion
@@ -68,23 +66,19 @@ export const PublicacionCard = memo(function PublicacionCard({
       <div className="relative aspect-square overflow-hidden bg-muted cursor-pointer" onClick={() => setIsImageViewerOpen(true)}>
         <Image
           src={mascota.imagenUrl || "/placeholder.svg"}
-          alt={`${especieLabels[mascota.especie]} ${mascota.raza} ${publicacion.tipoPublicacion === "buscada" ? "buscado" : publicacion.tipoPublicacion === "adopcion" ? "en adopción" : "encontrado"} en ${publicacion.ubicacion}`}
+          alt={`${especieLabels[mascota.especie]} ${getRazaLabel(mascota.raza, mascota.sexo)} ${publicacion.tipoPublicacion === "buscada" ? "buscado" : publicacion.tipoPublicacion === "adopcion" ? "en adopción" : "encontrado"} en ${publicacion.ubicacion}`}
           fill
           loading="lazy"
           className="object-cover object-top transition-transform duration-300 group-hover:scale-105"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 20vw"
         />
 
-        {/* Zoom indicator overlay */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
           <div className="bg-white/90 dark:bg-black/70 rounded-full p-2 shadow-lg backdrop-blur-sm">
             <ZoomIn className="h-5 w-5 text-foreground" />
           </div>
         </div>
 
-        {/* imagen renderizada */}
-
-        {/* Botón de compartir */}
         <div className="absolute right-3 top-3 z-10">
           <Button
             size="icon"
@@ -132,7 +126,7 @@ export const PublicacionCard = memo(function PublicacionCard({
             ))
           ) : (
             <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0">
-              {razasLabels[mascota.raza]}
+              {getRazaLabel(mascota.raza, mascota.sexo)}
             </Badge>
           )}
         </div>
@@ -177,7 +171,6 @@ export const PublicacionCard = memo(function PublicacionCard({
             return canSeeContact
           })() ? (
             <div className="rounded-lg bg-[#FF8A65]/10 px-3 py-3 min-h-[84px] relative flex flex-col">
-              {/* Icono flip para ver historial (solo si hay historial) */}
               {tieneHistorial && (
                 <button
                   onClick={() => setShowHistory(!showHistory)}
@@ -189,7 +182,6 @@ export const PublicacionCard = memo(function PublicacionCard({
                 </button>
               )}
 
-              {/* Si está en tránsito y tiene contacto de tránsito, mostrar ambos o historial */}
               {publicacion.transitoContactoNombre ? (
                 <div
                   style={{
@@ -206,7 +198,6 @@ export const PublicacionCard = memo(function PublicacionCard({
                       minHeight: "inherit",
                     } as any}
                   >
-                    {/* FRENTE - Cuidador actual */}
                     <div
                       style={{
                         backfaceVisibility: "hidden",
@@ -237,7 +228,6 @@ export const PublicacionCard = memo(function PublicacionCard({
                       </div>
                     </div>
 
-                    {/* ATRÁS - Cuidador anterior */}
                     {contactoAnterior && (
                       <div
                         style={{
@@ -277,7 +267,6 @@ export const PublicacionCard = memo(function PublicacionCard({
                   </div>
                 </div>
               ) : (
-                /* Contacto normal (sin tránsito) */
                 <div className="space-y-0 leading-tight rounded-lg bg-transparent p-0 overflow-hidden min-h-[84px] flex flex-col flex-1">
                   <div className="mb-1">
                     <div className="flex items-center gap-1.5">
@@ -335,7 +324,6 @@ export const PublicacionCard = memo(function PublicacionCard({
         </div>
       </CardContent>
 
-      {/* Image Viewer Modal */}
       <ImageViewerModal
         isOpen={isImageViewerOpen}
         onClose={() => setIsImageViewerOpen(false)}
