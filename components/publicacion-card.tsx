@@ -8,40 +8,15 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { MapPin, Lock, Share2, Check, Loader2, AlertTriangle, UserPlus, User, ZoomIn, History } from "lucide-react"
 import type { Publicacion } from "@/lib/types"
-import { especieSexoToTipo } from "@/lib/types"
-import { razasLabels, tipoMascotaLabels } from "@/lib/labels"
-import { isMestizoRaza, truncateUbicacion } from "@/lib/utils"
 import { ImageViewerModal } from "@/components/image-viewer-modal"
 import { formatHeartEmojiSpacing } from "@/lib/utils"
 import { useSharePublicacion } from "@/hooks/use-share-publicacion"
+import { PublicacionBadges, PublicacionDetalle } from "@/components/publicacion-badges"
 
 interface PublicacionCardProps {
   publicacion: Publicacion
   isAuthenticated?: boolean
   onRequireAuth?: (publicacionId: string) => void
-}
-
-function formatDate(date: Date): string {
-  const day = date.getDate().toString().padStart(2, "0")
-  const month = (date.getMonth() + 1).toString().padStart(2, "0")
-  const year = date.getFullYear().toString().slice(-2)
-  return `${day}/${month}/${year}`
-}
-
-function formatEdad(edad?: string | null): string {
-  if (!edad) return ""
-  const parts = edad.trim().split(/\s+/)
-  if (parts.length < 2) return edad
-  const num = parseInt(parts[0], 10)
-  if (isNaN(num)) return edad
-  const unidad = parts[1].toLowerCase()
-  if (unidad.startsWith("año")) {
-    return num === 1 ? "1 año" : `${num} años`
-  }
-  if (unidad.startsWith("día") || unidad.startsWith("dia")) {
-    return num === 1 ? "1 día" : `${num} días`
-  }
-  return edad
 }
 
 export const PublicacionCard = memo(function PublicacionCard({
@@ -56,11 +31,6 @@ export const PublicacionCard = memo(function PublicacionCard({
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
 
-  const parentBreedBadges = [
-    mascota.padreRaza ? `Padre: ${razasLabels[mascota.padreRaza]}` : null,
-    mascota.madreRaza ? `Madre: ${razasLabels[mascota.madreRaza]}` : null,
-  ].filter(Boolean) as string[]
-
   // Obtener el historial anterior (del array historialTransferencias)
   const historialTransferencias = (publicacion.historialTransferencias as any[]) || []
   const tieneHistorial = historialTransferencias.length > 0
@@ -72,12 +42,6 @@ export const PublicacionCard = memo(function PublicacionCard({
     }
   }
 
-  // Limitar descripcion a 100 caracteres y capitalizar primera letra
-  const descripcionLimitada = mascota.descripcion.length > 100
-    ? mascota.descripcion.slice(0, 100).trim() + "..."
-    : mascota.descripcion
-  const descripcionFormateada = descripcionLimitada.charAt(0).toUpperCase() + descripcionLimitada.slice(1).toLowerCase()
-
   return (
     <Card
       id={`publicacion-${publicacion.id}`}
@@ -86,7 +50,7 @@ export const PublicacionCard = memo(function PublicacionCard({
       <div className="relative aspect-square overflow-hidden bg-muted cursor-pointer" onClick={() => setIsImageViewerOpen(true)}>
         <Image
           src={mascota.imagenUrl || "/placeholder.svg"}
-          alt={`${tipoMascotaLabels[especieSexoToTipo(mascota.especie, mascota.sexo)]} ${mascota.raza} ${publicacion.tipoPublicacion === "buscada" ? "buscado" : publicacion.tipoPublicacion === "adopcion" ? "en adopción" : "encontrado"} en ${publicacion.ubicacion}`}
+          alt={`${publicacion.mascota.especie} ${publicacion.mascota.raza} ${publicacion.tipoPublicacion === "buscada" ? "buscado" : publicacion.tipoPublicacion === "adopcion" ? "en adopción" : "encontrado"} en ${publicacion.ubicacion}`}
           fill
           loading="lazy"
           className="object-cover object-top transition-transform duration-300 group-hover:scale-105"
@@ -126,63 +90,11 @@ export const PublicacionCard = memo(function PublicacionCard({
           </Button>
         </div>
 
-        <div className="absolute left-3 top-3 flex flex-col gap-1.5">
-          <div className="flex flex-wrap gap-1.5">
-            <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm border-0">
-              {tipoMascotaLabels[especieSexoToTipo(mascota.especie, mascota.sexo)]}
-            </Badge>
-          </div>
-          {parentBreedBadges.length > 0 ? (
-            parentBreedBadges.map((label) => (
-              <Badge
-                key={label}
-                variant="secondary"
-                className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0"
-              >
-                {label}
-              </Badge>
-            ))
-          ) : (
-            <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0">
-              {razasLabels[mascota.raza]}
-            </Badge>
-          )}
-        </div>
-        <div className="absolute left-3 bottom-3 flex flex-col gap-1.5">
-          {publicacion.transitoUrgente && (
-            <Badge variant="secondary" className="text-white backdrop-blur-sm text-xs flex items-center gap-1 border-0 w-fit" style={{ backgroundColor: "#F44336" }}>
-              <AlertTriangle className="h-3 w-3" />
-              Tránsito urgente
-            </Badge>
-          )}
-          <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm text-xs flex items-center gap-1 border-0">
-            <MapPin className="h-3 w-3" />
-            {truncateUbicacion(publicacion.ubicacion)}
-          </Badge>
-        </div>
-        <div className="absolute right-3 bottom-3">
-          <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm text-xs border-0">
-            {publicacion.tipoPublicacion === "adopcion"
-              ? formatEdad(mascota.edad)
-              : publicacion.fechaEncuentro && publicacion.fechaEncuentro.getFullYear() > 1970 
-                ? formatDate(publicacion.fechaEncuentro) 
-                : ""}
-          </Badge>
-        </div>
+        <PublicacionBadges publicacion={publicacion} />
       </div>
 
       <CardContent className="flex flex-1 flex-col px-3 py-3">
-        <p className="text-sm text-foreground/80 line-clamp-6 mb-[10px] min-h-[120px]">
-          <span className="font-semibold block">
-            {publicacion.tipoPublicacion === "adopcion" 
-              ? "En adopción" 
-              : publicacion.tipoPublicacion === "buscada" 
-              ? mascota.sexo === "hembra" ? "Buscada" : "Buscado"
-              : mascota.sexo === "hembra" ? "Encontrada" : "Encontrado"}
-          </span>
-          {mascota.color && <span className="block">{mascota.color}</span>}
-          {descripcionFormateada && <span className="italic">{descripcionFormateada}</span>}
-        </p>
+        <PublicacionDetalle publicacion={publicacion} />
 
         <div className="mt-auto">
           {(() => {
@@ -358,7 +270,7 @@ export const PublicacionCard = memo(function PublicacionCard({
         isOpen={isImageViewerOpen}
         onClose={() => setIsImageViewerOpen(false)}
         imageUrl={mascota.imagenUrl || "/placeholder.svg"}
-        alt={`${tipoMascotaLabels[especieSexoToTipo(mascota.especie, mascota.sexo)]} ${publicacion.tipoPublicacion === "buscada" ? "buscado" : "encontrado"}`}
+        alt={`${publicacion.mascota.especie} ${publicacion.tipoPublicacion === "buscada" ? "buscado" : "encontrado"}`}
       />
     </Card>
   )

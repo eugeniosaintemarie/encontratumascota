@@ -1,8 +1,5 @@
 import type { Publicacion } from "./types"
-import { especieSexoToTipo } from "./types"
-import { razasLabels, tipoMascotaLabels } from "./labels"
-import { isMestizoRaza, truncateUbicacion } from "./utils"
-import { MESTIZO_RAZAS } from "./utils"
+import { getPublicacionInfo, formatEdad, formatDate } from "./publicacion-utils"
 
 // 4:5 aspect ratio (optimal for Instagram feed / sharing)
 const CANVAS_WIDTH = 1080
@@ -16,29 +13,6 @@ const COLORS = {
   badgeText: "#1a1a1a",
   urgentBg: "#F44336",
   urgentText: "#ffffff",
-}
-
-function formatDate(date: Date): string {
-  const day = date.getDate().toString().padStart(2, "0")
-  const month = (date.getMonth() + 1).toString().padStart(2, "0")
-  const year = date.getFullYear().toString().slice(-2)
-  return `${day}/${month}/${year}`
-}
-
-function formatEdad(edad?: string | null): string {
-  if (!edad) return ""
-  const parts = edad.trim().split(/\s+/)
-  if (parts.length < 2) return edad
-  const num = parseInt(parts[0], 10)
-  if (isNaN(num)) return edad
-  const unidad = parts[1].toLowerCase()
-  if (unidad.startsWith("año")) {
-    return num === 1 ? "1 año" : `${num} años`
-  }
-  if (unidad.startsWith("día") || unidad.startsWith("dia")) {
-    return num === 1 ? "1 día" : `${num} días`
-  }
-  return edad
 }
 
 function loadImage(src: string): Promise<HTMLImageElement> {
@@ -163,7 +137,7 @@ export async function generateShareImage(
   canvas.height = CANVAS_HEIGHT
   const ctx = canvas.getContext("2d")!
 
-  const { mascota } = publicacion
+  const info = getPublicacionInfo(publicacion)
 
   // =====================
   // 1. WHITE BACKGROUND (same as landing)
@@ -177,7 +151,7 @@ export async function generateShareImage(
   const imageSize = CANVAS_WIDTH // 1080x1080
 
   try {
-    const petImage = await loadImage(mascota.imagenUrl)
+    const petImage = await loadImage(publicacion.mascota.imagenUrl)
     const imgRatio = petImage.width / petImage.height
     let sx = 0, sy = 0, sw = petImage.width, sh = petImage.height
 
@@ -216,36 +190,35 @@ export async function generateShareImage(
   ctx.fillRect(0, imageSize * 0.6, imageSize, imageSize * 0.4)
 
   // =====================
-  // 4. BADGES ON IMAGE (same layout as card)
+  // 4. BADGES ON IMAGE
   // =====================
   const badgePad = 30
   let badgeY = badgePad
 
-  // Top-left: Tipo (Perro/Perra/Gato/Gata/Otro)
-  const tipoBadge = tipoMascotaLabels[especieSexoToTipo(mascota.especie, mascota.sexo)]
-  let badgeX = drawBadge(ctx, tipoBadge, badgePad, badgeY)
+  // Esquina superior izquierda: Tipo
+  let badgeX = drawBadge(ctx, info.tipo, badgePad, badgeY)
   badgeX += 15
 
-  // Top-left: Raza (si es mestizo, mostrar raza de padres)
-  const isMestizo = isMestizoRaza(mascota.raza)
-  const isHembra = mascota.sexo === "hembra"
-  let razaText = ""
-  if (isMestizo) {
-    const padre = mascota.padreRaza ?razasLabels[mascota.padreRaza] || mascota.padreRaza : "?"
-    const madre = mascota.madreRaza ?razasLabels[mascota.madreRaza] || mascota.madreRaza : "?"
-    razaText = isHembra ? `Mestiza (${madre} + ${padre})` : `Mestizo (${madre} + ${padre})`
+  // Esquina superior izquierda: Raza (si es mestizo, mostrar madre y padre en líneas separadas)
+  if (info.razaDetalle) {
+    drawBadge(ctx, info.raza, badgeX, badgeY)
+    badgeY += 56
+    const lineas = info.razaDetalle.split("\n")
+    lineas.forEach((linea) => {
+      drawBadge(ctx, linea, badgeX, badgeY)
+      badgeY += 56
+    })
+    badgeY = badgePad
   } else {
-    razaText = razasLabels[mascota.raza] || mascota.raza
+    drawBadge(ctx, info.raza, badgeX, badgeY)
   }
-  drawBadge(ctx, razaText, badgeX, badgeY)
 
-  // Bottom-left: ubicación
+  // Esquina inferior izquierda: ubicación
   let bottomY = imageSize - badgePad
   bottomY -= 56
-  const ubicacionText = truncateUbicacion(publicacion.ubicacion)
-  drawBadge(ctx, `📍 ${ubicacionText}`, badgePad, bottomY, { fontSize: 28 })
+  drawBadge(ctx, `📍 ${info.ubicacionCorta}`, badgePad, bottomY, { fontSize: 28 })
 
-  if (publicacion.transitoUrgente) {
+  if (info.transitoUrgente) {
     bottomY -= 56 + 10
     drawBadge(ctx, "⚠️ Tránsito urgente", badgePad, bottomY, {
       bgColor: COLORS.urgentBg,
@@ -254,21 +227,8 @@ export async function generateShareImage(
     })
   }
 
-  // Bottom-right: date or age
-  const getBottomRightText = () => {
-    if (publicacion.tipoPublicacion === "adopcion") {
-      return formatEdad(mascota.edad) || "Edad desconocida"
-    }
-
-    const referenceDate = publicacion.fechaEncuentro ?? publicacion.fechaPublicacion
-    if (referenceDate && referenceDate.getFullYear() > 1970) {
-      return formatDate(referenceDate)
-    }
-
-    return "Fecha desconocida"
-  }
-
-  const dateText = getBottomRightText()
+  // Esquina inferior derecha: edad o fecha
+  const dateText = info.edadOFecha || (info.esAdopcion ? "Edad desconocida" : "Fecha desconocida")
   ctx.font = `600 28px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
   const dateW = ctx.measureText(dateText).width
   drawBadge(ctx, dateText, imageSize - badgePad - dateW - 44, imageSize - badgePad - 56, {
@@ -285,12 +245,6 @@ export async function generateShareImage(
   const domainRectHeight = 70
   const domainRectMargin = 24
 
-  const tipoLabel = publicacion.tipoPublicacion === "adopcion"
-    ? "En adopción"
-    : publicacion.tipoPublicacion === "buscada"
-      ? (mascota.sexo === "hembra" ? "Buscada" : "Buscado")
-      : (mascota.sexo === "hembra" ? "Encontrada" : "Encontrado")
-
   let currentY = descStartY
 
   // 1. Categoría en negrita
@@ -298,20 +252,20 @@ export async function generateShareImage(
   ctx.font = `700 32px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
   ctx.textBaseline = "top"
   ctx.textAlign = "start"
-  ctx.fillText(tipoLabel, descPadding, currentY)
+  ctx.fillText(info.categoria, descPadding, currentY)
   currentY += 40
 
   // 2. Color
-  if (mascota.color) {
+  if (info.color) {
     ctx.font = `400 32px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
-    ctx.fillText(mascota.color, descPadding, currentY)
+    ctx.fillText(info.color, descPadding, currentY)
     currentY += 40
   }
 
   // 3. Descripción en cursiva
   ctx.font = `italic 32px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
   const maxDescLines = Math.floor((CANVAS_HEIGHT - currentY - domainRectHeight - domainRectMargin) / lineHeight)
-  wrapText(ctx, mascota.descripcion, descPadding, currentY, descMaxWidth, lineHeight, maxDescLines)
+  wrapText(ctx, info.descripcion, descPadding, currentY, descMaxWidth, lineHeight, maxDescLines)
 
   // =====================
   // 6. ENCONTRA TU MASCOTA AT BOTTOM
