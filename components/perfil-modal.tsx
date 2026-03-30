@@ -430,7 +430,7 @@ export function PerfilModal({
                       const color = pub.mascota.color ? ` ${pub.mascota.color}` : ""
                       return (
                         <SelectItem key={pub.id} value={pub.id}>
-                          {tipo} {raza}{color}
+                          {tipo} {raza}{color} 🐾
                         </SelectItem>
                       )
                     })}

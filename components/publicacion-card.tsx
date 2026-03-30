@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, memo } from "react"
+import { useState, memo, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
@@ -30,6 +30,19 @@ export const PublicacionCard = memo(function PublicacionCard({
   const { isSharing, isCopied, handleShare } = useSharePublicacion(publicacion)
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
+  const [authChecked, setAuthChecked] = useState(isAuthenticated)
+
+  useEffect(() => {
+    setAuthChecked(isAuthenticated)
+  }, [isAuthenticated])
+
+  useEffect(() => {
+    const handleSessionUpdate = () => {
+      setAuthChecked(true)
+    }
+    window.addEventListener("demo-session-updated", handleSessionUpdate)
+    return () => window.removeEventListener("demo-session-updated", handleSessionUpdate)
+  }, [])
 
   // Obtener el historial anterior (del array historialTransferencias)
   const historialTransferencias = (publicacion.historialTransferencias as any[]) || []
@@ -99,7 +112,7 @@ export const PublicacionCard = memo(function PublicacionCard({
         <div className="mt-auto">
           {(() => {
             const isCerrada = publicacion.activa === false && !publicacion.enTransito
-            const canSeeContact = publicacion.mostrarContactoPublico && (isAuthenticated || !isCerrada)
+            const canSeeContact = publicacion.mostrarContactoPublico && (authChecked || !isCerrada)
             return canSeeContact
           })() ? (
             <div className="rounded-lg bg-[#FF8A65]/10 px-3 py-3 min-h-[84px] relative flex flex-col">
