@@ -17,7 +17,6 @@ interface PublicacionesContextType {
     sexo?: string
     color?: string
     descripcion?: string
-    edad?: string | null
     imagenUrl?: string
   }) => void
   eliminarPublicacion: (id: string) => Promise<void>

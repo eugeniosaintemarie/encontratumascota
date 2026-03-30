@@ -59,10 +59,6 @@ export async function getPublicaciones(filtros?: FiltrosPublicaciones, opts?: { 
     const { db } = await import("@/lib/db")
     const { publicaciones } = await import("@/lib/db/schema")
 
-    if (!isDemo) {
-      conditions.push(eq(publicaciones.esPrueba, false))
-    }
-
     if (filtros?.soloActivas !== false) {
       conditions.push(eq(publicaciones.activa, true))
     }
@@ -108,15 +104,15 @@ export async function getPublicaciones(filtros?: FiltrosPublicaciones, opts?: { 
   // Transformar a las interfaces del frontend
   let result = rows.map(mapRowToPublicacion)
 
-  // En produccion, reflejar el flag esRefugio desde perfil de usuario
-  if (!isDemo) {
+  // En demo/dev, enriquecer con perfiles de refugio y aplicar filtros
+  if (isDemo) {
     result = await enrichPublicacionesWithRefugioProfile(result)
     if (filtros?.soloRefugios) {
       result = result.filter((pub) => pub.esRefugio === true)
     }
   }
 
-  // Inyectar mocks estaticos si estamos en demo
+  // Inyectar mocks estaticos solo si estamos en demo/dev
   if (isDemo) {
     const mockFiltradas = mockPublicaciones.filter((pub) => {
       if (filtros?.soloActivas !== false) {
@@ -157,9 +153,6 @@ export async function getPublicacionById(id: string, opts?: { forceDemo?: boolea
   const { db } = await import("@/lib/db")
   const { publicaciones } = await import("@/lib/db/schema")
   const conditions = [eq(publicaciones.id, id)]
-  if (!isDemo) {
-    conditions.push(eq(publicaciones.esPrueba, false))
-  }
 
   const rows = await db
     .select()
@@ -180,7 +173,6 @@ export async function crearPublicacion(data: {
   sexo: string
   color: string
   descripcion: string
-  edad?: string // legacy
   fechaNacimiento?: Date
   imagenUrl?: string
   ubicacion: string
@@ -191,7 +183,6 @@ export async function crearPublicacion(data: {
   mostrarContactoPublico: boolean
   usuarioId: string
   transitoUrgente?: boolean
-  esPrueba?: boolean
   padreRaza?: string
   madreRaza?: string
 }) {
@@ -209,7 +200,6 @@ export async function crearPublicacion(data: {
       sexo: data.sexo,
       color: data.color,
       descripcion: data.descripcion,
-      edad: data.edad,
       fechaNacimiento: data.fechaNacimiento || null,
       imagenUrl: data.imagenUrl || "",
       ubicacion: data.ubicacion,
@@ -220,7 +210,6 @@ export async function crearPublicacion(data: {
       mostrarContactoPublico: data.mostrarContactoPublico,
       usuarioId: data.usuarioId,
       transitoUrgente: data.transitoUrgente ?? false,
-      esPrueba: data.esPrueba ?? false,
     })
     .returning()
 
@@ -278,7 +267,6 @@ export async function actualizarPublicacionDB(
     sexo: string
     color: string
     descripcion: string
-    edad: string | null
     imagenUrl: string
     tipoPublicacion: string
     ubicacion: string
@@ -288,7 +276,6 @@ export async function actualizarPublicacionDB(
     contactoEmail: string
     activa: boolean
     transitoUrgente: boolean
-    esPrueba: boolean
   }>
 ) {
 
@@ -319,24 +306,13 @@ export async function eliminarPublicacionDB(id: string) {
 
 // ─── Contador de mascotas reunidas ──────────────────────────
 export async function contarMascotasReunidas() {
-  const conditions = [
-    // lazy-import schema for conditions
-    // (we'll import publicaciones below)
-  ]
   const { db } = await import("@/lib/db")
   const { publicaciones } = await import("@/lib/db/schema")
-
-  conditions.push(eq(publicaciones.activa, false))
-
-  // Filtrar publicaciones de prueba si no estamos en modo demo
-  if (!isDemoEnv) {
-    conditions.push(eq(publicaciones.esPrueba, false))
-  }
 
   const rows = await db
     .select()
     .from(publicaciones)
-    .where(and(...conditions))
+    .where(eq(publicaciones.activa, false))
 
   return rows.length
 }
@@ -347,15 +323,14 @@ function mapRowToPublicacion(row: typeof publicacionesTable.$inferSelect): Publi
     id: row.id,
     tipoPublicacion: row.tipoPublicacion as "perdida" | "adopcion",
     mascota: {
-      id: row.id, // Usamos el mismo ID ya que no hay tabla separada
+      id: row.id,
       especie: row.especie as Especie,
       raza: row.raza as any,
-        padreRaza: row.padreRaza as Raza | undefined,
-        madreRaza: row.madreRaza as Raza | undefined,
+      padreRaza: row.padreRaza as Raza | undefined,
+      madreRaza: row.madreRaza as Raza | undefined,
       sexo: row.sexo as Sexo,
       color: row.color,
       descripcion: row.descripcion,
-      edad: row.edad,
       fechaNacimiento: row.fechaNacimiento,
       imagenUrl: row.imagenUrl || "",
     },
@@ -368,7 +343,6 @@ function mapRowToPublicacion(row: typeof publicacionesTable.$inferSelect): Publi
     mostrarContactoPublico: row.mostrarContactoPublico,
     usuarioId: row.usuarioId,
     activa: row.activa,
-    esPrueba: row.esPrueba,
     transitoUrgente: row.transitoUrgente,
     transitoContactoNombre: row.transitoContactoNombre,
     transitoContactoTelefono: row.transitoContactoTelefono,

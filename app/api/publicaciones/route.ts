@@ -67,7 +67,6 @@ export async function POST(request: Request) {
     const datosSanitizados = sanitizeObject({
       color: body.color,
       descripcion: body.descripcion,
-      edad: body.edad,
       ubicacion: body.ubicacion,
       padreRaza: body.padreRaza,
       madreRaza: body.madreRaza,
@@ -137,7 +136,6 @@ export async function POST(request: Request) {
       sexo: body.sexo,
       color: datosSanitizados.color,
       descripcion: datosSanitizados.descripcion,
-      edad: datosSanitizados.edad,
       fechaNacimiento: body.fechaNacimiento ? new Date(body.fechaNacimiento) : undefined,
       imagenUrl: body.imagenUrl || "",
       ubicacion: datosSanitizados.ubicacion,
@@ -148,7 +146,6 @@ export async function POST(request: Request) {
       mostrarContactoPublico,
       usuarioId: session.user.id,
       transitoUrgente: !!body.transitoUrgente,
-      esPrueba: !!body.esPrueba,
     })
 
     return NextResponse.json({ publicacion }, { status: 201 })

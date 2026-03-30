@@ -39,7 +39,6 @@ export const publicaciones = pgTable("publicaciones", {
   sexo: text("sexo").notNull(), // "macho" | "hembra" | "desconocido"
   color: text("color").notNull(),
   descripcion: text("descripcion").notNull(),
-  edad: text("edad"), // Solo para adopcion: "~ X años o meses" (legacy)
   fechaNacimiento: timestamp("fecha_nacimiento"), // Para adopcion: fecha de nacimiento
   imagenUrl: text("imagen_url").default(""),
 
@@ -60,7 +59,6 @@ export const publicaciones = pgTable("publicaciones", {
 
   // Estado
   activa: boolean("activa").default(true).notNull(),
-  esPrueba: boolean("es_prueba").default(false).notNull(),
   transitoUrgente: boolean("transito_urgente").default(false).notNull(),
   motivoCierre: text("motivo_cierre"), // null = abierta
 

@@ -59,7 +59,6 @@ export interface Mascota {
   sexo: Sexo
   color: string
   descripcion: string
-  edad?: string | null // legacy
   fechaNacimiento?: Date | null
   imagenUrl: string
 }
@@ -79,11 +78,8 @@ export interface Publicacion {
   mostrarContactoPublico: boolean
   usuarioId: string
   activa: boolean
-  enTransito?: boolean
-  esPrueba?: boolean
   transitoUrgente?: boolean
   esRefugio?: boolean
-  enTransito?: boolean
   transitoContactoNombre?: string | null
   transitoContactoTelefono?: string | null
   transitoContactoEmail?: string | null
