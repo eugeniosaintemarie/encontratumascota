@@ -213,7 +213,7 @@ export function PublicarModal({
       return
     }
 
-    if (!croppedBlob) {
+    if (!croppedBlob && !(editingId && croppedPreview)) {
       toast.error("Por favor, subí una foto de la mascota obligatoriamente")
       return
     }
