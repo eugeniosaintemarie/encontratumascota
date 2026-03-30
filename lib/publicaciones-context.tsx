@@ -11,7 +11,7 @@ interface PublicacionesContextType {
   agregarPublicacion: (publicacion: Omit<Publicacion, "id" | "fechaPublicacion">) => void
   actualizarPublicacion: (id: string, datos: Partial<Publicacion>) => void
   eliminarPublicacion: (id: string) => Promise<void>
-  refetch: () => Promise<void>
+  refetch: (options?: { includeInactive?: boolean }) => Promise<void>
 }
 
 const PublicacionesContext = createContext<PublicacionesContextType | null>(null)
@@ -34,12 +34,12 @@ export function PublicacionesProvider({ children }: { children: ReactNode }) {
   }
 
   // Intentar cargar desde la API (DB) al montar
-  const fetchPublicaciones = useCallback(async (options?: { skipShuffle?: boolean }) => {
+  const fetchPublicaciones = useCallback(async (options?: { skipShuffle?: boolean; includeInactive?: boolean }) => {
     try {
-      // Si estamos en la ruta /reunidas, solicitamos también las publicaciones cerradas
+      // Determinar la URL basada en si necesitamos publicaciones inactivas
       let url = "/api/publicaciones"
       try {
-        if (typeof window !== "undefined" && window.location.pathname === "/reunidas") {
+        if (options?.includeInactive || (typeof window !== "undefined" && window.location.pathname === "/reunidas")) {
           url = "/api/publicaciones?soloActivas=false"
         }
       } catch {
