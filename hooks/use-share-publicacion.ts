@@ -32,7 +32,7 @@ export function useSharePublicacion(publicacion: Publicacion | null) {
     
     let title: string
     if (info.esAdopcion) {
-      title = `${info.tipo}${info.raza ? ` ${info.raza}` : ""}${razaDetalle}${color} ${info.categoria.toLowerCase()}${transitoTag}`
+      title = `${info.tipo}${info.raza ? ` ${info.raza}` : ""}${razaDetalle}${color ? ` ${color}` : ""} 🐾 ${info.categoria.toLowerCase()}${transitoTag}`
     } else {
       title = `${info.tipo}${info.raza ? ` ${info.raza}` : ""}${razaDetalle}${color} ${info.categoria.toLowerCase()} en ${info.ubicacionCorta}${transitoTag}`
     }

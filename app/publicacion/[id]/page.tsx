@@ -1,9 +1,10 @@
 import type { Metadata } from "next"
 import Script from "next/script"
-import { razasLabels, tipoMascotaLabels } from "@/lib/labels"
-import { especieSexoToTipo } from "@/lib/types"
+import { getShareText } from "@/lib/publicacion-utils"
 import { PublicacionDetail } from "./publicacion-detail"
 import Link from "next/link"
+import { tipoMascotaLabels, razasLabels } from "@/lib/labels"
+import { especieSexoToTipo } from "@/lib/types"
 import type { Especie, Sexo, Raza } from "@/lib/types"
 
 type Props = {
@@ -30,11 +31,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
   }
 
+  const shareText = getShareText(publicacion)
+  const lines = shareText.split("\n")
+  const title = lines[0]
+  const description = lines[1] || publicacion.mascota.descripcion
   const { mascota } = publicacion
-  const ubicacionSinComa = publicacion.ubicacion.replace(",", "")
-  const transitoTag = publicacion.transitoUrgente ? " ¡Tránsito urgente!" : ""
-  const title = `${tipoMascotaLabels[especieSexoToTipo(mascota.especie as Especie, mascota.sexo as Sexo)]} ${razasLabels[mascota.raza as Raza]} encontrado en ${ubicacionSinComa}${transitoTag}`
-  const description = mascota.descripcion
 
   return {
     title: `${title} | Encontra Tu Mascota`,
