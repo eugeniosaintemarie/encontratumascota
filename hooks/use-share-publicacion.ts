@@ -27,11 +27,15 @@ export function useSharePublicacion(publicacion: Publicacion | null) {
     const url = `${window.location.origin}/publicacion/${publicacion.id}`
     const { mascota } = publicacion
     const tipo = tipoMascotaLabels[especieSexoToTipo(mascota.especie, mascota.sexo)]
-    const raza = isMestizoRaza(mascota.raza)
-      ? `Mestizo (${mascota.madreRaza ? razasLabels[mascota.madreRaza] : "?"} + ${mascota.padreRaza ? razasLabels[mascota.padreRaza] : "?"})`
+    const isHembra = mascota.sexo === "hembra"
+    const razaLabel = isMestizoRaza(mascota.raza)
+      ? isHembra ? "mestiza" : "mestizo"
       : razasLabels[mascota.raza]
+    const razaDetalle = isMestizoRaza(mascota.raza)
+      ? ` (${mascota.madreRaza ? razasLabels[mascota.madreRaza] : "?"} + ${mascota.padreRaza ? razasLabels[mascota.padreRaza] : "?"})`
+      : ""
     const color = mascota.color ? ` ${mascota.color}` : ""
-    const tipoTexto = mascota.sexo === "hembra"
+    const tipoTexto = isHembra
       ? publicacion.tipoPublicacion === "buscada"
         ? "buscada"
         : publicacion.tipoPublicacion === "adopcion"
@@ -43,7 +47,7 @@ export function useSharePublicacion(publicacion: Publicacion | null) {
           ? "en adopción"
           : "encontrado"
     const transitoTag = publicacion.transitoUrgente ? " ¡Tránsito urgente!" : ""
-    const title = `${tipo} ${raza}${color} ${tipoTexto} en ${truncateUbicacion(publicacion.ubicacion)}${transitoTag}`
+    const title = `${tipo} ${razaLabel}${razaDetalle}${color} ${tipoTexto} en ${truncateUbicacion(publicacion.ubicacion)}${transitoTag}`
     const shareText = `${title}\n\n${mascota.descripcion}\n\n${url}`
 
     try {

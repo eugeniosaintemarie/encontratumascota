@@ -2,6 +2,7 @@ import type { Publicacion } from "./types"
 import { especieSexoToTipo } from "./types"
 import { razasLabels, tipoMascotaLabels } from "./labels"
 import { isMestizoRaza, truncateUbicacion } from "./utils"
+import { MESTIZO_RAZAS } from "./utils"
 
 // 4:5 aspect ratio (optimal for Instagram feed / sharing)
 const CANVAS_WIDTH = 1080
@@ -221,7 +222,22 @@ export async function generateShareImage(
   let badgeY = badgePad
 
   // Top-left: Tipo (Perro/Perra/Gato/Gata/Otro)
-  drawBadge(ctx, tipoMascotaLabels[especieSexoToTipo(mascota.especie, mascota.sexo)], badgePad, badgeY)
+  const tipoBadge = tipoMascotaLabels[especieSexoToTipo(mascota.especie, mascota.sexo)]
+  let badgeX = drawBadge(ctx, tipoBadge, badgePad, badgeY)
+  badgeX += 15
+
+  // Top-left: Raza (si es mestizo, mostrar raza de padres)
+  const isMestizo = isMestizoRaza(mascota.raza)
+  const isHembra = mascota.sexo === "hembra"
+  let razaText = ""
+  if (isMestizo) {
+    const padre = mascota.padreRaza ?razasLabels[mascota.padreRaza] || mascota.padreRaza : "?"
+    const madre = mascota.madreRaza ?razasLabels[mascota.madreRaza] || mascota.madreRaza : "?"
+    razaText = isHembra ? `Mestiza (${madre} + ${padre})` : `Mestizo (${madre} + ${padre})`
+  } else {
+    razaText = razasLabels[mascota.raza] || mascota.raza
+  }
+  drawBadge(ctx, razaText, badgeX, badgeY)
 
   // Bottom-left: ubicación
   let bottomY = imageSize - badgePad
@@ -272,8 +288,8 @@ export async function generateShareImage(
   const tipoLabel = publicacion.tipoPublicacion === "adopcion"
     ? "En adopción"
     : publicacion.tipoPublicacion === "buscada"
-    ? mascota.sexo === "hembra" ? "Buscada" : "Buscado"
-    : mascota.sexo === "hembra" ? "Encontrada" : "Encontrado"
+      ? (mascota.sexo === "hembra" ? "Buscada" : "Buscado")
+      : (mascota.sexo === "hembra" ? "Encontrada" : "Encontrado")
 
   let currentY = descStartY
 
