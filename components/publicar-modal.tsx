@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ImageCropEditor } from "@/components/image-crop-editor"
+import DatePicker from "@/components/ui/date-picker"
 import { Upload, X, Search, MapPin, Heart } from "lucide-react"
 
 import type { Especie, Sexo, Raza, TipoPublicacion, Publicacion, TipoMascota } from "@/lib/types"
@@ -591,13 +592,11 @@ export function PublicarModal({
             ) : (
               <div className="space-y-2">
                 <Label htmlFor="fecha-nacimiento">Fecha de nacimiento</Label>
-                <Input
+                <DatePicker
                   id="fecha-nacimiento"
-                  type="date"
                   value={fechaNacimiento}
-                  onChange={(e) => setFechaNacimiento(e.target.value)}
+                  onChange={setFechaNacimiento}
                   required
-                  className="w-full text-foreground placeholder:text-muted-foreground [&::-webkit-calendar-picker-indicator]:opacity-50"
                   max={new Date().toISOString().split("T")[0]}
                 />
               </div>
