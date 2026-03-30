@@ -180,7 +180,8 @@ export async function crearPublicacion(data: {
   sexo: string
   color: string
   descripcion: string
-  edad?: string
+  edad?: string // legacy
+  fechaNacimiento?: Date
   imagenUrl?: string
   ubicacion: string
   fechaEncuentro?: Date
@@ -209,6 +210,7 @@ export async function crearPublicacion(data: {
       color: data.color,
       descripcion: data.descripcion,
       edad: data.edad,
+      fechaNacimiento: data.fechaNacimiento || null,
       imagenUrl: data.imagenUrl || "",
       ubicacion: data.ubicacion,
       fechaEncuentro: data.fechaEncuentro || null,
@@ -354,6 +356,7 @@ function mapRowToPublicacion(row: typeof publicacionesTable.$inferSelect): Publi
       color: row.color,
       descripcion: row.descripcion,
       edad: row.edad,
+      fechaNacimiento: row.fechaNacimiento,
       imagenUrl: row.imagenUrl || "",
     },
     ubicacion: row.ubicacion,

@@ -126,8 +126,7 @@ export function PublicarModal({
   const [madreRaza, setMadreRaza] = useState<Raza | "">("")
   const [color, setColor] = useState("")
   const [descripcion, setDescripcion] = useState("")
-  const [edadValor, setEdadValor] = useState("")
-  const [edadUnidad, setEdadUnidad] = useState<"años" | "días">("años")
+  const [fechaNacimiento, setFechaNacimiento] = useState("")
   const [fechaEncuentro, setFechaEncuentro] = useState("")
   const [transitoUrgente, setTransitoUrgente] = useState(false)
   const [imageFile, setImageFile] = useState<File | null>(null)
@@ -149,12 +148,9 @@ export function PublicarModal({
       setMadreRaza(publicacionToEdit.mascota.madreRaza ?? "")
       setColor(publicacionToEdit.mascota.color)
       setDescripcion(publicacionToEdit.mascota.descripcion)
-      if (publicacionToEdit.mascota.edad) {
-        const parts = publicacionToEdit.mascota.edad.split(" ")
-        if (parts.length >= 2) {
-          setEdadValor(parts[0])
-          setEdadUnidad(parts[1] === "años" ? "años" : "días")
-        }
+      if (publicacionToEdit.mascota.fechaNacimiento) {
+        const d = new Date(publicacionToEdit.mascota.fechaNacimiento)
+        setFechaNacimiento(d.toISOString().split("T")[0])
       }
       if (publicacionToEdit.fechaEncuentro) {
         const d = new Date(publicacionToEdit.fechaEncuentro)
@@ -218,8 +214,8 @@ export function PublicarModal({
       return
     }
 
-    if (tipoPublicacion === "adopcion" && !edadValor.trim()) {
-      toast.error("Por favor, ingresá una edad aproximada")
+    if (tipoPublicacion === "adopcion" && !fechaNacimiento.trim()) {
+      toast.error("Por favor, ingresá la fecha de nacimiento")
       return
     }
 
@@ -279,7 +275,7 @@ export function PublicarModal({
           sexo: tipoMascotaToSexo(tipoMascota as TipoMascota),
           color: sanitizeText(color),
           descripcion: sanitizeRichText(descripcion),
-          edad: tipoPublicacion === "adopcion" ? sanitizeText(`${edadValor.trim()} ${edadUnidad}`) : undefined,
+          fechaNacimiento: tipoPublicacion === "adopcion" && fechaNacimiento ? new Date(fechaNacimiento) : undefined,
           imagenUrl: finalImagenUrl,
           fechaEncuentro: tipoPublicacion === "perdida" || tipoPublicacion === "buscada" ? new Date(fechaEncuentro) : undefined,
           transitoUrgente: tipoPublicacion === "perdida" ? transitoUrgente : false,
@@ -298,7 +294,7 @@ export function PublicarModal({
             sexo: tipoMascotaToSexo(tipoMascota as TipoMascota),
             color: sanitizeText(color),
             descripcion: sanitizeRichText(descripcion),
-            edad: tipoPublicacion === "adopcion" ? sanitizeText(`${edadValor.trim()} ${edadUnidad}`) : undefined,
+            fechaNacimiento: tipoPublicacion === "adopcion" && fechaNacimiento ? new Date(fechaNacimiento) : undefined,
             imagenUrl: finalImagenUrl,
           },
           ubicacion: sanitizeText(currentUser?.ubicacion ?? ""),
@@ -333,8 +329,7 @@ export function PublicarModal({
     setMadreRaza("")
     setColor("")
     setDescripcion("")
-    setEdadValor("")
-    setEdadUnidad("años")
+    setFechaNacimiento("")
     setFechaEncuentro("")
     setTransitoUrgente(false)
     setImageFile(null)
@@ -595,37 +590,16 @@ export function PublicarModal({
               </div>
             ) : (
               <div className="space-y-2">
-                <Label htmlFor="edad-valor">Edad (puede ser aproximada)</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  <Input
-                    id="edad-valor"
-                    type="number"
-                    inputMode="numeric"
-                    min={0}
-                    step={1}
-                    value={edadValor}
-                    onChange={(e) => setEdadValor(sanitizeEdadValor(e.target.value, edadUnidad))}
-                    placeholder="Número"
-                    required
-                    className="w-full"
-                  />
-                  <Select
-                    value={edadUnidad}
-                    onValueChange={(v) => {
-                      const nextUnit = v as "años" | "días"
-                      setEdadUnidad(nextUnit)
-                      setEdadValor((current) => sanitizeEdadValor(current, nextUnit))
-                    }}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Unidad" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="días">días</SelectItem>
-                      <SelectItem value="años">años</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                <Label htmlFor="fecha-nacimiento">Fecha de nacimiento</Label>
+                <Input
+                  id="fecha-nacimiento"
+                  type="date"
+                  value={fechaNacimiento}
+                  onChange={(e) => setFechaNacimiento(e.target.value)}
+                  required
+                  className="w-full"
+                  max={new Date().toISOString().split("T")[0]}
+                />
               </div>
             )}
           </div>

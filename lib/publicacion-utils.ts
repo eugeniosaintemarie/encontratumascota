@@ -49,7 +49,7 @@ export function getPublicacionInfo(publicacion: Publicacion): PublicacionInfo {
 
   let edadOFecha = ""
   if (publicacion.tipoPublicacion === "adopcion") {
-    edadOFecha = formatEdad(mascota.edad)
+    edadOFecha = formatEdadFromDate(mascota.fechaNacimiento)
   } else if (publicacion.fechaEncuentro && publicacion.fechaEncuentro.getFullYear() > 1970) {
     edadOFecha = formatDate(publicacion.fechaEncuentro)
   }
@@ -95,6 +95,28 @@ export function formatEdad(edad?: string | null): string {
     return num === 1 ? "1 día" : `${num} días`
   }
   return edad
+}
+
+export function formatEdadFromDate(fechaNacimiento?: Date | null): string {
+  if (!fechaNacimiento) return ""
+  const hoy = new Date()
+  const nacimiento = new Date(fechaNacimiento)
+  const diffMs = hoy.getTime() - nacimiento.getTime()
+  const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+  
+  if (diffDias < 0) return ""
+  
+  if (diffDias < 30) {
+    return diffDias === 1 ? "1 día" : `${diffDias} días`
+  }
+  
+  if (diffDias < 365) {
+    const meses = Math.floor(diffDias / 30)
+    return meses === 1 ? "1 mes" : `${meses} meses`
+  }
+  
+  const años = Math.floor(diffDias / 365)
+  return años === 1 ? "1 año" : `${años} años`
 }
 
 export function formatDate(date: Date): string {

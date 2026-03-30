@@ -39,7 +39,8 @@ export const publicaciones = pgTable("publicaciones", {
   sexo: text("sexo").notNull(), // "macho" | "hembra" | "desconocido"
   color: text("color").notNull(),
   descripcion: text("descripcion").notNull(),
-  edad: text("edad"), // Solo para adopcion: "~ X años o meses"
+  edad: text("edad"), // Solo para adopcion: "~ X años o meses" (legacy)
+  fechaNacimiento: timestamp("fecha_nacimiento"), // Para adopcion: fecha de nacimiento
   imagenUrl: text("imagen_url").default(""),
 
   // Datos de la publicacion

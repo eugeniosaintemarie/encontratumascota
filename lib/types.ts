@@ -59,7 +59,8 @@ export interface Mascota {
   sexo: Sexo
   color: string
   descripcion: string
-  edad?: string | null
+  edad?: string | null // legacy
+  fechaNacimiento?: Date | null
   imagenUrl: string
 }
 
