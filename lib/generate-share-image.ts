@@ -199,17 +199,15 @@ export async function generateShareImage(
   let badgeX = drawBadge(ctx, info.tipo, badgePad, badgeY)
   badgeX += 15
 
-  // Esquina superior izquierda: Raza (si es mestizo, mostrar madre y padre en líneas separadas)
-  if (info.razaDetalle) {
-    drawBadge(ctx, info.raza, badgeX, badgeY)
-    badgeY += 56
+  // Esquina superior izquierda: Raza (si es mestizo, mostrar madre y padre)
+  if (info.esMestizo && info.razaDetalle) {
     const lineas = info.razaDetalle.split("\n")
     lineas.forEach((linea) => {
       drawBadge(ctx, linea, badgeX, badgeY)
       badgeY += 56
     })
     badgeY = badgePad
-  } else {
+  } else if (info.raza) {
     drawBadge(ctx, info.raza, badgeX, badgeY)
   }
 

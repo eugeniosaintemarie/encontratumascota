@@ -464,10 +464,10 @@ export function PerfilModal({
                 <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-3 space-y-3">
                   <div className="flex items-center gap-2 text-sm font-medium text-destructive">
                     <AlertTriangle className="h-4 w-4" />
-                    Confirmar eliminación
+                    CONFIRMACIÓN
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    ¿Estás seguro de que querés eliminar esta publicación? Esta acción no se puede deshacer.
+                    Esta acción no se puede deshacer
                   </p>
                   <div className="flex gap-2">
                     <Button

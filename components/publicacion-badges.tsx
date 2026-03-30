@@ -19,23 +19,20 @@ export function PublicacionBadges({ publicacion, className = "", badgeClassName 
         <Badge variant="secondary" className={`bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm border-0 ${badgeClassName}`}>
           {info.tipo}
         </Badge>
-        {info.razaDetalle ? (
+        {info.esMestizo ? (
           <>
             <Badge variant="secondary" className={`bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0 ${badgeClassName}`}>
-              {info.raza}
+              {info.razaDetalle?.split("\n")[0]}
             </Badge>
             <Badge variant="secondary" className={`bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0 ${badgeClassName}`}>
-              {info.razaDetalle.split("\n")[0]}
-            </Badge>
-            <Badge variant="secondary" className={`bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0 ${badgeClassName}`}>
-              {info.razaDetalle.split("\n")[1]}
+              {info.razaDetalle?.split("\n")[1]}
             </Badge>
           </>
-        ) : (
+        ) : info.raza ? (
           <Badge variant="secondary" className={`bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0 ${badgeClassName}`}>
             {info.raza}
           </Badge>
-        )}
+        ) : null}
       </div>
 
       {/* Esquina inferior izquierda: ubicación */}

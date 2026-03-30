@@ -32,7 +32,12 @@ export function getPublicacionInfo(publicacion: Publicacion): PublicacionInfo {
     const madre = mascota.madreRaza ? razasLabels[mascota.madreRaza] || mascota.madreRaza : "?"
     razaDetalle = `Madre: ${madre}\nPadre: ${padre}`
   } else {
-    raza = razasLabels[mascota.raza] || mascota.raza
+    raza =razasLabels[mascota.raza] || mascota.raza
+  }
+
+  // Si es mestizo, no mostrar "Mestiza/o" como razaDetalle, solo mostrar madre y padre
+  if (esMestizo) {
+    raza = ""
   }
 
   const ubicacionCorta = truncateUbicacion(publicacion.ubicacion)

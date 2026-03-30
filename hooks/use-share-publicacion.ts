@@ -3,10 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { generateShareImage } from "@/lib/generate-share-image"
-import { razasLabels, tipoMascotaLabels } from "@/lib/labels"
+import { getPublicacionInfo } from "@/lib/publicacion-utils"
 import type { Publicacion } from "@/lib/types"
-import { especieSexoToTipo } from "@/lib/types"
-import { isMestizoRaza, truncateUbicacion } from "@/lib/utils"
 
 export function useSharePublicacion(publicacion: Publicacion | null) {
   const [isSharing, setIsSharing] = useState(false)
@@ -25,30 +23,14 @@ export function useSharePublicacion(publicacion: Publicacion | null) {
     setIsSharing(true)
 
     const url = `${window.location.origin}/publicacion/${publicacion.id}`
-    const { mascota } = publicacion
-    const tipo = tipoMascotaLabels[especieSexoToTipo(mascota.especie, mascota.sexo)]
-    const isHembra = mascota.sexo === "hembra"
-    const razaLabel = isMestizoRaza(mascota.raza)
-      ? isHembra ? "mestiza" : "mestizo"
-      : razasLabels[mascota.raza]
-    const razaDetalle = isMestizoRaza(mascota.raza)
-      ? ` (${mascota.madreRaza ? razasLabels[mascota.madreRaza] : "?"} + ${mascota.padreRaza ? razasLabels[mascota.padreRaza] : "?"})`
+    const info = getPublicacionInfo(publicacion)
+    const razaDetalle = info.razaDetalle
+      ? ` (${info.razaDetalle.replace(/\n/g, " + ")})`
       : ""
-    const color = mascota.color ? ` ${mascota.color}` : ""
-    const tipoTexto = isHembra
-      ? publicacion.tipoPublicacion === "buscada"
-        ? "buscada"
-        : publicacion.tipoPublicacion === "adopcion"
-          ? "en adopción"
-          : "encontrada"
-      : publicacion.tipoPublicacion === "buscada"
-        ? "buscado"
-        : publicacion.tipoPublicacion === "adopcion"
-          ? "en adopción"
-          : "encontrado"
-    const transitoTag = publicacion.transitoUrgente ? " ¡Tránsito urgente!" : ""
-    const title = `${tipo} ${razaLabel}${razaDetalle}${color} ${tipoTexto} en ${truncateUbicacion(publicacion.ubicacion)}${transitoTag}`
-    const shareText = `${title}\n\n${mascota.descripcion}\n\n${url}`
+    const color = info.color ? ` ${info.color}` : ""
+    const transitoTag = info.transitoUrgente ? " ¡Trnésito urgente!" : ""
+    const title = `${info.tipo}${info.raza ? ` ${info.raza}` : ""}${razaDetalle}${color} ${info.categoria.toLowerCase()} en ${info.ubicacionCorta}${transitoTag}`
+    const shareText = `${title}\n\n${info.descripcion}\n\n${url}`
 
     try {
       const imageBlob = await generateShareImage(publicacion)
