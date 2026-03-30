@@ -145,6 +145,7 @@ export function PublicacionesProvider({ children }: { children: ReactNode }) {
           imagenUrl: publicacion.mascota.imagenUrl,
           ubicacion: publicacion.ubicacion,
           fechaEncuentro: publicacion.fechaEncuentro,
+          fechaNacimiento: publicacion.mascota.fechaNacimiento,
           transitoUrgente: publicacion.transitoUrgente ?? false,
         }),
       })

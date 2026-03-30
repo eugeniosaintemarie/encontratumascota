@@ -138,6 +138,7 @@ export async function POST(request: Request) {
       color: datosSanitizados.color,
       descripcion: datosSanitizados.descripcion,
       edad: datosSanitizados.edad,
+      fechaNacimiento: body.fechaNacimiento ? new Date(body.fechaNacimiento) : undefined,
       imagenUrl: body.imagenUrl || "",
       ubicacion: datosSanitizados.ubicacion,
       fechaEncuentro: body.fechaEncuentro ? new Date(body.fechaEncuentro) : undefined,
