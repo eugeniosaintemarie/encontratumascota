@@ -112,7 +112,7 @@ export const PublicacionCard = memo(function PublicacionCard({
         <div className="mt-auto">
           {(() => {
             const isCerrada = publicacion.activa === false && !publicacion.enTransito
-            const canSeeContact = publicacion.mostrarContactoPublico && (authChecked || !isCerrada)
+            const canSeeContact = authChecked || (publicacion.mostrarContactoPublico && !isCerrada)
             return canSeeContact
           })() ? (
             <div className="rounded-lg bg-[#FF8A65]/10 px-3 py-3 min-h-[84px] relative flex flex-col">

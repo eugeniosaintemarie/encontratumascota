@@ -206,23 +206,28 @@ export async function generateShareImage(
   const centerX = (CANVAS_WIDTH - dateTextW) / 2 - badgePad
   drawBadge(ctx, dateText, centerX, badgeY, { fontSize: 28 })
 
-  // Abajo a la izquierda: Raza (si es mestizo, mostrar madre y padre)
+  // Abajo a la izquierda: Raza (si es mestizo, mostrar madre y padre en dos líneas)
   ctx.font = `600 30px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
   let bottomY = imageSize - badgePad - badgeH
-  if (info.esMestizo && info.razaDetalle) {
-    const lineas = info.razaDetalle.split("\n")
-    lineas.forEach((linea) => {
-      drawBadge(ctx, linea, badgePad, bottomY, { fontSize: 28 })
-      bottomY -= badgeH + 10
-    })
+  if (info.esMestizo && info.madreRaza && info.padreRaza) {
+    drawBadge(ctx, info.madreRaza, badgePad, bottomY, { fontSize: 28 })
+    bottomY -= badgeH + 10
+    drawBadge(ctx, info.padreRaza, badgePad, bottomY, { fontSize: 28 })
   } else if (info.raza) {
     drawBadge(ctx, info.raza, badgePad, bottomY, { fontSize: 28 })
   }
 
-  // Abajo a la derecha: ubicación
+  // Abajo a la derecha: tránsito urgente (arriba) y ubicación (abajo)
+  let rightBottomY = imageSize - badgePad - badgeH
+  if (info.transitoUrgente) {
+    const transitoText = "⚠️ Tránsito urgente"
+    const transitoW = ctx.measureText(transitoText).width
+    drawBadge(ctx, transitoText, CANVAS_WIDTH - badgePad - transitoW - 44, rightBottomY, { fontSize: 28, bgColor: "#F44336", textColor: "#FFFFFF" })
+    rightBottomY -= badgeH + 10
+  }
   const ubicacionText = `📍 ${info.ubicacionCorta}`
   const ubicacionW = ctx.measureText(ubicacionText).width
-  drawBadge(ctx, ubicacionText, CANVAS_WIDTH - badgePad - ubicacionW - 44, imageSize - badgePad - badgeH, { fontSize: 28 })
+  drawBadge(ctx, ubicacionText, CANVAS_WIDTH - badgePad - ubicacionW - 44, rightBottomY, { fontSize: 28 })
 
   // =====================
   // 5. DESCRIPTION (below image, white bg)
