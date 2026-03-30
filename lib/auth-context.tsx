@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from "react"
 import { useDemoSession } from "@/hooks/use-demo-session"
 import { logout as authLogout } from "@/lib/auth/client"
+import type { Publicacion } from "@/lib/types"
 
 interface AuthModalState {
   isOpen: boolean
@@ -21,11 +22,13 @@ interface AuthContextType {
   isPublicarModalOpen: boolean
   isPerfilModalOpen: boolean
   pendingPublicacionId: string | null
+  publicacionToEdit: Publicacion | null
   
   // Actions
   openAuthModal: (view?: "login" | "register") => void
   closeAuthModal: () => void
   openPublicarModal: () => void
+  openPublicarModalForEdit: (publicacion: Publicacion) => void
   closePublicarModal: () => void
   openPerfilModal: () => void
   closePerfilModal: () => void
@@ -48,6 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isPublicarModalOpen, setIsPublicarModalOpen] = useState(false)
   const [isPerfilModalOpen, setIsPerfilModalOpen] = useState(false)
   const [pendingPublicacionId, setPendingPublicacionId] = useState<string | null>(null)
+  const [publicacionToEdit, setPublicacionToEdit] = useState<Publicacion | null>(null)
 
   // Auth modal actions
   const openAuthModal = useCallback((view: "login" | "register" = "login") => {
@@ -60,11 +64,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Publicar modal actions
   const openPublicarModal = useCallback(() => {
+    setPublicacionToEdit(null)
+    setIsPublicarModalOpen(true)
+  }, [])
+
+  const openPublicarModalForEdit = useCallback((publicacion: Publicacion) => {
+    setPublicacionToEdit(publicacion)
     setIsPublicarModalOpen(true)
   }, [])
 
   const closePublicarModal = useCallback(() => {
     setIsPublicarModalOpen(false)
+    setPublicacionToEdit(null)
   }, [])
 
   // Perfil modal actions
@@ -102,9 +113,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isPublicarModalOpen,
       isPerfilModalOpen,
       pendingPublicacionId,
+      publicacionToEdit,
       openAuthModal,
       closeAuthModal,
       openPublicarModal,
+      openPublicarModalForEdit,
       closePublicarModal,
       openPerfilModal,
       closePerfilModal,
@@ -121,9 +134,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isPublicarModalOpen,
       isPerfilModalOpen,
       pendingPublicacionId,
+      publicacionToEdit,
       openAuthModal,
       closeAuthModal,
       openPublicarModal,
+      openPublicarModalForEdit,
       closePublicarModal,
       openPerfilModal,
       closePerfilModal,

@@ -7,7 +7,8 @@ import { FiltrosPublicaciones } from "@/components/filtros-publicaciones"
 import { PawPrint, ChevronLeft, ChevronRight } from "lucide-react"
 import { usePublicaciones } from "@/lib/publicaciones-context"
 import { Button } from "@/components/ui/button"
-import type { Especie, Sexo, TipoPublicacion, Publicacion } from "@/lib/types"
+import type { TipoMascota, TipoPublicacion, Publicacion } from "@/lib/types"
+import { tipoMascotaToEspecie, tipoMascotaToSexo } from "@/lib/types"
 import { useItemsPerPage } from "@/hooks/use-items-per-page"
 
 interface ListadoPublicacionesProps {
@@ -30,9 +31,8 @@ export function ListadoPublicaciones({
   emptyDescription = "",
 }: ListadoPublicacionesProps) {
   const [tipoPublicacion, setTipoPublicacion] = useState<TipoPublicacion | undefined>(fixedTipoPublicacion)
-  const [especie, setEspecie] = useState<Especie | "todos">("todos")
+  const [tipoMascota, setTipoMascota] = useState<TipoMascota | "todos">("todos")
   const [raza, setRaza] = useState<string | "todos">("todos")
-  const [sexo, setSexo] = useState<Sexo | "todos">("todos")
   const [ubicacion, setUbicacion] = useState("")
   const [fechaDesde, setFechaDesde] = useState<string | undefined>(undefined)
   const [transitoUrgente, setTransitoUrgente] = useState(false)
@@ -48,9 +48,12 @@ export function ListadoPublicaciones({
       // Excluir publicaciones "buscadas" del home (tienen su propia página)
       if (pub.tipoPublicacion === "buscada") return false
       if (tipoActivo !== undefined && pub.tipoPublicacion !== tipoActivo) return false
-      if (especie !== "todos" && pub.mascota.especie !== especie) return false
+      if (tipoMascota !== "todos") {
+        const especieFiltro = tipoMascotaToEspecie(tipoMascota)
+        const sexoFiltro = tipoMascotaToSexo(tipoMascota)
+        if (pub.mascota.especie !== especieFiltro || pub.mascota.sexo !== sexoFiltro) return false
+      }
       if (raza !== "todos" && pub.mascota.raza !== raza) return false
-      if (sexo !== "todos" && pub.mascota.sexo !== sexo) return false
       if (
         ubicacion &&
         !pub.ubicacion.toLowerCase().includes(ubicacion.toLowerCase())
@@ -68,7 +71,7 @@ export function ListadoPublicaciones({
       if (tipoActivo === "perdida" && transitoUrgente && !pub.transitoUrgente) return false
       return pub.activa
     })
-  }, [tipoActivo, especie, raza, sexo, ubicacion, transitoUrgente, sourcePublicaciones, fechaDesde])
+  }, [tipoActivo, tipoMascota, raza, ubicacion, transitoUrgente, sourcePublicaciones, fechaDesde])
 
   const totalPages = Math.ceil(publicacionesFiltradas.length / itemsPerPage)
   const paginatedPublicaciones = useMemo(() => {
@@ -77,12 +80,11 @@ export function ListadoPublicaciones({
   }, [publicacionesFiltradas, currentPage, itemsPerPage])
 
   const hasActiveFilters =
-    especie !== "todos" || raza !== "todos" || sexo !== "todos" || ubicacion !== "" || transitoUrgente || !!fechaDesde
+    tipoMascota !== "todos" || raza !== "todos" || ubicacion !== "" || transitoUrgente || !!fechaDesde
 
   const clearFilters = () => {
-    setEspecie("todos")
+    setTipoMascota("todos")
     setRaza("todos")
-    setSexo("todos")
     setUbicacion("")
     setFechaDesde(undefined)
     setTransitoUrgente(false)
@@ -109,9 +111,8 @@ export function ListadoPublicaciones({
     <div className="space-y-4">
       <FiltrosPublicaciones
         tipoPublicacion={tipoActivo}
-        especie={especie}
+        tipoMascota={tipoMascota}
         raza={raza}
-        sexo={sexo}
         ubicacion={ubicacion}
         fechaDesde={fechaDesde}
         transitoUrgente={transitoUrgente}
@@ -122,16 +123,12 @@ export function ListadoPublicaciones({
           setTipoPublicacion(v)
           setCurrentPage(1)
         }}
-        onEspecieChange={(v) => {
-          setEspecie(v)
+        onTipoMascotaChange={(v) => {
+          setTipoMascota(v)
           setCurrentPage(1)
         }}
         onRazaChange={(v) => {
           setRaza(v)
-          setCurrentPage(1)
-        }}
-        onSexoChange={(v) => {
-          setSexo(v)
           setCurrentPage(1)
         }}
         onUbicacionChange={(v) => {

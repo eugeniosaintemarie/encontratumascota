@@ -14,23 +14,22 @@ import { Input } from "@/components/ui/input"
 import LocationAutocomplete from "@/components/location-autocomplete"
 import DatePicker from "@/components/ui/date-picker"
 import { Search, X } from "lucide-react"
-import type { Especie, Sexo, TipoPublicacion, Raza } from "@/lib/types"
-import { razasPorEspecie } from "@/lib/labels"
+import type { TipoMascota, TipoPublicacion, Raza } from "@/lib/types"
+import { tipoMascotaToEspecie } from "@/lib/types"
+import { getRazasPorTipoMascota } from "@/lib/labels"
 
 interface FiltrosPublicacionesProps {
   tipoPublicacion: TipoPublicacion | undefined
-  especie: Especie | "todos"
+  tipoMascota: TipoMascota | "todos"
   raza: string | "todos"
-  sexo: Sexo | "todos"
   ubicacion: string
   fechaDesde?: string
   transitoUrgente: boolean
   hideTipoSelector?: boolean
   wideUbicacion?: boolean
   onTipoPublicacionChange: (value: TipoPublicacion | undefined) => void
-  onEspecieChange: (value: Especie | "todos") => void
+  onTipoMascotaChange: (value: TipoMascota | "todos") => void
   onRazaChange: (value: string | "todos") => void
-  onSexoChange: (value: Sexo | "todos") => void
   onUbicacionChange: (value: string) => void
   onFechaDesdeChange?: (value: string) => void
   onTransitoUrgenteChange: (value: boolean) => void
@@ -41,16 +40,14 @@ interface FiltrosPublicacionesProps {
 
 export function FiltrosPublicaciones({
   tipoPublicacion,
-  especie,
+  tipoMascota,
   raza,
-  sexo,
   ubicacion,
   fechaDesde,
   transitoUrgente,
   onTipoPublicacionChange,
-  onEspecieChange,
+  onTipoMascotaChange,
   onRazaChange,
-  onSexoChange,
   onUbicacionChange,
   onFechaDesdeChange,
   onTransitoUrgenteChange,
@@ -65,15 +62,12 @@ export function FiltrosPublicaciones({
 
   const clearField = (field: string) => {
     switch (field) {
-      case 'especie':
-        onEspecieChange('todos')
+      case 'tipo':
+        onTipoMascotaChange('todos')
         onRazaChange('todos')
         break
       case 'raza':
         onRazaChange('todos')
-        break
-      case 'sexo':
-        onSexoChange('todos')
         break
       case 'ubicacion':
         onUbicacionChange('')
@@ -140,15 +134,15 @@ export function FiltrosPublicaciones({
             <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 w-full ${wideUbicacion ? 'lg:grid-cols-[1fr_1fr_1fr_auto] lg:w-1/2' : 'lg:grid-cols-[1fr_1fr_1fr_1fr_auto] lg:w-2/3'}`}>
               {/* Tipo */}
               <Select
-                value={especie === "todos" ? "" : especie}
+                value={tipoMascota === "todos" ? "" : tipoMascota}
                 onValueChange={(v) => {
                   const newValue = v || "todos"
-                  onEspecieChange(newValue as Especie | "todos")
+                  onTipoMascotaChange(newValue as TipoMascota | "todos")
                   onRazaChange("todos")
                 }}
               >
                 <SelectTrigger
-                  onFocus={() => setActiveClearField('especie')}
+                  onFocus={() => setActiveClearField('tipo')}
                   onBlur={() => setActiveClearField(null)}
                   className="w-full !bg-[var(--salmon)] !text-white border-white/30 [&_svg]:!text-white/70"
                 >
@@ -156,7 +150,9 @@ export function FiltrosPublicaciones({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="perro">Perro</SelectItem>
+                  <SelectItem value="perra">Perra</SelectItem>
                   <SelectItem value="gato">Gato</SelectItem>
+                  <SelectItem value="gata">Gata</SelectItem>
                   <SelectItem value="otro">Otro</SelectItem>
                 </SelectContent>
               </Select>
@@ -165,7 +161,7 @@ export function FiltrosPublicaciones({
               <Select
                 value={raza === "todos" ? "" : raza}
                 onValueChange={(v) => onRazaChange(v || "todos")}
-                disabled={especie === "todos" || especie === "otro"}
+                disabled={tipoMascota === "todos" || tipoMascota === "otro"}
               >
                 <SelectTrigger
                   onFocus={() => setActiveClearField('raza')}
@@ -175,30 +171,11 @@ export function FiltrosPublicaciones({
                   <SelectValue placeholder="Raza" />
                 </SelectTrigger>
                 <SelectContent>
-                  {especie !== "todos" && especie !== "otro" && razasPorEspecie[especie]?.map((r) => (
+                  {tipoMascota !== "todos" && tipoMascota !== "otro" && getRazasPorTipoMascota(tipoMascota)?.map((r) => (
                     <SelectItem key={r.value} value={r.value}>
                       {r.label}
                     </SelectItem>
                   ))}
-                </SelectContent>
-              </Select>
-
-              {/* Género */}
-              <Select
-                value={sexo === "todos" ? "" : sexo}
-                onValueChange={(v) => onSexoChange((v || "todos") as Sexo | "todos")}
-              >
-                <SelectTrigger
-                  onFocus={() => setActiveClearField('sexo')}
-                  onBlur={() => setActiveClearField(null)}
-                  className="w-full !bg-[var(--salmon)] !text-white border-white/30 [&_svg]:!text-white/70"
-                >
-                  <SelectValue placeholder="Género" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="macho">Macho</SelectItem>
-                  <SelectItem value="hembra">Hembra</SelectItem>
-                  <SelectItem value="desconocido">Desconocido</SelectItem>
                 </SelectContent>
               </Select>
 

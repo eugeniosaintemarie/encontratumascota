@@ -21,6 +21,7 @@ export function GlobalModals() {
     pendingPublicacionId,
     clearPendingPublicacion,
     logout,
+    publicacionToEdit,
   } = useAuth()
 
   const { user } = useDemoSession()
@@ -58,6 +59,7 @@ export function GlobalModals() {
         onClose={closePublicarModal}
         isAuthenticated={isAuthenticated}
         onRequireAuth={requireAuth}
+        publicacionToEdit={publicacionToEdit}
       />
 
       <PerfilModal

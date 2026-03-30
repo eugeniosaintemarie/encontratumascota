@@ -9,12 +9,12 @@ import { PawPrint, ChevronLeft, ChevronRight } from "lucide-react"
 import { Footer } from "@/components/footer"
 import { usePublicaciones } from "@/lib/publicaciones-context"
 import { useAuth } from "@/lib/auth-context"
-import type { Especie, Sexo } from "@/lib/types"
+import type { TipoMascota } from "@/lib/types"
+import { tipoMascotaToEspecie, tipoMascotaToSexo } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 
 export default function BuscadosPage() {
-  const [especie, setEspecie] = useState<Especie | "todos">("todos")
-  const [sexo, setSexo] = useState<Sexo | "todos">("todos")
+  const [tipoMascota, setTipoMascota] = useState<TipoMascota | "todos">("todos")
   const [ubicacion, setUbicacion] = useState("")
   const [raza, setRaza] = useState<string | "todos">("todos")
   const [fechaDesde, setFechaDesde] = useState<string | undefined>(undefined)
@@ -29,9 +29,12 @@ export default function BuscadosPage() {
     return publicaciones.filter((pub) => {
       // Solo mostrar publicaciones "buscadas" (mascotas perdidas por sus dueños)
       if (pub.tipoPublicacion !== "buscada") return false
-      if (especie !== "todos" && pub.mascota.especie !== especie) return false
+      if (tipoMascota !== "todos") {
+        const especieFiltro = tipoMascotaToEspecie(tipoMascota)
+        const sexoFiltro = tipoMascotaToSexo(tipoMascota)
+        if (pub.mascota.especie !== especieFiltro || pub.mascota.sexo !== sexoFiltro) return false
+      }
       if (raza !== "todos" && pub.mascota.raza !== raza) return false
-      if (sexo !== "todos" && pub.mascota.sexo !== sexo) return false
       if (
         ubicacion &&
         !pub.ubicacion.toLowerCase().includes(ubicacion.toLowerCase())
@@ -48,7 +51,7 @@ export default function BuscadosPage() {
       // Solo mostrar activas
       return pub.activa
     })
-  }, [especie, raza, sexo, ubicacion, fechaDesde, publicaciones])
+  }, [tipoMascota, raza, ubicacion, fechaDesde, publicaciones])
 
   const totalPages = Math.ceil(publicacionesBuscadas.length / itemsPerPage)
   const paginatedPublicaciones = useMemo(() => {
@@ -62,12 +65,11 @@ export default function BuscadosPage() {
   }, [itemsPerPage])
 
   const hasActiveFilters =
-    especie !== "todos" || raza !== "todos" || sexo !== "todos" || ubicacion !== "" || !!fechaDesde
+    tipoMascota !== "todos" || raza !== "todos" || ubicacion !== "" || !!fechaDesde
 
   const clearFilters = () => {
-    setEspecie("todos")
+    setTipoMascota("todos")
     setRaza("todos")
-    setSexo("todos")
     setUbicacion("")
     setFechaDesde(undefined)
     setCurrentPage(1)
@@ -81,17 +83,15 @@ export default function BuscadosPage() {
         <div className="space-y-4">
           <FiltrosPublicaciones
             tipoPublicacion={"perdida"}
-            especie={especie}
+            tipoMascota={tipoMascota}
             raza={raza}
-            sexo={sexo}
             ubicacion={ubicacion}
             fechaDesde={fechaDesde}
             transitoUrgente={false}
             hideTipoSelector={true}
             onTipoPublicacionChange={() => { /* noop: not applicable for buscados */ }}
-            onEspecieChange={setEspecie}
+            onTipoMascotaChange={setTipoMascota}
             onRazaChange={setRaza}
-            onSexoChange={setSexo}
             onUbicacionChange={setUbicacion}
             onFechaDesdeChange={setFechaDesde}
             onTransitoUrgenteChange={() => { /* noop */ }}

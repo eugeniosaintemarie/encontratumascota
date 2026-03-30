@@ -6,6 +6,7 @@ export interface RefugioProfile {
   authUserId: string
   esRefugio: boolean
   nombreRefugio?: string | null
+  ubicacion?: string | null
   contactoNombre?: string | null
   contactoTelefono?: string | null
   contactoEmail?: string | null
@@ -22,6 +23,7 @@ export async function setRefugioProfile(input: RefugioProfile) {
       authUserId: input.authUserId,
       esRefugio: input.esRefugio,
       nombreRefugio: input.nombreRefugio ?? null,
+      ubicacion: input.ubicacion ?? null,
       contactoNombre: input.contactoNombre ?? null,
       contactoTelefono: input.contactoTelefono ?? null,
       contactoEmail: input.contactoEmail ?? null,
@@ -33,6 +35,7 @@ export async function setRefugioProfile(input: RefugioProfile) {
       set: {
         esRefugio: input.esRefugio,
         nombreRefugio: input.nombreRefugio ?? null,
+        ubicacion: input.ubicacion ?? null,
         contactoNombre: input.contactoNombre ?? null,
         contactoTelefono: input.contactoTelefono ?? null,
         contactoEmail: input.contactoEmail ?? null,
@@ -78,6 +81,7 @@ export async function getRefugioProfileMapByAuthUserIds(authUserIds: string[]) {
       authUserId: row.authUserId,
       esRefugio: row.esRefugio,
       nombreRefugio: row.nombreRefugio,
+      ubicacion: row.ubicacion,
       contactoNombre: row.contactoNombre,
       contactoTelefono: row.contactoTelefono,
       contactoEmail: row.contactoEmail,

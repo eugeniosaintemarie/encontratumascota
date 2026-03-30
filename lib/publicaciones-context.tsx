@@ -10,7 +10,8 @@ interface PublicacionesContextType {
   cerrarPublicacion: (id: string, motivo: "encontrado_dueno" | "adoptado" | "en_transito" | "otro", transitoContacto?: { nombre: string; telefono: string; email: string }, confirmarTransferenciaMultiple?: boolean) => void
   agregarPublicacion: (publicacion: Omit<Publicacion, "id" | "fechaPublicacion">) => void
   actualizarPublicacion: (id: string, datos: Partial<Publicacion>) => void
-  refetch: () => Promise<void>
+  eliminarPublicacion: (id: string) => Promise<void>
+  refetch: (options?: { includeInactive?: boolean }) => Promise<void>
 }
 
 const PublicacionesContext = createContext<PublicacionesContextType | null>(null)
@@ -33,12 +34,12 @@ export function PublicacionesProvider({ children }: { children: ReactNode }) {
   }
 
   // Intentar cargar desde la API (DB) al montar
-  const fetchPublicaciones = useCallback(async (options?: { skipShuffle?: boolean }) => {
+  const fetchPublicaciones = useCallback(async (options?: { skipShuffle?: boolean; includeInactive?: boolean }) => {
     try {
-      // Si estamos en la ruta /reunidas, solicitamos también las publicaciones cerradas
+      // Determinar la URL basada en si necesitamos publicaciones inactivas
       let url = "/api/publicaciones"
       try {
-        if (typeof window !== "undefined" && window.location.pathname === "/reunidas") {
+        if (options?.includeInactive || (typeof window !== "undefined" && window.location.pathname === "/reunidas")) {
           url = "/api/publicaciones?soloActivas=false"
         }
       } catch {
@@ -175,6 +176,24 @@ export function PublicacionesProvider({ children }: { children: ReactNode }) {
     }
   }, [fetchPublicaciones])
 
+  const eliminarPublicacion = useCallback(async (id: string) => {
+    try {
+      const res = await fetch(`/api/publicaciones/${id}`, {
+        method: "DELETE",
+      })
+      if (res.ok) {
+        await fetchPublicaciones({ skipShuffle: true })
+      } else {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error || "Error al eliminar la publicación")
+      }
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Error de conexión"
+      console.error("Error eliminando publicacion:", e)
+      throw e
+    }
+  }, [fetchPublicaciones])
+
   return (
     <PublicacionesContext.Provider
       value={{
@@ -183,6 +202,7 @@ export function PublicacionesProvider({ children }: { children: ReactNode }) {
         cerrarPublicacion,
         agregarPublicacion,
         actualizarPublicacion,
+        eliminarPublicacion,
         refetch: fetchPublicaciones,
       }}
     >

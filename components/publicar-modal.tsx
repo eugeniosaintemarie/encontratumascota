@@ -16,11 +16,11 @@ import {
 } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ImageCropEditor } from "@/components/image-crop-editor"
-import LocationAutocomplete from "@/components/location-autocomplete"
 import { Upload, X, Search, MapPin, Heart } from "lucide-react"
 
-import type { Especie, Sexo, Raza, TipoPublicacion } from "@/lib/types"
-import { razasPorEspecie } from "@/lib/labels"
+import type { Especie, Sexo, Raza, TipoPublicacion, Publicacion, TipoMascota } from "@/lib/types"
+import { tipoMascotaToEspecie, tipoMascotaToSexo, especieSexoToTipo } from "@/lib/types"
+import { razasPorEspecie, getRazasPorTipoMascota, tipoMascotaLabels } from "@/lib/labels"
 import { usePublicaciones } from "@/lib/publicaciones-context"
 import { fetchServerSession } from "@/lib/auth/client"
 import { useImageUpload } from "@/hooks/use-image-upload"
@@ -35,6 +35,7 @@ interface PublicarModalProps {
   onClose: () => void
   isAuthenticated: boolean
   onRequireAuth: () => void
+  publicacionToEdit?: Publicacion | null
 }
 
 function SimpleModal({ 
@@ -99,9 +100,10 @@ export function PublicarModal({
   onClose,
   isAuthenticated,
   onRequireAuth,
+  publicacionToEdit,
 }: PublicarModalProps) {
   const [isLoading, setIsLoading] = useState(false)
-  const { agregarPublicacion } = usePublicaciones()
+  const { agregarPublicacion, actualizarPublicacion } = usePublicaciones()
   const { uploadImage, isUploading: isUploadingImage } = useImageUpload()
   const [currentUser, setCurrentUser] = useState<any | null>(null)
 
@@ -118,24 +120,53 @@ export function PublicarModal({
 
   const [paso, setPaso] = useState<1 | 2>(1)
   const [tipoPublicacion, setTipoPublicacion] = useState<TipoPublicacion | null>(null)
-  const [especie, setEspecie] = useState<Especie | "">("")
+  const [tipoMascota, setTipoMascota] = useState<TipoMascota | "">("")
   const [raza, setRaza] = useState<Raza | "">("")
-  const [sexo, setSexo] = useState<Sexo | "">("")
   const [padreRaza, setPadreRaza] = useState<Raza | "">("")
   const [madreRaza, setMadreRaza] = useState<Raza | "">("")
   const [color, setColor] = useState("")
   const [descripcion, setDescripcion] = useState("")
   const [edadValor, setEdadValor] = useState("")
   const [edadUnidad, setEdadUnidad] = useState<"años" | "días">("años")
-  const [ubicacion, setUbicacion] = useState("")
   const [fechaEncuentro, setFechaEncuentro] = useState("")
   const [transitoUrgente, setTransitoUrgente] = useState(false)
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [showCropEditor, setShowCropEditor] = useState(false)
   const [croppedBlob, setCroppedBlob] = useState<Blob | null>(null)
   const [croppedPreview, setCroppedPreview] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const dateInputRef = useRef<HTMLInputElement | null>(null)
+
+  // Precargar datos cuando se está editando
+  useEffect(() => {
+    if (publicacionToEdit && isOpen) {
+      setEditingId(publicacionToEdit.id)
+      setTipoPublicacion(publicacionToEdit.tipoPublicacion)
+      setTipoMascota(especieSexoToTipo(publicacionToEdit.mascota.especie, publicacionToEdit.mascota.sexo))
+      setRaza(publicacionToEdit.mascota.raza)
+      setPadreRaza(publicacionToEdit.mascota.padreRaza ?? "")
+      setMadreRaza(publicacionToEdit.mascota.madreRaza ?? "")
+      setColor(publicacionToEdit.mascota.color)
+      setDescripcion(publicacionToEdit.mascota.descripcion)
+      if (publicacionToEdit.mascota.edad) {
+        const parts = publicacionToEdit.mascota.edad.split(" ")
+        if (parts.length >= 2) {
+          setEdadValor(parts[0])
+          setEdadUnidad(parts[1] === "años" ? "años" : "días")
+        }
+      }
+      if (publicacionToEdit.fechaEncuentro) {
+        const d = new Date(publicacionToEdit.fechaEncuentro)
+        setFechaEncuentro(d.toISOString().split("T")[0])
+      }
+      setTransitoUrgente(publicacionToEdit.transitoUrgente ?? false)
+      setPaso(2)
+      if (publicacionToEdit.mascota.imagenUrl) {
+        setCroppedPreview(publicacionToEdit.mascota.imagenUrl)
+      }
+    }
+  }, [publicacionToEdit, isOpen])
 
   const pad = (n: number) => n.toString().padStart(2, "0")
   const formatDateDisplay = (iso?: string) => {
@@ -145,8 +176,8 @@ export function PublicarModal({
     return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`
   }
 
-  const parentRazas = especie
-    ? razasPorEspecie[especie].filter((option) => !MESTIZO_RAZAS.has(option.value))
+  const parentRazas = tipoMascota
+    ? getRazasPorTipoMascota(tipoMascota).filter((option) => !MESTIZO_RAZAS.has(option.value))
     : []
 
   const clampEdadDigits = (unit: "años" | "días") => (unit === "años" ? 2 : 3)
@@ -157,7 +188,7 @@ export function PublicarModal({
     e.preventDefault()
     if (!tipoPublicacion) return
 
-    if (!especie) {
+    if (!tipoMascota) {
       toast.error("Por favor, seleccioná el tipo de mascota")
       return
     }
@@ -172,13 +203,8 @@ export function PublicarModal({
       return
     }
 
-    if (!sexo) {
-      toast.error("Por favor, seleccioná el género")
-      return
-    }
-
-    if (!ubicacion.trim()) {
-      toast.error("Por favor, ingresá la ubicación")
+    if (!currentUser?.ubicacion?.trim()) {
+      toast.error("Configurá tu ubicación en tu perfil antes de publicar")
       return
     }
 
@@ -229,41 +255,70 @@ export function PublicarModal({
       let finalImagenUrl = ""
 
       try {
-        const url = await uploadImage(croppedBlob, currentUser?.id || undefined)
-        finalImagenUrl = url
+        // Solo subir imagen si es una nueva imagen (blob diferente)
+        if (croppedBlob) {
+          const url = await uploadImage(croppedBlob, currentUser?.id || undefined)
+          finalImagenUrl = url
+        } else if (editingId && croppedPreview) {
+          // Si estamos editando y no hay nueva imagen, usar la existente
+          finalImagenUrl = croppedPreview
+        }
       } catch (error) {
         console.error("Error subiendo imagen:", error)
         throw new Error("Error al subir la imagen. Intenta nuevamente.")
       }
 
-      await agregarPublicacion({
-        tipoPublicacion,
-        mascota: {
-          id: "",
-          especie: especie as Especie,
-          raza: raza as Raza,
-          padreRaza: padreRaza ? (padreRaza as Raza) : undefined,
-          madreRaza: madreRaza ? (madreRaza as Raza) : undefined,
-          sexo: sexo as Sexo,
-          color: sanitizeText(color),
-          descripcion: sanitizeRichText(descripcion),
-          edad: tipoPublicacion === "adopcion" ? sanitizeText(`${edadValor.trim()} ${edadUnidad}`) : undefined,
-          imagenUrl: finalImagenUrl,
-        },
-        ubicacion: sanitizeText(ubicacion),
-        fechaEncuentro: tipoPublicacion === "perdida" || tipoPublicacion === "buscada" ? new Date(fechaEncuentro) : undefined,
-        contactoNombre: sanitizeText(contactoNombre),
-        contactoTelefono: contactoTelefono,
-        contactoEmail: contactoEmail,
-        mostrarContactoPublico: mostrarContactoPublicoFlag,
-        usuarioId: currentUser?.id || "",
-        activa: true,
-        transitoUrgente: tipoPublicacion === "perdida" ? transitoUrgente : false,
-      })
+      if (editingId) {
+        // Actualizar publicación existente
+        await actualizarPublicacion(editingId, {
+          tipoPublicacion,
+          mascota: {
+            id: "",
+            especie: tipoMascotaToEspecie(tipoMascota as TipoMascota),
+            raza: raza as Raza,
+            padreRaza: padreRaza ? (padreRaza as Raza) : undefined,
+            madreRaza: madreRaza ? (madreRaza as Raza) : undefined,
+            sexo: tipoMascotaToSexo(tipoMascota as TipoMascota),
+            color: sanitizeText(color),
+            descripcion: sanitizeRichText(descripcion),
+            edad: tipoPublicacion === "adopcion" ? sanitizeText(`${edadValor.trim()} ${edadUnidad}`) : undefined,
+            imagenUrl: finalImagenUrl,
+          },
+          fechaEncuentro: tipoPublicacion === "perdida" || tipoPublicacion === "buscada" ? new Date(fechaEncuentro) : undefined,
+          transitoUrgente: tipoPublicacion === "perdida" ? transitoUrgente : false,
+        })
+        toast.success("¡Publicación actualizada exitosamente!")
+      } else {
+        // Crear nueva publicación
+        await agregarPublicacion({
+          tipoPublicacion,
+          mascota: {
+            id: "",
+            especie: tipoMascotaToEspecie(tipoMascota as TipoMascota),
+            raza: raza as Raza,
+            padreRaza: padreRaza ? (padreRaza as Raza) : undefined,
+            madreRaza: madreRaza ? (madreRaza as Raza) : undefined,
+            sexo: tipoMascotaToSexo(tipoMascota as TipoMascota),
+            color: sanitizeText(color),
+            descripcion: sanitizeRichText(descripcion),
+            edad: tipoPublicacion === "adopcion" ? sanitizeText(`${edadValor.trim()} ${edadUnidad}`) : undefined,
+            imagenUrl: finalImagenUrl,
+          },
+          ubicacion: sanitizeText(currentUser?.ubicacion ?? ""),
+          fechaEncuentro: tipoPublicacion === "perdida" || tipoPublicacion === "buscada" ? new Date(fechaEncuentro) : undefined,
+          contactoNombre: sanitizeText(contactoNombre),
+          contactoTelefono: contactoTelefono,
+          contactoEmail: contactoEmail,
+          mostrarContactoPublico: mostrarContactoPublicoFlag,
+          usuarioId: currentUser?.id || "",
+          activa: true,
+          transitoUrgente: tipoPublicacion === "perdida" ? transitoUrgente : false,
+        })
+        toast.success("¡Publicación creada exitosamente!")
+      }
 
       resetForm()
       onClose()
-      toast.success("¡Publicación creada exitosamente!")
     } catch (error) {
       console.error("Error creando publicacion:", error)
       toast.error(error instanceof Error ? error.message : "Error al crear la publicación")
@@ -275,16 +330,14 @@ export function PublicarModal({
   const resetForm = () => {
     setPaso(1)
     setTipoPublicacion(null)
-    setEspecie("")
+    setTipoMascota("")
     setRaza("")
-    setSexo("")
     setPadreRaza("")
     setMadreRaza("")
     setColor("")
     setDescripcion("")
     setEdadValor("")
     setEdadUnidad("años")
-    setUbicacion("")
     setFechaEncuentro("")
     setTransitoUrgente(false)
     setImageFile(null)
@@ -292,6 +345,7 @@ export function PublicarModal({
     if (croppedPreview) URL.revokeObjectURL(croppedPreview)
     setCroppedBlob(null)
     setCroppedPreview(null)
+    setEditingId(null)
   }
 
   const handleClose = () => {
@@ -386,9 +440,9 @@ export function PublicarModal({
           <div className="grid gap-2 sm:grid-cols-2 mt-0">
             <div className="space-y-2 sm:col-span-1">
               <Select
-                value={especie}
+                value={tipoMascota}
                 onValueChange={(v) => {
-                  setEspecie(v as Especie)
+                  setTipoMascota(v as TipoMascota)
                   setRaza("")
                   setPadreRaza("")
                   setMadreRaza("")
@@ -399,7 +453,9 @@ export function PublicarModal({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="perro">Perro</SelectItem>
+                  <SelectItem value="perra">Perra</SelectItem>
                   <SelectItem value="gato">Gato</SelectItem>
+                  <SelectItem value="gata">Gata</SelectItem>
                   <SelectItem value="otro">Otro</SelectItem>
                 </SelectContent>
               </Select>
@@ -415,14 +471,14 @@ export function PublicarModal({
                     setMadreRaza("")
                   }
                 }}
-                disabled={!especie}
+                disabled={!tipoMascota}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Raza" />
                 </SelectTrigger>
                 <SelectContent>
-                  {especie &&
-                    razasPorEspecie[especie].map((r) => (
+                  {tipoMascota &&
+                    getRazasPorTipoMascota(tipoMascota).map((r) => (
                       <SelectItem key={r.value} value={r.value}>
                         {r.label}
                       </SelectItem>
@@ -483,23 +539,7 @@ export function PublicarModal({
             </div>
           )}
 
-          <div className="grid gap-2 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="sexo" className="font-semibold">
-                Género
-              </Label>
-              <Select value={sexo} onValueChange={(v) => setSexo(v as Sexo)}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccionar" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="macho">Macho</SelectItem>
-                  <SelectItem value="hembra">Hembra</SelectItem>
-                  <SelectItem value="desconocido">Desconocido</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
+          <div className="space-y-2">
             <div className="space-y-2">
               <Label htmlFor="color" className="font-semibold">
                 Color
@@ -535,28 +575,11 @@ export function PublicarModal({
               rows={4}
               maxLength={DESCRIPCION_MAX_LENGTH}
               aria-describedby="descripcion-counter"
-              className="min-h-[80px]"
+              className="min-h-[80px] placeholder:text-xs"
             />
           </div>
 
-          <div className="grid gap-2 sm:grid-cols-2 mt-[20px] mb-2 items-start">
-            <div className="space-y-2">
-              <Label htmlFor="ubicacion">
-                {tipoPublicacion === "perdida" 
-                  ? "Ubicación donde fue encontrada" 
-                  : tipoPublicacion === "buscada"
-                  ? "Última ubicación donde se la vio"
-                  : "Ubicación donde está alojada"}
-              </Label>
-              <LocationAutocomplete
-                value={ubicacion}
-                onChange={(v) => setUbicacion(v)}
-                onSelect={(place) => setUbicacion(place.address)}
-                placeholder="Ejemplo: Almagro"
-                className="!bg-transparent dark:!bg-transparent placeholder:text-muted-foreground text-foreground"
-              />
-            </div>
-
+          <div className="space-y-2 mt-[20px] mb-2">
             {tipoPublicacion === "perdida" || tipoPublicacion === "buscada" ? (
               <div className="space-y-2">
                 <Label htmlFor="fecha">
@@ -601,8 +624,8 @@ export function PublicarModal({
                       <SelectValue placeholder="Unidad" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="años">años</SelectItem>
                       <SelectItem value="días">días</SelectItem>
+                      <SelectItem value="años">años</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

@@ -19,6 +19,7 @@ export const usuariosPerfil = pgTable("usuarios_perfil", {
   authUserId: text("auth_user_id").primaryKey(),
   esRefugio: boolean("es_refugio").default(false).notNull(),
   nombreRefugio: text("nombre_refugio"),
+  ubicacion: text("ubicacion"),
   contactoNombre: text("contacto_nombre"),
   contactoTelefono: text("contacto_telefono"),
   contactoEmail: text("contacto_email"),

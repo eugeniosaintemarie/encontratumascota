@@ -14,3 +14,10 @@ export const MESTIZO_RAZAS = new Set<string>(["mestizo", "mestizo_perro", "mesti
 export function isMestizoRaza(raza?: string): boolean {
   return !!raza && MESTIZO_RAZAS.has(raza)
 }
+
+// Truncar ubicación: solo mostrar lo que está antes de la primera coma
+export function truncateUbicacion(ubicacion?: string): string {
+  if (!ubicacion) return ""
+  const parts = ubicacion.split(",")
+  return parts[0].trim()
+}

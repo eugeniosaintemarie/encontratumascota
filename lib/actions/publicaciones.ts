@@ -54,8 +54,8 @@ export async function getPublicaciones(filtros?: FiltrosPublicaciones, opts?: { 
   const isDemo = opts?.forceDemo ?? isDemoEnv
   let rows: any[] = []
 
-  if (!isDemo) {
-    // Lazy-import DB/schema only when needed (avoids throwing when DATABASE_URL is missing in dev)
+  // Intentar cargar desde la base de datos primero
+  try {
     const { db } = await import("@/lib/db")
     const { publicaciones } = await import("@/lib/db/schema")
 
@@ -100,6 +100,9 @@ export async function getPublicaciones(filtros?: FiltrosPublicaciones, opts?: { 
       .from(publicaciones)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
       .orderBy(desc(publicaciones.fechaPublicacion))
+  } catch (error) {
+    console.error("Error loading from database, falling back to mocks:", error)
+    rows = []
   }
 
   // Transformar a las interfaces del frontend
@@ -284,6 +287,19 @@ export async function actualizarPublicacionDB(
   const [row] = await db
     .update(publicaciones)
     .set(datos)
+    .where(eq(publicaciones.id, id))
+    .returning()
+
+  return row ? mapRowToPublicacion(row) : null
+}
+
+// ─── DELETE: Eliminar publicacion ──────────────────────────
+export async function eliminarPublicacionDB(id: string) {
+  const { db } = await import("@/lib/db")
+  const { publicaciones } = await import("@/lib/db/schema")
+
+  const [row] = await db
+    .delete(publicaciones)
     .where(eq(publicaciones.id, id))
     .returning()
 

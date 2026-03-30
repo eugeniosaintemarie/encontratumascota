@@ -8,7 +8,9 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { MapPin, Lock, Share2, Check, Loader2, AlertTriangle, UserPlus, User, ZoomIn, History } from "lucide-react"
 import type { Publicacion } from "@/lib/types"
-import { getRazaLabel, especieLabels, generoLabels } from "@/lib/labels"
+import { especieSexoToTipo } from "@/lib/types"
+import { razasLabels, tipoMascotaLabels } from "@/lib/labels"
+import { isMestizoRaza, truncateUbicacion } from "@/lib/utils"
 import { ImageViewerModal } from "@/components/image-viewer-modal"
 import { formatHeartEmojiSpacing } from "@/lib/utils"
 import { useSharePublicacion } from "@/hooks/use-share-publicacion"
@@ -26,6 +28,22 @@ function formatDate(date: Date): string {
   return `${day}/${month}/${year}`
 }
 
+function formatEdad(edad?: string | null): string {
+  if (!edad) return ""
+  const parts = edad.trim().split(/\s+/)
+  if (parts.length < 2) return edad
+  const num = parseInt(parts[0], 10)
+  if (isNaN(num)) return edad
+  const unidad = parts[1].toLowerCase()
+  if (unidad.startsWith("año")) {
+    return num === 1 ? "1 año" : `${num} años`
+  }
+  if (unidad.startsWith("día") || unidad.startsWith("dia")) {
+    return num === 1 ? "1 día" : `${num} días`
+  }
+  return edad
+}
+
 export const PublicacionCard = memo(function PublicacionCard({
   publicacion,
   isAuthenticated = false,
@@ -39,10 +57,11 @@ export const PublicacionCard = memo(function PublicacionCard({
   const [showHistory, setShowHistory] = useState(false)
 
   const parentBreedBadges = [
-    mascota.padreRaza ? `Padre: ${getRazaLabel(mascota.padreRaza)}` : null,
-    mascota.madreRaza ? `Madre: ${getRazaLabel(mascota.madreRaza)}` : null,
+    mascota.padreRaza ? `Padre: ${razasLabels[mascota.padreRaza]}` : null,
+    mascota.madreRaza ? `Madre: ${razasLabels[mascota.madreRaza]}` : null,
   ].filter(Boolean) as string[]
 
+  // Obtener el historial anterior (del array historialTransferencias)
   const historialTransferencias = (publicacion.historialTransferencias as any[]) || []
   const tieneHistorial = historialTransferencias.length > 0
   const contactoAnterior = tieneHistorial ? historialTransferencias[historialTransferencias.length - 1] : null
@@ -53,6 +72,7 @@ export const PublicacionCard = memo(function PublicacionCard({
     }
   }
 
+  // Limitar descripcion a 100 caracteres y capitalizar primera letra
   const descripcionLimitada = mascota.descripcion.length > 100
     ? mascota.descripcion.slice(0, 100).trim() + "..."
     : mascota.descripcion
@@ -66,19 +86,23 @@ export const PublicacionCard = memo(function PublicacionCard({
       <div className="relative aspect-square overflow-hidden bg-muted cursor-pointer" onClick={() => setIsImageViewerOpen(true)}>
         <Image
           src={mascota.imagenUrl || "/placeholder.svg"}
-          alt={`${especieLabels[mascota.especie]} ${getRazaLabel(mascota.raza, mascota.sexo)} ${publicacion.tipoPublicacion === "buscada" ? "buscado" : publicacion.tipoPublicacion === "adopcion" ? "en adopción" : "encontrado"} en ${publicacion.ubicacion}`}
+          alt={`${tipoMascotaLabels[especieSexoToTipo(mascota.especie, mascota.sexo)]} ${mascota.raza} ${publicacion.tipoPublicacion === "buscada" ? "buscado" : publicacion.tipoPublicacion === "adopcion" ? "en adopción" : "encontrado"} en ${publicacion.ubicacion}`}
           fill
           loading="lazy"
           className="object-cover object-top transition-transform duration-300 group-hover:scale-105"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 20vw"
         />
 
+        {/* Zoom indicator overlay */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
           <div className="bg-white/90 dark:bg-black/70 rounded-full p-2 shadow-lg backdrop-blur-sm">
             <ZoomIn className="h-5 w-5 text-foreground" />
           </div>
         </div>
 
+        {/* imagen renderizada */}
+
+        {/* Botón de compartir */}
         <div className="absolute right-3 top-3 z-10">
           <Button
             size="icon"
@@ -105,13 +129,7 @@ export const PublicacionCard = memo(function PublicacionCard({
         <div className="absolute left-3 top-3 flex flex-col gap-1.5">
           <div className="flex flex-wrap gap-1.5">
             <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm border-0">
-              {especieLabels[mascota.especie]}
-            </Badge>
-            <Badge
-              variant="outline"
-              className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm border-0"
-            >
-              {generoLabels[mascota.sexo]}
+              {tipoMascotaLabels[especieSexoToTipo(mascota.especie, mascota.sexo)]}
             </Badge>
           </div>
           {parentBreedBadges.length > 0 ? (
@@ -126,7 +144,7 @@ export const PublicacionCard = memo(function PublicacionCard({
             ))
           ) : (
             <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0">
-              {getRazaLabel(mascota.raza, mascota.sexo)}
+              {razasLabels[mascota.raza]}
             </Badge>
           )}
         </div>
@@ -139,14 +157,16 @@ export const PublicacionCard = memo(function PublicacionCard({
           )}
           <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm text-xs flex items-center gap-1 border-0">
             <MapPin className="h-3 w-3" />
-            {publicacion.ubicacion}
+            {truncateUbicacion(publicacion.ubicacion)}
           </Badge>
         </div>
         <div className="absolute right-3 bottom-3">
           <Badge variant="secondary" className="bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm text-xs border-0">
             {publicacion.tipoPublicacion === "adopcion"
-              ? `${mascota.edad}`
-              : publicacion.fechaEncuentro ? formatDate(publicacion.fechaEncuentro) : ""}
+              ? formatEdad(mascota.edad)
+              : publicacion.fechaEncuentro && publicacion.fechaEncuentro.getFullYear() > 1970 
+                ? formatDate(publicacion.fechaEncuentro) 
+                : ""}
           </Badge>
         </div>
       </div>
@@ -157,8 +177,8 @@ export const PublicacionCard = memo(function PublicacionCard({
             {publicacion.tipoPublicacion === "adopcion" 
               ? "En adopción" 
               : publicacion.tipoPublicacion === "buscada" 
-              ? "Perdida" 
-              : "Encontrada"}
+              ? mascota.sexo === "hembra" ? "Buscada" : "Buscado"
+              : mascota.sexo === "hembra" ? "Encontrada" : "Encontrado"}
           </span>
           {mascota.color && <span className="block">{mascota.color}</span>}
           {descripcionFormateada && <span className="italic">{descripcionFormateada}</span>}
@@ -167,10 +187,11 @@ export const PublicacionCard = memo(function PublicacionCard({
         <div className="mt-auto">
           {(() => {
             const isCerrada = publicacion.activa === false && !publicacion.enTransito
-            const canSeeContact = isAuthenticated || (publicacion.mostrarContactoPublico && !isCerrada)
+            const canSeeContact = publicacion.mostrarContactoPublico && (isAuthenticated || !isCerrada)
             return canSeeContact
           })() ? (
             <div className="rounded-lg bg-[#FF8A65]/10 px-3 py-3 min-h-[84px] relative flex flex-col">
+              {/* Icono flip para ver historial (solo si hay historial) */}
               {tieneHistorial && (
                 <button
                   onClick={() => setShowHistory(!showHistory)}
@@ -182,6 +203,7 @@ export const PublicacionCard = memo(function PublicacionCard({
                 </button>
               )}
 
+              {/* Si está en tránsito y tiene contacto de tránsito, mostrar ambos o historial */}
               {publicacion.transitoContactoNombre ? (
                 <div
                   style={{
@@ -198,6 +220,7 @@ export const PublicacionCard = memo(function PublicacionCard({
                       minHeight: "inherit",
                     } as any}
                   >
+                    {/* FRENTE - Cuidador actual */}
                     <div
                       style={{
                         backfaceVisibility: "hidden",
@@ -228,6 +251,7 @@ export const PublicacionCard = memo(function PublicacionCard({
                       </div>
                     </div>
 
+                    {/* ATRÁS - Cuidador anterior */}
                     {contactoAnterior && (
                       <div
                         style={{
@@ -267,11 +291,16 @@ export const PublicacionCard = memo(function PublicacionCard({
                   </div>
                 </div>
               ) : (
+                /* Contacto normal (sin tránsito) */
                 <div className="space-y-0 leading-tight rounded-lg bg-transparent p-0 overflow-hidden min-h-[84px] flex flex-col flex-1">
                   <div className="mb-1">
                     <div className="flex items-center gap-1.5">
-                      <User className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="text-xs font-medium text-muted-foreground">Contacto</span>
+                      {publicacion.esRefugio ? (
+                        <span className="text-[14px] leading-none" aria-hidden="true">❤️‍🩹</span>
+                      ) : (
+                        <User className="h-3.5 w-3.5 text-muted-foreground" />
+                      )}
+                      <span className="text-xs font-medium text-muted-foreground"></span>
                     </div>
                     {publicacion.esRefugio ? (
                       <button
@@ -324,11 +353,12 @@ export const PublicacionCard = memo(function PublicacionCard({
         </div>
       </CardContent>
 
+      {/* Image Viewer Modal */}
       <ImageViewerModal
         isOpen={isImageViewerOpen}
         onClose={() => setIsImageViewerOpen(false)}
         imageUrl={mascota.imagenUrl || "/placeholder.svg"}
-        alt={`${especieLabels[mascota.especie]} ${publicacion.tipoPublicacion === "buscada" ? "buscado" : "encontrado"}`}
+        alt={`${tipoMascotaLabels[especieSexoToTipo(mascota.especie, mascota.sexo)]} ${publicacion.tipoPublicacion === "buscada" ? "buscado" : "encontrado"}`}
       />
     </Card>
   )

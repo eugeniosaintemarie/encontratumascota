@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import Script from "next/script"
-import { especieLabels, generoLabels, razasLabels } from "@/lib/labels"
+import { razasLabels, tipoMascotaLabels } from "@/lib/labels"
+import { especieSexoToTipo } from "@/lib/types"
 import { PublicacionDetail } from "./publicacion-detail"
 import Link from "next/link"
 import type { Especie, Sexo, Raza } from "@/lib/types"
@@ -32,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { mascota } = publicacion
   const ubicacionSinComa = publicacion.ubicacion.replace(",", "")
   const transitoTag = publicacion.transitoUrgente ? " ¡Tránsito urgente!" : ""
-  const title = `${especieLabels[mascota.especie as Especie]} ${generoLabels[mascota.sexo as Sexo].toLowerCase()} ${razasLabels[mascota.raza as Raza]} encontrado en ${ubicacionSinComa}${transitoTag}`
+  const title = `${tipoMascotaLabels[especieSexoToTipo(mascota.especie as Especie, mascota.sexo as Sexo)]} ${razasLabels[mascota.raza as Raza]} encontrado en ${ubicacionSinComa}${transitoTag}`
   const description = mascota.descripcion
 
   return {
@@ -90,7 +91,7 @@ export default async function PublicacionPage({ params }: Props) {
   const jsonLd = {
     "@context": "https://schema.org/",
     "@type": "Article",
-    "headline": `${especieLabels[mascota.especie as Especie]} ${razasLabels[mascota.raza as Raza]} ${tipoTexto}`,
+    "headline": `${tipoMascotaLabels[especieSexoToTipo(mascota.especie as Especie, mascota.sexo as Sexo)]} ${razasLabels[mascota.raza as Raza]} ${tipoTexto}`,
     "description": mascota.descripcion,
     "image": mascota.imagenUrl,
     "datePublished": publicacion.fechaPublicacion.toISOString(),
@@ -100,7 +101,7 @@ export default async function PublicacionPage({ params }: Props) {
     },
     "mainEntity": {
       "@type": "Pet",
-      "name": `${especieLabels[mascota.especie as Especie]} ${razasLabels[mascota.raza as Raza]}`,
+      "name": `${tipoMascotaLabels[especieSexoToTipo(mascota.especie as Especie, mascota.sexo as Sexo)]} ${razasLabels[mascota.raza as Raza]}`,
       "breed": razasLabels[mascota.raza as Raza],
       "image": mascota.imagenUrl,
       "description": mascota.descripcion,
