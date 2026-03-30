@@ -375,7 +375,7 @@ export function PublicarModal({
         <X className="h-4 w-4" />
       </button>
 
-      <h2 className="text-lg font-semibold -mt-1">Publicar mascota</h2>
+      <h2 className="text-lg font-semibold -mt-1">{editingId ? "Editar publicación" : "Publicar mascota"}</h2>
 
       {paso === 1 && (
         <div className="flex flex-col gap-4">
@@ -721,7 +721,9 @@ export function PublicarModal({
 
           <div className="flex gap-3 py-2">
             <Button type="submit" className="flex-1" disabled={isLoading || isUploadingImage}>
-              {isLoading || isUploadingImage ? "Publicando..." : "Publicar"}
+              {isLoading || isUploadingImage 
+                ? (editingId ? "Guardando..." : "Publicando...") 
+                : (editingId ? "Guardar cambios" : "Publicar")}
             </Button>
           </div>
         </form>
