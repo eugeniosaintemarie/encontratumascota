@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { useItemsPerPage } from "@/hooks/use-items-per-page"
 import { PublicacionCard } from "@/components/publicacion-card"
 import { FiltrosPublicaciones } from "@/components/filtros-publicaciones"
@@ -19,8 +19,13 @@ export default function ReunidasPage() {
 
   const { isAuthenticated, requireAuth } = useAuth()
 
-  const { publicaciones } = usePublicaciones()
+  const { publicaciones, refetch } = usePublicaciones()
   const { itemsPerPage, columns } = useItemsPerPage()
+
+  // Cargar publicaciones inactivas al montar
+  useEffect(() => {
+    refetch({ includeInactive: true })
+  }, [refetch])
 
   const publicacionesReunidas = useMemo(() => {
     return publicaciones.filter((pub) => {
