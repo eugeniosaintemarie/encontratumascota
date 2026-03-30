@@ -29,7 +29,8 @@ export function useSharePublicacion(publicacion: Publicacion | null) {
       : ""
     const color = info.color ? ` ${info.color}` : ""
     const transitoTag = info.transitoUrgente ? " ¡Trnésito urgente!" : ""
-    const title = `${info.tipo}${info.raza ? ` ${info.raza}` : ""}${razaDetalle}${color} ${info.categoria.toLowerCase()} en ${info.ubicacionCorta}${transitoTag}`
+    const ubicacionPrep = info.esAdopcion ? "de" : "en"
+    const title = `${info.tipo}${info.raza ? ` ${info.raza}` : ""}${razaDetalle}${color} ${info.categoria.toLowerCase()} ${ubicacionPrep} ${info.ubicacionCorta}${transitoTag}`
     const shareText = `${title}\n\n${info.descripcion}\n\n${url}`
 
     try {
