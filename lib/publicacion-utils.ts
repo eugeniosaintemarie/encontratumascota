@@ -7,6 +7,8 @@ export interface PublicacionInfo {
   tipo: string
   raza: string
   razaDetalle?: string
+  madreRaza?: string
+  padreRaza?: string
   esMestizo: boolean
   ubicacion: string
   ubicacionCorta: string
@@ -26,11 +28,15 @@ export function getPublicacionInfo(publicacion: Publicacion): PublicacionInfo {
   
   let raza: string
   let razaDetalle: string | undefined
+  let madreRaza: string | undefined
+  let padreRaza: string | undefined
   if (esMestizo) {
     raza = esHembra ? "Mestiza" : "Mestizo"
     const padre = mascota.padreRaza ? razasLabels[mascota.padreRaza] || mascota.padreRaza : "?"
     const madre = mascota.madreRaza ? razasLabels[mascota.madreRaza] || mascota.madreRaza : "?"
-    razaDetalle = `${raza} (♀️${madre} + ♂️${padre})`
+    madreRaza = `♀${madre}`
+    padreRaza = `♂${padre}`
+    razaDetalle = `${raza} (${madreRaza} ${padreRaza})`
   } else {
     raza =razasLabels[mascota.raza] || mascota.raza
   }
@@ -61,6 +67,8 @@ export function getPublicacionInfo(publicacion: Publicacion): PublicacionInfo {
     tipo,
     raza,
     razaDetalle,
+    madreRaza,
+    padreRaza,
     esMestizo,
     ubicacion: publicacion.ubicacion,
     ubicacionCorta,

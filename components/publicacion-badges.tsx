@@ -38,12 +38,16 @@ export function PublicacionBadges({ publicacion, className = "", badgeClassName 
         )}
         {info.esMestizo ? (
           <>
-            <Badge variant="secondary" className={`bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0 text-xs ${badgeClassName}`}>
-              {info.razaDetalle?.split("\n")[0]}
-            </Badge>
-            <Badge variant="secondary" className={`bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0 text-xs ${badgeClassName}`}>
-              {info.razaDetalle?.split("\n")[1]}
-            </Badge>
+            {info.madreRaza && (
+              <Badge variant="secondary" className={`bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0 text-xs ${badgeClassName}`}>
+                {info.madreRaza}
+              </Badge>
+            )}
+            {info.padreRaza && (
+              <Badge variant="secondary" className={`bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0 text-xs ${badgeClassName}`}>
+                {info.padreRaza}
+              </Badge>
+            )}
           </>
         ) : info.raza ? (
           <Badge variant="secondary" className={`bg-white dark:bg-black/70 text-foreground dark:text-white backdrop-blur-sm font-medium w-fit border-0 text-xs ${badgeClassName}`}>
