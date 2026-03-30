@@ -9,7 +9,17 @@ interface PublicacionesContextType {
   loading: boolean
   cerrarPublicacion: (id: string, motivo: "encontrado_dueno" | "adoptado" | "en_transito" | "otro", transitoContacto?: { nombre: string; telefono: string; email: string }, confirmarTransferenciaMultiple?: boolean) => void
   agregarPublicacion: (publicacion: Omit<Publicacion, "id" | "fechaPublicacion">) => void
-  actualizarPublicacion: (id: string, datos: Partial<Publicacion>) => void
+  actualizarPublicacion: (id: string, datos: Partial<Publicacion> & {
+    especie?: string
+    raza?: string
+    padreRaza?: string | null
+    madreRaza?: string | null
+    sexo?: string
+    color?: string
+    descripcion?: string
+    edad?: string | null
+    imagenUrl?: string
+  }) => void
   eliminarPublicacion: (id: string) => Promise<void>
   refetch: (options?: { includeInactive?: boolean }) => Promise<void>
 }

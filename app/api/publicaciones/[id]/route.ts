@@ -46,7 +46,13 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     const body = await request.json()
     // Solo permitir campos seguros (no permitir cambiar usuarioId)
-    const { usuarioId: _, ...safeData } = body
+    const { usuarioId: _, mascota, ...rest } = body
+    
+    // Si viene el objeto mascota, extraer sus campos
+    const safeData = mascota
+      ? { ...mascota, ...rest }
+      : rest
+    
     const publicacion = await actualizarPublicacionDB(id, safeData)
 
     if (!publicacion) {

@@ -272,18 +272,15 @@ export function PublicarModal({
         // Actualizar publicación existente
         await actualizarPublicacion(editingId, {
           tipoPublicacion,
-          mascota: {
-            id: "",
-            especie: tipoMascotaToEspecie(tipoMascota as TipoMascota),
-            raza: raza as Raza,
-            padreRaza: padreRaza ? (padreRaza as Raza) : undefined,
-            madreRaza: madreRaza ? (madreRaza as Raza) : undefined,
-            sexo: tipoMascotaToSexo(tipoMascota as TipoMascota),
-            color: sanitizeText(color),
-            descripcion: sanitizeRichText(descripcion),
-            edad: tipoPublicacion === "adopcion" ? sanitizeText(`${edadValor.trim()} ${edadUnidad}`) : undefined,
-            imagenUrl: finalImagenUrl,
-          },
+          especie: tipoMascotaToEspecie(tipoMascota as TipoMascota),
+          raza: raza as Raza,
+          padreRaza: padreRaza ? (padreRaza as Raza) : undefined,
+          madreRaza: madreRaza ? (madreRaza as Raza) : undefined,
+          sexo: tipoMascotaToSexo(tipoMascota as TipoMascota),
+          color: sanitizeText(color),
+          descripcion: sanitizeRichText(descripcion),
+          edad: tipoPublicacion === "adopcion" ? sanitizeText(`${edadValor.trim()} ${edadUnidad}`) : undefined,
+          imagenUrl: finalImagenUrl,
           fechaEncuentro: tipoPublicacion === "perdida" || tipoPublicacion === "buscada" ? new Date(fechaEncuentro) : undefined,
           transitoUrgente: tipoPublicacion === "perdida" ? transitoUrgente : false,
         })

@@ -269,12 +269,21 @@ export async function cerrarPublicacionDB(
 export async function actualizarPublicacionDB(
   id: string,
   datos: Partial<{
+    especie: string
+    raza: string
+    padreRaza: string | null
+    madreRaza: string | null
+    sexo: string
+    color: string
     descripcion: string
+    edad: string | null
+    imagenUrl: string
+    tipoPublicacion: string
     ubicacion: string
+    fechaEncuentro: Date | null
     contactoNombre: string
     contactoTelefono: string
     contactoEmail: string
-    imagenUrl: string
     activa: boolean
     transitoUrgente: boolean
     esPrueba: boolean
