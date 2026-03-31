@@ -122,26 +122,33 @@ export function AuthModal({
       })
 
       if (result.error) {
-        setError(result.error.message || "Email o contraseña incorrectos")
+        const errorCode = result.error.code || ""
+        if (errorCode === "EMAIL_NOT_VERIFIED") {
+          setError("Tu email aún no está verificado. Revisa tu correo y completá la verificación")
+        } else if (errorCode === "INVALID_CREDENTIALS" || result.error.message?.includes("incorrect")) {
+          setError("Email o contraseña incorrectos")
+        } else {
+          setError(result.error.message || "Error al iniciar sesión")
+        }
       } else {
         const { data: sessionData } = await authClient.getSession()
         
         if (sessionData?.session?.user && !sessionData.session.user.emailVerified) {
           logout()
-          setError("Tu email aún no está verificado. Revisa tu correo y seguí las instrucciones.")
+          setError("Tu email aún no está verificado. Revisa tu correo y seguí las instrucciones")
           return
         }
 
         const sessionReady = await refreshSession()
         if (!sessionReady) {
-          setError("No pudimos confirmar tu sesión. Probá recargar la página y volvé a iniciar sesión.")
+          setError("No pudimos confirmar tu sesión. Probá recargar la página y volvé a iniciar sesión")
           return
         }
         onAuthSuccess?.()
         onClose()
       }
     } catch {
-      setError("Error de conexión. Intentá de nuevo.")
+      setError("Error de conexión. Intentá de nuevo")
     } finally {
       setIsLoading(false)
     }
@@ -201,7 +208,7 @@ export function AuthModal({
       if (result.error) {
         const errorCode = result.error.code || ""
         if (errorCode === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL" || result.error.message?.includes("already exists")) {
-          setError("Ya existe un usuario registrado con ese correo. Intentá con otro o iniciá sesión.")
+          setError("Ya existe un usuario registrado con ese correo. Intentá con otro o iniciá sesión")
         } else {
           setError(result.error.message || "Error al registrarse")
         }
@@ -222,7 +229,7 @@ export function AuthModal({
         }
       }
     } catch {
-      setError("Error de conexión. Intentá de nuevo.")
+      setError("Error de conexión. Intentá de nuevo")
     } finally {
       setIsLoading(false)
     }
@@ -266,7 +273,7 @@ export function AuthModal({
       } else {
         resetForms()
         setView("login")
-        setError("¡Email verificado! Ahora podés iniciar sesión.")
+        setError("¡Email verificado! Ahora podés iniciar sesión")
       }
     } catch (err) {
       setError("Error al verificar el código")
@@ -286,7 +293,7 @@ export function AuthModal({
       if (error) {
         setError(error.message || "Error al reenviar el código")
       } else {
-        setError("Código reenviado. Revisa tu correo.")
+        setError("Código reenviado. Revisa tu correo")
       }
     } catch (err) {
       setError("Error al reenviar el código")
@@ -435,7 +442,7 @@ export function AuthModal({
               }}
               className="w-full text-sm text-muted-foreground hover:underline"
             >
-              Volver al inicio de sesión
+              Volver
             </button>
           </form>
         ) : (
