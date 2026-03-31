@@ -36,6 +36,20 @@ export const authClient = {
     const client = await getAuthClientInstance()
     return client.changePassword(data)
   },
+  async getSession() {
+    const client = await getAuthClientInstance()
+    return client.getSession()
+  },
+  emailOtp: {
+    async verifyEmail(data: { email: string; otp: string }) {
+      const client = await getAuthClientInstance()
+      return client.emailOtp.verifyEmail(data)
+    },
+  },
+  async sendVerificationEmail(data: { email: string; callbackURL?: string }) {
+    const client = await getAuthClientInstance()
+    return client.sendVerificationEmail(data)
+  },
 }
 
 /**

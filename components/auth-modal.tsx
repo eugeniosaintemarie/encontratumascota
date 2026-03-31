@@ -122,16 +122,11 @@ export function AuthModal({
       if (result.error) {
         setError(result.error.message || "Email o contraseña incorrectos")
       } else {
-        const checkRes = await fetch("/api/auth/login/check", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: loginEmail }),
-        })
-        const checkData = await checkRes.json()
+        const { data: sessionData } = await authClient.getSession()
         
-        if (!checkData.verificado) {
+        if (sessionData?.session?.user && !sessionData.session.user.emailVerified) {
           logout()
-          setError("Tu email aún no está verificado. Revisa tu correo y haz clic en el enlace de verificación.")
+          setError("Tu email aún no está verificado. Revisa tu correo y seguí las instrucciones.")
           return
         }
 
@@ -209,24 +204,15 @@ export function AuthModal({
           setError(result.error.message || "Error al registrarse")
         }
       } else {
-        // Enviar email de verificación
-        try {
-          await fetch("/api/auth/verify/send", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email: registerEmail,
-              nombre: registerNombre,
-              baseUrl: window.location.origin,
-            }),
-          })
-        } catch (e) {
-          console.error("Error enviando email de verificación:", e)
+        const { data } = result
+        
+        if (data?.user && !data.user.emailVerified) {
+          setShowVerificationMessage(true)
+          setError(null)
+        } else {
+          setShowVerificationMessage(true)
+          setError(null)
         }
-
-        // Mostrar mensaje de verificación de email
-        setShowVerificationMessage(true)
-        setError(null)
       }
     } catch {
       setError("Error de conexión. Intentá de nuevo.")
