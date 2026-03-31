@@ -15,15 +15,20 @@ export async function POST(request: Request) {
     const token = nanoid(32)
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)
 
+    console.log("[API /auth/verify/send] Inserting token for email:", email)
+
     await db.insert(emailVerificacionTokens).values({
       email,
       token,
       expiresAt,
     })
 
+    console.log("[API /auth/verify/send] Token inserted, sending email...")
+
     const result = await sendVerificationEmail(email, token, baseUrl || "https://encontratumascota.ar")
 
     if (!result.success) {
+      console.error("[API /auth/verify/send] Resend failed:", result.error)
       return NextResponse.json({ error: "Error al enviar email de verificación" }, { status: 500 })
     }
 

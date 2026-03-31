@@ -189,7 +189,12 @@ export function AuthModal({
       })
 
       if (result.error) {
-        setError(result.error.message || "Error al registrarse")
+        const errorCode = result.error.code || ""
+        if (errorCode === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL" || result.error.message?.includes("already exists")) {
+          setError("Ya existe un usuario registrado con ese correo. Intentá con otro o iniciá sesión.")
+        } else {
+          setError(result.error.message || "Error al registrarse")
+        }
       } else {
         // Enviar email de verificación
         try {
