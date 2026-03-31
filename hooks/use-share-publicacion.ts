@@ -27,12 +27,12 @@ export function useSharePublicacion(publicacion: Publicacion | null) {
     const razaDetalle = info.razaDetalle
       ? ` ${info.razaDetalle.replace(/\n/g, " + ")}`
       : ""
-    const color = info.color ? ` ${info.color}` : ""
+    const color = info.color ? `${info.color}` : ""
     const transitoTag = info.transitoUrgente ? " ¡Tránsito urgente! ⚠️" : ""
 
     let title: string
     if (info.esAdopcion) {
-      title = `${info.tipo}${info.raza ? ` ${info.raza}` : ""}${razaDetalle}${color ? ` ${color}` : ""} 🐾 ${info.categoria.toLowerCase()}${transitoTag}`
+      title = `${info.tipo}${info.raza ? ` ${info.raza}` : ""}${razaDetalle}${color ? `${color} ` : ""}🐾 ${info.categoria.toLowerCase()}${transitoTag}`
     } else {
       title = `${info.tipo}${info.raza ? ` ${info.raza}` : ""}${razaDetalle}${color} ${info.categoria.toLowerCase()} en ${info.ubicacionCorta}${transitoTag}`
     }
