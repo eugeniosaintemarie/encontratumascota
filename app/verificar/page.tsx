@@ -1,12 +1,11 @@
 "use client"
 
 import { Suspense, useEffect, useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { authClient } from "@/lib/auth/client"
 
 function VerificarContent() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [status, setStatus] = useState<"verificando" | "exito" | "error" | "esperando">("verificando")
   const [mensaje, setMensaje] = useState("")
   const [codigo, setCodigo] = useState("")
@@ -34,7 +33,7 @@ function VerificarContent() {
         setStatus("error")
         setMensaje("No hay sesión activa. Iniciá sesión para verificar tu email.")
       }
-    } catch (e) {
+    } catch {
       setStatus("error")
       setMensaje("Error al verificar la sesión")
     }
@@ -65,7 +64,7 @@ function VerificarContent() {
         setMensaje("¡Correo verificado! Ya podés iniciar sesión.")
         setTimeout(() => router.push("/?login=verificado"), 2500)
       }
-    } catch (e) {
+    } catch {
       setMensaje("Error al verificar. Intentá de nuevo.")
     } finally {
       setEnviando(false)
@@ -85,7 +84,7 @@ function VerificarContent() {
       } else {
         setMensaje("¡Código reenviado! Revisa tu correo.")
       }
-    } catch (e) {
+    } catch {
       setMensaje("Error al reenviar el código")
     } finally {
       setEnviando(false)

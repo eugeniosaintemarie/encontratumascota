@@ -275,7 +275,7 @@ export function AuthModal({
         setView("login")
         setError("¡Email verificado! Ahora podés iniciar sesión")
       }
-    } catch (err) {
+    } catch {
       setError("Error al verificar el código")
     } finally {
       setIsVerifying(false)
@@ -295,7 +295,7 @@ export function AuthModal({
       } else {
         setError("Código reenviado. Revisa tu correo")
       }
-    } catch (err) {
+    } catch {
       setError("Error al reenviar el código")
     }
   }
