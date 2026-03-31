@@ -381,7 +381,7 @@ export function PerfilModal({
           <p className="text-xs text-muted-foreground">{currentUser.email}</p>
         </div>
         <Button variant="outline" size="sm" onClick={handleLogout}>
-          Cerrar sesión
+          Salir
         </Button>
       </div>
 
