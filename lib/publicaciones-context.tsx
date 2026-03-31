@@ -199,7 +199,6 @@ export function PublicacionesProvider({ children }: { children: ReactNode }) {
         throw new Error(data.error || "Error al eliminar la publicación")
       }
     } catch (e) {
-      const message = e instanceof Error ? e.message : "Error de conexión"
       console.error("Error eliminando publicacion:", e)
       throw e
     }

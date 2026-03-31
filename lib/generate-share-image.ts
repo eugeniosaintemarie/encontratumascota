@@ -1,5 +1,5 @@
 import type { Publicacion } from "./types"
-import { getPublicacionInfo, formatEdad, formatDate } from "./publicacion-utils"
+import { getPublicacionInfo } from "./publicacion-utils"
 
 // 9:16 aspect ratio for Instagram Stories/Reels
 const CANVAS_WIDTH = 1080

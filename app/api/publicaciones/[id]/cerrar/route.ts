@@ -43,7 +43,6 @@ export async function POST(request: Request, { params }: RouteParams) {
       : undefined
     
     // Si es tránsito, validar si ya tiene historial de transferencias
-    let advertenciaTransferenciaMultiple = false
     let historialActualizado: Array<{ nombre: string; telefono: string; email: string; fecha: string }> | undefined
 
     if (motivo === "en_transito" && transitoContactoSanitizado) {
@@ -51,8 +50,6 @@ export async function POST(request: Request, { params }: RouteParams) {
       
       // Si ya tiene una transferencia previa, mostrar advertencia
       if (historialActual.length > 0) {
-        advertenciaTransferenciaMultiple = true
-        
         // Si no confirma, solo devolver la advertencia sin actualizar
         if (!confirmarTransferenciaMultiple) {
           return NextResponse.json(

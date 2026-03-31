@@ -42,7 +42,7 @@ self.addEventListener('fetch', (event) => {
 
     // No cachear chunks/scripts de Next para evitar hydration mismatch
     if (url.pathname.startsWith('/_next/')) return
-  } catch (e) {
+  } catch {
     return
   }
 

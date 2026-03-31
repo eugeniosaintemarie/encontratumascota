@@ -88,7 +88,7 @@ export function useSharePublicacion(publicacion: Publicacion | null) {
         description: "Subí la imagen a tus redes y pegá el enlace",
       })
       setTimeout(() => setIsCopied(false), 3000)
-    } catch (err) {
+    } catch {
       try {
         await navigator.clipboard.writeText(url)
         setIsCopied(true)

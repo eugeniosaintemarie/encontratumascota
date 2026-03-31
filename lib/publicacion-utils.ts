@@ -1,4 +1,4 @@
-import type { Publicacion, Mascota } from "./types"
+import type { Publicacion } from "./types"
 import { especieSexoToTipo } from "./types"
 import { tipoMascotaLabels, razasLabels } from "./labels"
 import { isMestizoRaza, truncateUbicacion } from "./utils"

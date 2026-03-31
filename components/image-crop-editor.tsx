@@ -67,8 +67,8 @@ export function ImageCropEditor({
 
       // Image left edge must be <= 0 (viewport left)
       // Image right edge must be >= VIEWPORT
-      let nx = Math.min(0, Math.max(VIEWPORT - w, ox))
-      let ny = Math.min(0, Math.max(VIEWPORT - h, oy))
+      const nx = Math.min(0, Math.max(VIEWPORT - w, ox))
+      const ny = Math.min(0, Math.max(VIEWPORT - h, oy))
 
       return { ox: nx, oy: ny }
     },

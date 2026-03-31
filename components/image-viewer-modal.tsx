@@ -51,7 +51,6 @@ export function ImageViewerModal({
         <div className="flex flex-col items-center justify-center gap-4">
           {/* Image container */}
           <div className="relative w-full max-w-[calc(100vw-1rem)] sm:max-w-[640px] max-h-[calc(100vh-3rem)]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={imageUrl || "/placeholder.svg"}
               alt={alt}

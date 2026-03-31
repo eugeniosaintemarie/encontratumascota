@@ -5,11 +5,10 @@ import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { useSharePublicacion } from "@/hooks/use-share-publicacion"
 import { usePublicaciones } from "@/lib/publicaciones-context"
 import { PublicacionBadges } from "@/components/publicacion-badges"
-import { X, MapPin, RotateCcw, Share2, Check, Loader2 } from "lucide-react"
+import { X, RotateCcw, Share2, Check, Loader2 } from "lucide-react"
 
 interface SwipeExplorerModalProps {
     isOpen: boolean

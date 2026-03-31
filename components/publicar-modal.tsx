@@ -19,9 +19,9 @@ import { ImageCropEditor } from "@/components/image-crop-editor"
 import DatePicker from "@/components/ui/date-picker"
 import { Upload, X, Search, MapPin, Heart } from "lucide-react"
 
-import type { Especie, Sexo, Raza, TipoPublicacion, Publicacion, TipoMascota } from "@/lib/types"
+import type { Raza, TipoPublicacion, Publicacion, TipoMascota } from "@/lib/types"
 import { tipoMascotaToEspecie, tipoMascotaToSexo, especieSexoToTipo } from "@/lib/types"
-import { razasPorEspecie, getRazasPorTipoMascota, tipoMascotaLabels } from "@/lib/labels"
+import { getRazasPorTipoMascota } from "@/lib/labels"
 import { usePublicaciones } from "@/lib/publicaciones-context"
 import { fetchServerSession } from "@/lib/auth/client"
 import { useImageUpload } from "@/hooks/use-image-upload"
@@ -165,21 +165,9 @@ export function PublicarModal({
     }
   }, [publicacionToEdit, isOpen])
 
-  const pad = (n: number) => n.toString().padStart(2, "0")
-  const formatDateDisplay = (iso?: string) => {
-    if (!iso) return ""
-    const d = new Date(iso)
-    if (Number.isNaN(d.getTime())) return ""
-    return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`
-  }
-
   const parentRazas = tipoMascota
     ? getRazasPorTipoMascota(tipoMascota).filter((option) => !MESTIZO_RAZAS.has(option.value))
     : []
-
-  const clampEdadDigits = (unit: "años" | "días") => (unit === "años" ? 2 : 3)
-  const sanitizeEdadValor = (value: string, unit: "años" | "días") =>
-    value.replace(/\D/g, "").slice(0, clampEdadDigits(unit))
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -262,7 +250,7 @@ export function PublicarModal({
         }
       } catch (error) {
         console.error("Error subiendo imagen:", error)
-        throw new Error("Error al subir la imagen. Intenta nuevamente.")
+        throw new Error("Error al subir la imagen. Intenta nuevamente.", { cause: error })
       }
 
       if (editingId) {

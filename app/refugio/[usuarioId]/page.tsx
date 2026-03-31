@@ -11,8 +11,8 @@ export default async function RefugioPage({ params }: { params: Promise<{ usuari
   const host = (await headers()).get("host") ?? undefined
   const isDemo = isDemoHost(host)
 
-  let publicacionesRefugio = [] as typeof mockPublicaciones
-  let nombreRefugio = "Refugio"
+  let publicacionesRefugio: typeof mockPublicaciones
+  let nombreRefugio: string
 
   if (isDemo) {
     publicacionesRefugio = mockPublicaciones.filter(

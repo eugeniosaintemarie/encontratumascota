@@ -1,6 +1,6 @@
 "use server"
 
-import { eq, and, or, ilike, desc } from "drizzle-orm"
+import { eq, and, ilike, desc } from "drizzle-orm"
 import type { Especie, Sexo, Raza } from "@/lib/types"
 import { mockPublicaciones } from "@/lib/mock-data"
 import { isDemoHost } from "@/lib/env"
@@ -52,7 +52,7 @@ export async function getPublicaciones(filtros?: FiltrosPublicaciones, opts?: { 
 
   // Filtrar publicaciones de prueba si no estamos en modo demo
   const isDemo = opts?.forceDemo ?? isDemoEnv
-  let rows: any[] = []
+  let rows: any[]
 
   // Intentar cargar desde la base de datos primero
   try {

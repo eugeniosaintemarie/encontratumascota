@@ -66,7 +66,7 @@ export function useImageUpload(): UseImageUploadReturn {
             return url
         } catch (err) {
             if ((err as Error).name === "AbortError") {
-                throw new Error("Upload cancelled")
+                throw new Error("Upload cancelled", { cause: err })
             }
             const errorMessage = err instanceof Error ? err.message : "Error desconocido al subir imagen"
             if (isMountedRef.current) {

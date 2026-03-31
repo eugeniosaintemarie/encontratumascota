@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge"
 import { AlertTriangle, MapPin } from "lucide-react"
-import { getPublicacionInfo, formatEdad } from "@/lib/publicacion-utils"
+import { getPublicacionInfo } from "@/lib/publicacion-utils"
 import type { Publicacion } from "@/lib/types"
 
 interface PublicacionBadgesProps {

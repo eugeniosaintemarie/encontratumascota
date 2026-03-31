@@ -46,6 +46,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     const body = await request.json()
     // Solo permitir campos seguros (no permitir cambiar usuarioId)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { usuarioId: _, mascota, ...rest } = body
     
     // Si viene el objeto mascota, extraer sus campos

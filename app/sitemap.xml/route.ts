@@ -1,5 +1,3 @@
-import type { MetadataRoute } from 'next'
-
 export async function GET() {
   const baseUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
     ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`

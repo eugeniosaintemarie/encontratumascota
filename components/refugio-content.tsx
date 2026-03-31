@@ -14,7 +14,6 @@ interface RefugioContentProps {
 export function RefugioContent({
   publicaciones,
   nombreRefugio,
-  usuarioId: _usuarioId,
 }: RefugioContentProps) {
   if (publicaciones.length === 0) {
     return (

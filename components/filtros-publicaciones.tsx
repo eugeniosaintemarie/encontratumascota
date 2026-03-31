@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
@@ -10,12 +9,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
 import LocationAutocomplete from "@/components/location-autocomplete"
 import DatePicker from "@/components/ui/date-picker"
-import { Search, X } from "lucide-react"
-import type { TipoMascota, TipoPublicacion, Raza } from "@/lib/types"
-import { tipoMascotaToEspecie } from "@/lib/types"
+import { X } from "lucide-react"
+import type { TipoMascota, TipoPublicacion } from "@/lib/types"
 import { getRazasPorTipoMascota } from "@/lib/labels"
 
 interface FiltrosPublicacionesProps {
@@ -44,42 +41,16 @@ export function FiltrosPublicaciones({
   raza,
   ubicacion,
   fechaDesde,
-  transitoUrgente,
   onTipoPublicacionChange,
   onTipoMascotaChange,
   onRazaChange,
   onUbicacionChange,
   onFechaDesdeChange,
-  onTransitoUrgenteChange,
   onClearFilters,
-  onSearch,
   hasActiveFilters,
   hideTipoSelector = false,
   wideUbicacion = false,
 }: FiltrosPublicacionesProps) {
-  // Hint animation removed: buttons are static now
-  const [activeClearField, setActiveClearField] = useState<string | null>(null)
-
-  const clearField = (field: string) => {
-    switch (field) {
-      case 'tipo':
-        onTipoMascotaChange('todos')
-        onRazaChange('todos')
-        break
-      case 'raza':
-        onRazaChange('todos')
-        break
-      case 'ubicacion':
-        onUbicacionChange('')
-        break
-      case 'fecha':
-        onFechaDesdeChange?.('')
-        break
-      default:
-        break
-    }
-    setActiveClearField(null)
-  }
   return (
     <div className="flex flex-col gap-4">
       {/* Tabs Type Selector */}
@@ -142,8 +113,6 @@ export function FiltrosPublicaciones({
                 }}
               >
                 <SelectTrigger
-                  onFocus={() => setActiveClearField('tipo')}
-                  onBlur={() => setActiveClearField(null)}
                   className="w-full !bg-[var(--salmon)] !text-white border-white/30 [&_svg]:!text-white/70"
                 >
                   <SelectValue placeholder="Tipo" />
@@ -164,8 +133,6 @@ export function FiltrosPublicaciones({
                 disabled={tipoMascota === "todos" || tipoMascota === "otro"}
               >
                 <SelectTrigger
-                  onFocus={() => setActiveClearField('raza')}
-                  onBlur={() => setActiveClearField(null)}
                   className="w-full !bg-[var(--salmon)] !text-white border-white/30 [&_svg]:!text-white/70"
                 >
                   <SelectValue placeholder="Raza" />
@@ -186,8 +153,6 @@ export function FiltrosPublicaciones({
                     id="fecha-buscador"
                     value={fechaDesde}
                     onChange={(v) => onFechaDesdeChange?.(v)}
-                    onFocus={() => setActiveClearField('fecha')}
-                    onBlur={() => setActiveClearField(null)}
                     placeholder="Fecha"
                   />
                 </div>

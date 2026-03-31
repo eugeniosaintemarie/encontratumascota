@@ -42,6 +42,7 @@ const baseConfig = {
     root: __dirname,
   },
   async headers() {
+    // eslint-disable-next-line no-undef
     const isDev = process.env.NODE_ENV === 'development'
     // Next.js app router needs inline bootstrap scripts to hydrate client components.
     const googleScriptHosts = "https://www.google.com https://www.gstatic.com https://recaptcha.google.com https://recaptcha.net https://www.recaptcha.net"
@@ -71,6 +72,7 @@ const baseConfig = {
 }
 
 const withBundleAnalyzerConfig = withBundleAnalyzer({
+  // eslint-disable-next-line no-undef
   enabled: process.env.ANALYZE === "true",
 })
 

@@ -108,7 +108,6 @@ export function PerfilModal({
   isOpen,
   onClose,
   currentUser,
-  onLogout,
   onPasswordChange,
 }: PerfilModalProps) {
   const [activeTab, setActiveTab] = useState("publicaciones")
