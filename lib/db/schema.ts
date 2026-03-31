@@ -4,6 +4,16 @@ import { nanoid } from "nanoid"
 // Helper: genera un ID corto alfanumérico (10 chars)
 const shortId = () => nanoid(10)
 
+// ─── Verificación de email ─────────────────────────────────
+export const emailVerificacionTokens = pgTable("email_verificacion_tokens", {
+  id: text("id").$defaultFn(() => nanoid(32)).primaryKey(),
+  email: text("email").notNull(),
+  token: text("token").notNull().unique(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  usado: boolean("usado").default(false).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+})
+
 // ─── Usuarios ───────────────────────────────────────────────
 export const usuarios = pgTable("usuarios", {
   id: uuid("id").defaultRandom().primaryKey(),

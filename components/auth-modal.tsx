@@ -46,6 +46,7 @@ export function AuthModal({
   const [registerEmail, setRegisterEmail] = useState("")
   const [registerPassword, setRegisterPassword] = useState("")
   const [registerConfirmPassword, setRegisterConfirmPassword] = useState("")
+  const [showVerificationMessage, setShowVerificationMessage] = useState(false)
 
   const { execute: executeRecaptcha } = useRecaptcha()
   const { refreshSession } = useAuth()
@@ -170,23 +171,34 @@ export function AuthModal({
         return
       }
 
-      // Registrar via Neon Auth (pasa por el catch-all handler)
+      // Registrar via Neon Auth (crea el usuario pero no inicia sesión automáticamente)
       const result = await authClient.signUp.email({
         email: sanitizeEmail(registerEmail),
         name: sanitizeText(registerNombre),
-        password: registerPassword, // Password no se sanitiza para preservar caracteres especiales
+        password: registerPassword,
       })
 
       if (result.error) {
         setError(result.error.message || "Error al registrarse")
       } else {
-        const sessionReady = await refreshSession()
-        if (!sessionReady) {
-          setError("No pudimos confirmar tu sesión luego de registrarte. Intentá recargar y volver a ingresar.")
-          return
+        // Enviar email de verificación
+        try {
+          await fetch("/api/auth/verify/send", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: registerEmail,
+              nombre: registerNombre,
+              baseUrl: window.location.origin,
+            }),
+          })
+        } catch (e) {
+          console.error("Error enviando email de verificación:", e)
         }
-        onAuthSuccess?.()
-        onClose()
+
+        // Mostrar mensaje de verificación de email
+        setShowVerificationMessage(true)
+        setError(null)
       }
     } catch {
       setError("Error de conexión. Intentá de nuevo.")
@@ -294,6 +306,27 @@ export function AuthModal({
               </button>
             </p>
           </form>
+        ) : showVerificationMessage ? (
+          <div className="text-center space-y-4 py-6">
+            <div className="flex justify-center">
+              <div className="rounded-full bg-green-100 p-3">
+                <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+            </div>
+            <h3 className="text-lg font-semibold">¡Revisa tu correo!</h3>
+            <p className="text-sm text-muted-foreground">
+              Te enviamos un enlace de verificación a <strong>{registerEmail}</strong>.
+              Abrí el enlace para completar tu registro.
+            </p>
+            <Button variant="outline" onClick={() => {
+              setShowVerificationMessage(false)
+              setView("login")
+            }}>
+              Volver al inicio de sesión
+            </Button>
+          </div>
         ) : (
           <form onSubmit={handleRegister} className="space-y-4">
             {error && (
