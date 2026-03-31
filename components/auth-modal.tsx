@@ -47,6 +47,8 @@ export function AuthModal({
   const [registerPassword, setRegisterPassword] = useState("")
   const [registerConfirmPassword, setRegisterConfirmPassword] = useState("")
   const [showVerificationMessage, setShowVerificationMessage] = useState(false)
+  const [verificationCode, setVerificationCode] = useState("")
+  const [isVerifying, setIsVerifying] = useState(false)
 
   const { execute: executeRecaptcha } = useRecaptcha()
   const { refreshSession } = useAuth()
@@ -210,8 +212,13 @@ export function AuthModal({
           setShowVerificationMessage(true)
           setError(null)
         } else {
-          setShowVerificationMessage(true)
-          setError(null)
+          const sessionReady = await refreshSession()
+          if (!sessionReady) {
+            setError("Error al crear la sesión")
+            return
+          }
+          onAuthSuccess?.()
+          onClose()
         }
       }
     } catch {
@@ -228,7 +235,62 @@ export function AuthModal({
     setRegisterEmail("")
     setRegisterPassword("")
     setRegisterConfirmPassword("")
+    setShowVerificationMessage(false)
+    setVerificationCode("")
     setError(null)
+  }
+
+  const handleVerifyCode = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsVerifying(true)
+    setError(null)
+
+    try {
+      const { data, error } = await authClient.emailOtp.verifyEmail({
+        email: registerEmail,
+        otp: verificationCode,
+      })
+
+      if (error) {
+        setError(error.message || "Código incorrecto")
+        setIsVerifying(false)
+        return
+      }
+
+      if (data?.session) {
+        const sessionReady = await refreshSession()
+        if (sessionReady) {
+          onAuthSuccess?.()
+          onClose()
+        }
+      } else {
+        resetForms()
+        setView("login")
+        setError("¡Email verificado! Ahora podés iniciar sesión.")
+      }
+    } catch (err) {
+      setError("Error al verificar el código")
+    } finally {
+      setIsVerifying(false)
+    }
+  }
+
+  const handleResendCode = async () => {
+    setError(null)
+    try {
+      const { error } = await authClient.sendVerificationEmail({
+        email: registerEmail,
+        callbackURL: window.location.origin,
+      })
+
+      if (error) {
+        setError(error.message || "Error al reenviar el código")
+      } else {
+        setError("Código reenviado. Revisa tu correo.")
+      }
+    } catch (err) {
+      setError("Error al reenviar el código")
+    }
   }
 
   const handleClose = () => {
@@ -321,26 +383,61 @@ export function AuthModal({
             </p>
           </form>
         ) : showVerificationMessage ? (
-          <div className="text-center space-y-4 py-6">
-            <div className="flex justify-center">
-              <div className="rounded-full bg-green-100 p-3">
-                <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
+          <form onSubmit={handleVerifyCode} className="space-y-4">
+            {error && (
+              <Alert variant="destructive" id="verify-error" role="alert">
+                <AlertCircle className="h-4 w-4" aria-hidden="true" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            <div className="text-center space-y-2 mb-4">
+              <div className="flex justify-center">
+                <div className="rounded-full bg-green-100 p-3">
+                  <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
               </div>
+              <h3 className="text-lg font-semibold">¡Revisa tu correo!</h3>
+              <p className="text-sm text-muted-foreground">
+                Te enviamos un código de verificación a<br />
+                <strong>{registerEmail}</strong>
+              </p>
             </div>
-            <h3 className="text-lg font-semibold">¡Revisa tu correo!</h3>
-            <p className="text-sm text-muted-foreground">
-              Te enviamos un enlace de verificación a <strong>{registerEmail}</strong>.
-              Abrí el enlace para completar tu registro.
-            </p>
-            <Button variant="outline" onClick={() => {
-              setShowVerificationMessage(false)
-              setView("login")
-            }}>
-              Volver al inicio de sesión
+            <div className="space-y-2">
+              <Label htmlFor="verify-code">Código de verificación</Label>
+              <Input
+                id="verify-code"
+                type="text"
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value)}
+                placeholder="Ingresá el código de 6 dígitos"
+                maxLength={6}
+                required
+                className="text-center text-lg tracking-widest"
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={isVerifying || verificationCode.length < 6}>
+              {isVerifying ? "Verificando..." : "Verificar"}
             </Button>
-          </div>
+            <button
+              type="button"
+              onClick={handleResendCode}
+              className="w-full text-sm text-muted-foreground hover:underline"
+            >
+              ¿No recibiste el código? Reenviar
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                resetForms()
+                setView("login")
+              }}
+              className="w-full text-sm text-muted-foreground hover:underline"
+            >
+              Volver al inicio de sesión
+            </button>
+          </form>
         ) : (
           <form onSubmit={handleRegister} className="space-y-4">
             {error && (
