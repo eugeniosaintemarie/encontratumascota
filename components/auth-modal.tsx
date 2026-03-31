@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Dialog,
   DialogContent,
@@ -50,6 +50,16 @@ export function AuthModal({
 
   const { execute: executeRecaptcha } = useRecaptcha()
   const { refreshSession } = useAuth()
+
+  useEffect(() => {
+    if (isOpen) {
+      const emailVerificado = localStorage.getItem("emailVerificado")
+      if (emailVerificado) {
+        setLoginEmail(emailVerificado)
+        localStorage.removeItem("emailVerificado")
+      }
+    }
+  }, [isOpen])
 
   const handleGoogleSignIn = async () => {
     setError(null)

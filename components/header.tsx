@@ -34,7 +34,6 @@ export const Header = memo(function Header({ isReadOnly = false }: HeaderProps) 
   const isDark = resolvedTheme === "dark"
   const [isDemoEnv, setIsDemoEnv] = useState(false)
 
-  // Detect demo host on client-side (origin-based)
   useEffect(() => {
     try {
       const host = window.location.host.toLowerCase()
@@ -44,6 +43,14 @@ export const Header = memo(function Header({ isReadOnly = false }: HeaderProps) 
       setIsDemoEnv(false)
     }
   }, [])
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get("login") === "verificado" && !isAuthenticated) {
+      openAuthModal("login")
+      window.history.replaceState({}, "", window.location.pathname)
+    }
+  }, [isAuthenticated, openAuthModal])
 
   const handleThemeToggle = useCallback(() => {
     setTheme(isDark ? "light" : "dark")

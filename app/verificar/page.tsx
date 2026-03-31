@@ -1,11 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { authClient } from "@/lib/auth/client"
 
-export default function VerificarPage() {
+function VerificarContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const token = searchParams.get("token")
@@ -39,14 +38,14 @@ export default function VerificarPage() {
         setStatus("exito")
         setMensaje("¡Correo verificado exitosamente!")
 
-        // Iniciar sesión automáticamente con el email verificado
-        // Como no tenemos la contraseña, necesitamos usar un método de verificación
-        // Neon Auth puede crear una sesión desde el server-side
-        
-        // Redirigir al home después de 2 segundos
+        // Guardar email verificado para autofill en login
+        if (data.email) {
+          localStorage.setItem("emailVerificado", data.email)
+        }
+
         setTimeout(() => {
-          router.push("/")
-        }, 2000)
+          router.push("/?login=verificado")
+        }, 2500)
       } catch (e) {
         setStatus("error")
         setMensaje("Error al verificar el token")
@@ -74,7 +73,7 @@ export default function VerificarPage() {
               </svg>
             </div>
             <h2 className="text-xl font-semibold text-green-600">{mensaje}</h2>
-            <p className="text-muted-foreground">Serás redirigido al inicio en unos segundos...</p>
+            <p className="text-muted-foreground">Ahora podés iniciar sesión con tu correo y contraseña.</p>
           </>
         )}
 
@@ -94,5 +93,17 @@ export default function VerificarPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function VerificarPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+      </div>
+    }>
+      <VerificarContent />
+    </Suspense>
   )
 }
