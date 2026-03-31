@@ -29,7 +29,7 @@ export function useSharePublicacion(publicacion: Publicacion | null) {
       : ""
     const color = info.color ? ` ${info.color}` : ""
     const transitoTag = info.transitoUrgente ? " ¡Tránsito urgente! ⚠️" : ""
-    
+
     let title: string
     if (info.esAdopcion) {
       title = `${info.tipo}${info.raza ? ` ${info.raza}` : ""}${razaDetalle}${color ? ` ${color}` : ""} 🐾 ${info.categoria.toLowerCase()}${transitoTag}`
@@ -41,33 +41,39 @@ export function useSharePublicacion(publicacion: Publicacion | null) {
     try {
       const imageBlob = await generateShareImage(publicacion)
 
+      // Copy URL to clipboard
       try {
         await navigator.clipboard.writeText(url)
       } catch {
-        // Silently fail if clipboard is blocked
+        // Silently fail
       }
 
       if (navigator.share) {
-        const imageFile = new File([imageBlob], `mascota-${publicacion.id}.jpg`, {
-          type: "image/jpeg",
-        })
-
-        if (navigator.canShare?.({ files: [imageFile] })) {
+        try {
+          // Try sharing with file
+          const imageFile = new File([imageBlob], `mascota-${publicacion.id}.jpg`, {
+            type: "image/jpeg",
+          })
           await navigator.share({
             files: [imageFile],
             title,
             text: shareText,
           })
-        } else {
-          await navigator.share({ title, text: shareText })
+          return
+        } catch (shareErr) {
+          if ((shareErr as Error).name !== "AbortError") {
+            // File share failed, try text only
+            try {
+              await navigator.share({ title, text: shareText })
+              return
+            } catch {
+              // Text share also failed
+            }
+          }
         }
-
-        toast.success("Enlace copiado al portapapeles", {
-          description: "Podés pegarlo donde quieras",
-        })
-        return
       }
 
+      // Fallback: download
       const downloadUrl = URL.createObjectURL(imageBlob)
       const a = document.createElement("a")
       a.href = downloadUrl
@@ -79,27 +85,20 @@ export function useSharePublicacion(publicacion: Publicacion | null) {
 
       setIsCopied(true)
       toast.success("¡Imagen descargada y enlace copiado!", {
-        description: "Subí la imagen a tus redes y pegá el enlace.",
+        description: "Subí la imagen a tus redes y pegá el enlace",
       })
       setTimeout(() => setIsCopied(false), 3000)
     } catch (err) {
-      if ((err as Error).name === "AbortError") {
-        toast.info("Enlace copiado al portapapeles", {
-          description: "Podés pegarlo donde quieras",
-        })
-        return
-      }
-
       try {
         await navigator.clipboard.writeText(url)
         setIsCopied(true)
         toast.success("¡Enlace copiado!", {
-          description: "El enlace a la publicación está en tu portapapeles.",
+          description: "El enlace a la publicación está en tu portapapeles",
         })
         setTimeout(() => setIsCopied(false), 2000)
       } catch {
         toast.error("No se pudo compartir", {
-          description: "Intentá copiar el enlace manualmente.",
+          description: "Intentá copiar el enlace manualmente",
         })
       }
     } finally {

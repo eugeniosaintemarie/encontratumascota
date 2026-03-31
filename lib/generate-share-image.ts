@@ -1,16 +1,15 @@
 import type { Publicacion } from "./types"
 import { getPublicacionInfo, formatEdad, formatDate } from "./publicacion-utils"
 
-// 4:5 aspect ratio (optimal for Instagram feed / sharing)
+// 9:16 aspect ratio for Instagram Stories/Reels
 const CANVAS_WIDTH = 1080
-const CANVAS_HEIGHT = 1500
+const CANVAS_HEIGHT = 1920
 
 const COLORS = {
+  salmon: "#FF8A65",
+  pink: "#FFF0EC",
   white: "#FAFAFA",
-  text: "#1a1a1a",
-  textSecondary: "#555555",
-  badgeBg: "#ffffff",
-  badgeText: "#1a1a1a",
+  textWhite: "#FF8A65",
   urgentBg: "#F44336",
   urgentText: "#ffffff",
 }
@@ -58,9 +57,9 @@ function drawBadge(
   } = {}
 ): number {
   const {
-    bgColor = COLORS.badgeBg,
-    textColor = COLORS.badgeText,
-    fontSize = 30,
+    bgColor = COLORS.pink,
+    textColor = COLORS.textWhite,
+    fontSize = 40,
   } = options
 
   ctx.font = `600 ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
@@ -140,15 +139,17 @@ export async function generateShareImage(
   const info = getPublicacionInfo(publicacion)
 
   // =====================
-  // 1. WHITE BACKGROUND (same as landing)
+  // 1. PINK BACKGROUND (entire canvas)
   // =====================
-  ctx.fillStyle = COLORS.white
+  ctx.fillStyle = COLORS.pink
   ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
 
   // =====================
-  // 2. PET IMAGE — square 1:1 (full width)
+  // 2. PET IMAGE — 1:1 square
   // =====================
-  const imageSize = CANVAS_WIDTH // 1080x1080
+  const topSpacer = 200
+  const imageSize = 1080
+  const imageY = topSpacer
 
   try {
     const petImage = await loadImage(publicacion.mascota.imagenUrl)
@@ -160,131 +161,134 @@ export async function generateShareImage(
       sx = (petImage.width - sw) / 2
     } else {
       sh = petImage.width
-      sy = 0
+      sy = (petImage.height - sh) / 2
     }
-    ctx.drawImage(petImage, sx, sy, sw, sh, 0, 0, imageSize, imageSize)
+    ctx.drawImage(petImage, sx, sy, sw, sh, 0, imageY, imageSize, imageSize)
   } catch {
     ctx.fillStyle = "#e0e0e0"
-    ctx.fillRect(0, 0, imageSize, imageSize)
+    ctx.fillRect(0, imageY, imageSize, imageSize)
     ctx.fillStyle = "#999"
     ctx.font = "bold 48px sans-serif"
     ctx.textAlign = "center"
     ctx.textBaseline = "middle"
-    ctx.fillText("Sin imagen", imageSize / 2, imageSize / 2)
+    ctx.fillText("Sin imagen", imageSize / 2, imageY + imageSize / 2)
     ctx.textAlign = "start"
   }
 
   // =====================
-  // 3. GRADIENT OVERLAYS for badge readability
+  // 3. GRADIENTS FOR BADGE READABILITY
   // =====================
-  const topGrad = ctx.createLinearGradient(0, 0, 0, imageSize * 0.3)
+  const topGrad = ctx.createLinearGradient(0, imageY, 0, imageY + imageSize * 0.3)
   topGrad.addColorStop(0, "rgba(0,0,0,0.45)")
   topGrad.addColorStop(1, "rgba(0,0,0,0)")
   ctx.fillStyle = topGrad
-  ctx.fillRect(0, 0, imageSize, imageSize * 0.3)
+  ctx.fillRect(0, imageY, imageSize, imageSize * 0.3)
 
-  const bottomGrad = ctx.createLinearGradient(0, imageSize * 0.6, 0, imageSize)
+  const bottomGrad = ctx.createLinearGradient(0, imageY + imageSize * 0.6, 0, imageY + imageSize)
   bottomGrad.addColorStop(0, "rgba(0,0,0,0)")
   bottomGrad.addColorStop(1, "rgba(0,0,0,0.55)")
   ctx.fillStyle = bottomGrad
-  ctx.fillRect(0, imageSize * 0.6, imageSize, imageSize * 0.4)
+  ctx.fillRect(0, imageY + imageSize * 0.6, imageSize, imageSize * 0.4)
 
   // =====================
   // 4. BADGES ON IMAGE
   // =====================
   const badgePad = 30
-  let badgeY = badgePad
-  const badgeH = 56
 
-  // Arriba a la izquierda: Tipo
-  drawBadge(ctx, info.tipo, badgePad, badgeY)
+  // TOP-LEFT: Tipo
+  drawBadge(ctx, info.tipo, badgePad, imageY + badgePad)
 
-  // Centro arriba: Edad o fecha
-  const dateText = info.edadOFecha || (info.esAdopcion ? "Edad desconocida" : "Fecha desconocida")
-  ctx.font = `600 28px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
-  const dateTextW = ctx.measureText(dateText).width
-  const centerX = (CANVAS_WIDTH - dateTextW) / 2 - badgePad
-  drawBadge(ctx, dateText, centerX, badgeY, { fontSize: 28 })
-
-  // Abajo a la izquierda: Raza (si es mestizo, mostrar madre y padre en dos líneas)
-  ctx.font = `600 30px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
-  let bottomY = imageSize - badgePad - badgeH
-  if (info.esMestizo && info.madreRaza && info.padreRaza) {
-    drawBadge(ctx, info.madreRaza, badgePad, bottomY, { fontSize: 28 })
-    bottomY -= badgeH + 10
-    drawBadge(ctx, info.padreRaza, badgePad, bottomY, { fontSize: 28 })
-  } else if (info.raza) {
-    drawBadge(ctx, info.raza, badgePad, bottomY, { fontSize: 28 })
+  // TOP-CENTER: fecha/edad
+  if (info.edadOFecha) {
+    const fechaBadgeWidth = ctx.measureText(info.edadOFecha).width + 44
+    drawBadge(ctx, info.edadOFecha, imageSize / 2 - fechaBadgeWidth / 2, imageY + badgePad)
   }
 
-  // Abajo a la derecha: tránsito urgente (arriba) y ubicación (abajo) - solo para no-adopciones
-  let rightBottomY = imageSize - badgePad - badgeH
-  if (info.transitoUrgente) {
-    const transitoText = "⚠ Tránsito urgente"
-    const transitoW = ctx.measureText(transitoText).width
-    drawBadge(ctx, transitoText, CANVAS_WIDTH - badgePad - transitoW - 44, rightBottomY, { fontSize: 28, bgColor: "#F44336", textColor: "#FFFFFF" })
-    rightBottomY -= badgeH + 10
+  // BOTTOM-LEFT: raza + ubicación
+  let bottomBadgeY = imageY + imageSize - badgePad
+
+  if (info.esMestizo) {
+    if (info.padreRaza) {
+      bottomBadgeY -= 62 + 10
+      drawBadge(ctx, info.padreRaza, badgePad, bottomBadgeY)
+    }
+    if (info.madreRaza) {
+      bottomBadgeY -= 62 + 10
+      drawBadge(ctx, info.madreRaza, badgePad, bottomBadgeY)
+    }
+  } else {
+    bottomBadgeY -= 62 + 10
+    drawBadge(ctx, info.raza, badgePad, bottomBadgeY)
   }
+
+  // Ubicación solo para perdidos/encontrados
   if (!info.esAdopcion) {
-    const ubicacionText = `⚲ ${info.ubicacionCorta}`
-    const ubicacionW = ctx.measureText(ubicacionText).width
-    drawBadge(ctx, ubicacionText, CANVAS_WIDTH - badgePad - ubicacionW - 44, rightBottomY, { fontSize: 28 })
+    bottomBadgeY -= 62 + 10
+    drawBadge(ctx, `📍 ${info.ubicacionCorta}`, badgePad, bottomBadgeY)
+  }
+
+  // Tránsito urgente
+  if (info.transitoUrgente) {
+    bottomBadgeY -= 62 + 10
+    drawBadge(ctx, "⚠️ Tránsito urgente", badgePad, bottomBadgeY, {
+      bgColor: COLORS.urgentBg,
+      textColor: COLORS.urgentText,
+    })
   }
 
   // =====================
-  // 5. DESCRIPTION (below image, white bg)
+  // 5. TEXT SECTION (pink background, white text)
   // =====================
-  const descPadding = 44
-  const descStartY = imageSize + 36
-  const descMaxWidth = CANVAS_WIDTH - descPadding * 2
-  const lineHeight = 42
-  const domainRectHeight = 70
-  const domainRectMargin = 24
+  const textSectionY = imageY + imageSize + 20
+  ctx.fillStyle = COLORS.pink
+  ctx.fillRect(0, textSectionY, CANVAS_WIDTH, CANVAS_HEIGHT - textSectionY)
 
-  let currentY = descStartY
+  const descPadding = 48
+  const descMaxWidth = CANVAS_WIDTH - descPadding * 2
+  const lineHeight = 52
+  const textFontSize = 40
+
+  let currentY = textSectionY + 40
 
   // 1. Categoría en negrita
-  ctx.fillStyle = COLORS.text
-  ctx.font = `700 32px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
+  ctx.fillStyle = COLORS.textWhite
+  ctx.font = `700 ${textFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
   ctx.textBaseline = "top"
   ctx.textAlign = "start"
   ctx.fillText(info.categoria, descPadding, currentY)
-  currentY += 40
+  currentY += 52
 
   // 2. Color
   if (info.color) {
-    ctx.font = `400 32px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
+    ctx.font = `400 ${textFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
     ctx.fillText(info.color, descPadding, currentY)
-    currentY += 40
+    currentY += 52
   }
 
   // 3. Descripción en cursiva
-  ctx.font = `italic 32px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
-  const maxDescLines = Math.floor((CANVAS_HEIGHT - currentY - domainRectHeight - domainRectMargin) / lineHeight)
-  wrapText(ctx, info.descripcion, descPadding, currentY, descMaxWidth, lineHeight, maxDescLines)
+  ctx.font = `italic ${textFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
+  wrapText(ctx, info.descripcion, descPadding, currentY, descMaxWidth, lineHeight, 6)
 
   // =====================
-  // 6. ENCONTRA TU MASCOTA AT BOTTOM
+  // 6. ENCONTRATUMASCOTA.AR (salmon bg, white text)
   // =====================
   const domainText = "EncontraTuMascota.ar"
+  const domainRectHeight = 80
+  const domainRectMargin = topSpacer
   const domainRectY = CANVAS_HEIGHT - domainRectHeight - domainRectMargin
   const domainRectX = descPadding
   const domainRectWidth = CANVAS_WIDTH - descPadding * 2
 
-  ctx.fillStyle = "rgba(245, 245, 245, 0.95)"
+  ctx.fillStyle = COLORS.salmon
   roundRect(ctx, domainRectX, domainRectY, domainRectWidth, domainRectHeight, domainRectHeight / 2)
   ctx.fill()
-  ctx.strokeStyle = "rgba(0,0,0,0.1)"
-  ctx.lineWidth = 2
-  ctx.stroke()
 
-  ctx.fillStyle = COLORS.text
-  ctx.font = `600 36px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
+  ctx.fillStyle = "#ffffff"
+  ctx.font = `600 ${textFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
   ctx.textAlign = "center"
   ctx.textBaseline = "middle"
   ctx.fillText(domainText, CANVAS_WIDTH / 2, domainRectY + domainRectHeight / 2)
 
-  // Convert to blob (JPEG for smaller file size)
   return new Promise((resolve, reject) => {
     canvas.toBlob(
       (blob) => {
@@ -292,7 +296,7 @@ export async function generateShareImage(
         else reject(new Error("Failed to generate image"))
       },
       "image/jpeg",
-      0.92
+      0.85
     )
   })
 }

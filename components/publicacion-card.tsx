@@ -266,7 +266,7 @@ export const PublicacionCard = memo(function PublicacionCard({
                     onClick={handleLoginClick}
                     className="text-[#FF8A65] text-sm font-medium text-left bg-transparent border-none p-0 inline-block focus:outline-none"
                   >
-                    Iniciá sesión o regístrate
+                    Inicia sesión o registrate
                   </button>
                   <span className="text-xs text-muted-foreground">
                     para ver los datos de contacto

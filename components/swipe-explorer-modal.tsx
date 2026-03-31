@@ -218,35 +218,33 @@ export function SwipeExplorerModal({ isOpen, onClose }: SwipeExplorerModalProps)
                                     <div className="flex h-[28%] flex-col justify-between p-4 text-card-foreground">
                                         {current && (
                                             <p className="text-sm text-foreground/80 line-clamp-6">
-                                                <span className="font-semibold block">
-                                                    {current.tipoPublicacion === "adopcion"
-                                                        ? "En adopción"
-                                                        : current.tipoPublicacion === "buscada"
-                                                            ? current.mascota.sexo === "hembra" ? "Buscada" : "Buscado"
-                                                            : current.mascota.sexo === "hembra" ? "Encontrada" : "Encontrado"}
+                                                <span className="font-semibold flex items-center justify-between">
+                                                    <span>
+                                                        {current.tipoPublicacion === "adopcion"
+                                                            ? "En adopción"
+                                                            : current.tipoPublicacion === "buscada"
+                                                                ? current.mascota.sexo === "hembra" ? "Buscada" : "Buscado"
+                                                                : current.mascota.sexo === "hembra" ? "Encontrada" : "Encontrado"}
+                                                    </span>
+                                                    <button
+                                                        type="button"
+                                                        onPointerDown={(event) => event.stopPropagation()}
+                                                        onPointerUp={(event) => event.stopPropagation()}
+                                                        onClick={(event) => {
+                                                            event.stopPropagation()
+                                                            if (!current) return
+                                                            onClose()
+                                                            router.push(`/publicacion/${current.id}`)
+                                                        }}
+                                                        className="inline-flex items-center gap-1 text-[#FF8A65] hover:underline text-sm"
+                                                    >
+                                                        Contacto
+                                                    </button>
                                                 </span>
                                                 {current.mascota.color && <span className="block">{current.mascota.color}</span>}
                                                 {current.mascota.descripcion && <span className="italic">{current.mascota.descripcion}</span>}
                                             </p>
                                         )}
-
-                                        <div className="mt-3 flex items-center justify-between gap-2 text-xs">
-                                            <p className="text-xs font-medium text-muted-foreground"></p>
-                                            <button
-                                                type="button"
-                                                onPointerDown={(event) => event.stopPropagation()}
-                                                onPointerUp={(event) => event.stopPropagation()}
-                                                onClick={(event) => {
-                                                    event.stopPropagation()
-                                                    if (!current) return
-                                                    onClose()
-                                                    router.push(`/publicacion/${current.id}`)
-                                                }}
-                                                className="inline-flex items-center gap-1 text-[#FF8A65] hover:underline"
-                                            >
-                                                Contacto
-                                            </button>
-                                        </div>
                                     </div>
                                 </article>
                             </div>
