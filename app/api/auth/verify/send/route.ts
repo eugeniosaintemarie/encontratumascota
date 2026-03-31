@@ -12,6 +12,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Email requerido" }, { status: 400 })
     }
 
+    console.log("[API /auth/verify/send] RESEND_API_KEY configured:", !!process.env.RESEND_API_KEY)
+    console.log("[API /auth/verify/send] DATABASE_URL configured:", !!process.env.DATABASE_URL)
+
     const token = nanoid(32)
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)
 
@@ -35,6 +38,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("[API /auth/verify/send] Error:", error)
-    return NextResponse.json({ error: "Error interno" }, { status: 500 })
+    return NextResponse.json({ error: "Error interno", details: String(error) }, { status: 500 })
   }
 }

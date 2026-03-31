@@ -4,6 +4,9 @@ const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
   : null
 
+console.log("[Resend] RESEND_API_KEY present:", !!process.env.RESEND_API_KEY)
+console.log("[Resend] RESEND_API_KEY value:", process.env.RESEND_API_KEY ? "set (len=" + process.env.RESEND_API_KEY.length + ")" : "NOT SET")
+
 export async function sendEmail({
   to,
   subject,
