@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
-import { emailVerificacionTokens } from "@/lib/db/schema"
+import { emailVerificacionTokens, usuarios } from "@/lib/db/schema"
 import { eq, and } from "drizzle-orm"
 
 export async function POST(request: Request) {
@@ -31,6 +31,10 @@ export async function POST(request: Request) {
     await db.update(emailVerificacionTokens)
       .set({ usado: true })
       .where(eq(emailVerificacionTokens.id, tokenRecord.id))
+
+    await db.update(usuarios)
+      .set({ emailVerificado: true })
+      .where(eq(usuarios.email, tokenRecord.email))
 
     return NextResponse.json({ 
       success: true, 

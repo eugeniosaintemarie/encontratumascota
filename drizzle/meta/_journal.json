@@ -15,6 +15,55 @@
       "when": 1770700000000,
       "tag": "0001_short_ids",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1771000000000,
+      "tag": "0002_add_buscada_type",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1771100000000,
+      "tag": "0003_add_transfer_history",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1771200000000,
+      "tag": "0004_add_usuarios_perfil",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1771300000000,
+      "tag": "0005_add_parent_breeds",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1771400000000,
+      "tag": "0006_add_profile_contact_fields",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1771500000000,
+      "tag": "0007_add_perfil_ubicacion",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1771600000000,
+      "tag": "0008_add_email_verificado",
+      "breakpoints": true
     }
   ]
 }

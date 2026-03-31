@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
-import { authClient } from "@/lib/auth/client"
+import { authClient, logout } from "@/lib/auth/client"
 import { useRecaptcha } from "@/hooks/use-recaptcha"
 import { useAuth } from "@/lib/auth-context"
 import { sanitizeText, sanitizeEmail } from "@/lib/sanitize"
@@ -122,6 +122,19 @@ export function AuthModal({
       if (result.error) {
         setError(result.error.message || "Email o contraseña incorrectos")
       } else {
+        const checkRes = await fetch("/api/auth/login/check", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: loginEmail }),
+        })
+        const checkData = await checkRes.json()
+        
+        if (!checkData.verificado) {
+          logout()
+          setError("Tu email aún no está verificado. Revisa tu correo y haz clic en el enlace de verificación.")
+          return
+        }
+
         const sessionReady = await refreshSession()
         if (!sessionReady) {
           setError("No pudimos confirmar tu sesión. Probá recargar la página y volvé a iniciar sesión.")
