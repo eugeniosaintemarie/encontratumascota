@@ -7,6 +7,12 @@ interface LoadingSkeletonProps {
   itemsPerPage?: number;
 }
 
+const ORBITAL_TRANSFORMS = [
+  "translate(calc(-50% + 50px), calc(-50% + 0px))",
+  "translate(calc(-50% - 25px), calc(-50% + 43.3013px))",
+  "translate(calc(-50% - 25px), calc(-50% - 43.3013px))",
+] as const;
+
 export function LoadingSkeleton({
   columns = 3,
   itemsPerPage = 6,
@@ -41,28 +47,20 @@ export function LoadingSkeleton({
                   />
 
                   {/* Patitas alrededor en orbita */}
-                  {Array.from({ length: 3 }).map((_, orbitalIndex) => {
-                    const angle = orbitalIndex * 120 * (Math.PI / 180);
-                    const radius = 50;
-                    const x = Math.cos(angle) * radius;
-                    const y = Math.sin(angle) * radius;
-
-                    return (
-                      <div
-                        key={`orbital-${orbitalIndex}`}
-                        className="absolute"
-                        style={{
-                          left: "50%",
-                          top: "50%",
-                          transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
-                          animation: `spin 4s linear infinite`,
-                          animationDelay: `${orbitalIndex * 0.3}s`,
-                        }}
-                      >
-                        <PawPrint className="h-6 w-6 text-muted-foreground/20" />
-                      </div>
-                    );
-                  })}
+                  {ORBITAL_TRANSFORMS.map((transform, orbitalIndex) => (
+                    <div
+                      key={`orbital-${orbitalIndex}`}
+                      className="absolute animate-spin [animation-duration:4s]"
+                      style={{
+                        left: "50%",
+                        top: "50%",
+                        transform,
+                        animationDelay: `${orbitalIndex * 0.3}s`,
+                      }}
+                    >
+                      <PawPrint className="h-6 w-6 text-muted-foreground/20" />
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -90,12 +88,7 @@ export function LoadingSkeleton({
       {/* Mensaje de carga */}
       <div className="flex flex-col items-center justify-center py-8">
         <div className="relative">
-          <div
-            className="inline-block"
-            style={{
-              animation: `pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite`,
-            }}
-          >
+          <div className="inline-block animate-pulse">
             <PawPrint className="h-8 w-8 text-primary/60" />
           </div>
         </div>
@@ -103,35 +96,6 @@ export function LoadingSkeleton({
           Buscando mascotas...
         </p>
       </div>
-
-      <style jsx>{`
-        @keyframes spin {
-          from {
-            transform: translate(
-                calc(-50% + var(--x, 0)),
-                calc(-50% + var(--y, 0))
-              )
-              rotate(0deg);
-          }
-          to {
-            transform: translate(
-                calc(-50% + var(--x, 0)),
-                calc(-50% + var(--y, 0))
-              )
-              rotate(360deg);
-          }
-        }
-
-        @keyframes pulse {
-          0%,
-          100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.5;
-          }
-        }
-      `}</style>
     </div>
   );
 }

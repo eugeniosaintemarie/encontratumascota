@@ -24,6 +24,8 @@ const siteUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
     ? `https://${process.env.VERCEL_URL}`
     : "http://localhost:3000";
 
+const GA_TRACKING_ID = "G-LNQ47VG50M";
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: "Encontra Tu Mascota",
@@ -94,31 +96,33 @@ export default function RootLayout({
     <html lang="es" suppressHydrationWarning dir="ltr">
       <head>
         {process.env.NODE_ENV === "development" && (
-          <Script
-            src="https://unpkg.com/react-grab@0.1.29/dist/index.global.js"
-            strategy="beforeInteractive"
-            async
-          />
-        )}
-        <Script id="sw-emergency-reset" strategy="beforeInteractive">
-          {`(function () {
-            try {
-              if (!('serviceWorker' in navigator)) return;
-              navigator.serviceWorker.getRegistrations().then(function (registrations) {
-                registrations.forEach(function (registration) {
-                  registration.unregister();
-                });
-              });
-              if ('caches' in window) {
-                caches.keys().then(function (keys) {
-                  keys.forEach(function (key) {
-                    caches.delete(key);
+          <>
+            <Script
+              src="https://unpkg.com/react-grab@0.1.29/dist/index.global.js"
+              strategy="beforeInteractive"
+              async
+            />
+            <Script id="sw-emergency-reset" strategy="beforeInteractive">
+              {`(function () {
+                try {
+                  if (!('serviceWorker' in navigator)) return;
+                  navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                    registrations.forEach(function (registration) {
+                      registration.unregister();
+                    });
                   });
-                });
-              }
-            } catch (e) {}
-          })();`}
-        </Script>
+                  if ('caches' in window) {
+                    caches.keys().then(function (keys) {
+                      keys.forEach(function (key) {
+                        caches.delete(key);
+                      });
+                    });
+                  }
+                } catch (e) {}
+              })();`}
+            </Script>
+          </>
+        )}
         {/* SEO Meta Tags */}
         <meta name="theme-color" content="#FF5722" />
         <meta
@@ -127,7 +131,13 @@ export default function RootLayout({
         />
         <link rel="canonical" href={siteUrl} />
         {/* Preload logo for LCP optimization */}
-        <link rel="preload" href="/logo.png" as="image" fetchPriority="high" />
+        <link
+          rel="preload"
+          href="/logo.webp"
+          as="image"
+          type="image/webp"
+          fetchPriority="high"
+        />
         {/* Organization Schema */}
         <Script
           id="organization-schema"
@@ -155,17 +165,23 @@ export default function RootLayout({
           }}
         />
         {/* Analytics */}
-        <Script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=G-LNQ47VG50M"
-          strategy="afterInteractive"
-        />
-        <Script id="gtag-init" strategy="afterInteractive">
-          {`window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-LNQ47VG50M');`}
-        </Script>
+        {process.env.NODE_ENV === "production" && (
+          <>
+            <link rel="preconnect" href="https://www.googletagmanager.com" />
+            <link rel="preconnect" href="https://www.google-analytics.com" />
+            <Script
+              async
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`}
+              strategy="lazyOnload"
+            />
+            <Script id="gtag-init" strategy="lazyOnload">
+              {`window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${GA_TRACKING_ID}', { anonymize_ip: true });`}
+            </Script>
+          </>
+        )}
       </head>
       <body className={`${inter.className} font-sans antialiased`}>
         <AppSplashScreen />
@@ -192,7 +208,7 @@ export default function RootLayout({
           <Toaster />
           <ServiceWorkerRegistration />
         </ThemeProvider>
-        <Analytics />
+        {process.env.NODE_ENV === "production" ? <Analytics /> : null}
       </body>
     </html>
   );

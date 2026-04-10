@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, memo } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
@@ -26,7 +27,14 @@ import {
 import Image from "next/image";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/lib/auth-context";
-import { SwipeExplorerModal } from "@/components/swipe-explorer-modal";
+
+const SwipeExplorerModal = dynamic(
+  () =>
+    import("@/components/swipe-explorer-modal").then(
+      (mod) => mod.SwipeExplorerModal,
+    ),
+  { ssr: false },
+);
 
 interface HeaderProps {
   isReadOnly?: boolean;
@@ -85,10 +93,12 @@ export const Header = memo(function Header({
             className="flex items-center gap-2 no-underline hover:no-underline focus:no-underline active:no-underline"
           >
             <Image
-              src="/logo.png"
+              src="/logo.webp"
               alt="Encontra Tu Mascota"
               width={36}
               height={36}
+              sizes="36px"
+              priority
               className="h-9 w-9 rounded-lg"
             />
             <span className="text-lg font-semibold text-[#D66528] dark:text-foreground">
@@ -256,10 +266,12 @@ export const Header = memo(function Header({
         </div>
       </div>
 
-      <SwipeExplorerModal
-        isOpen={isSwipeOpen}
-        onClose={() => setIsSwipeOpen(false)}
-      />
+      {isSwipeOpen ? (
+        <SwipeExplorerModal
+          isOpen={isSwipeOpen}
+          onClose={() => setIsSwipeOpen(false)}
+        />
+      ) : null}
     </header>
   );
 });

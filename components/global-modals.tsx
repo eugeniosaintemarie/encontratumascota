@@ -1,12 +1,25 @@
 "use client";
 
 import { useCallback } from "react";
-import { AuthModal } from "@/components/auth-modal";
-import { PublicarModal } from "@/components/publicar-modal";
-import { PerfilModal } from "@/components/perfil-modal";
+import dynamic from "next/dynamic";
 import { useAuth } from "@/lib/auth-context";
 import { useDemoSession } from "@/hooks/use-demo-session";
 import { mapNeonUser } from "@/lib/auth";
+
+const AuthModal = dynamic(
+  () => import("@/components/auth-modal").then((mod) => mod.AuthModal),
+  { ssr: false },
+);
+
+const PublicarModal = dynamic(
+  () => import("@/components/publicar-modal").then((mod) => mod.PublicarModal),
+  { ssr: false },
+);
+
+const PerfilModal = dynamic(
+  () => import("@/components/perfil-modal").then((mod) => mod.PerfilModal),
+  { ssr: false },
+);
 
 export function GlobalModals() {
   const {

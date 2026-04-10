@@ -52,7 +52,7 @@ export function AppSplashScreen() {
       <div className="flex flex-col items-center gap-4 px-6 text-center">
         <div className="rounded-2xl bg-white/90 p-3 shadow-[0_12px_35px_rgba(214,101,40,0.18)] ring-1 ring-[#d66528]/20">
           <Image
-            src="/logo.png"
+            src="/logo.webp"
             alt="Encontra Tu Mascota"
             width={84}
             height={84}
