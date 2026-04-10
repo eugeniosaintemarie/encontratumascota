@@ -3,20 +3,20 @@
  * Previene XSS y otros ataques de inyección
  */
 
-import DOMPurify from "dompurify"
+import DOMPurify from "dompurify";
 
 // Configuración por defecto: permite solo texto plano, sin HTML
 const DEFAULT_CONFIG = {
   ALLOWED_TAGS: [] as string[], // No permitir ninguna etiqueta HTML
   ALLOWED_ATTR: [] as string[], // No permitir atributos
   KEEP_CONTENT: true, // Mantener el contenido de las etiquetas no permitidas
-}
+};
 
 // Configuración para campos que permiten cierto formato (ej: descripciones)
 const RICH_TEXT_CONFIG = {
   ALLOWED_TAGS: ["b", "i", "em", "strong", "p", "br"], // Solo formato básico
   ALLOWED_ATTR: [], // Sin atributos
-}
+};
 
 /**
  * Sanitiza un string, eliminando todo HTML/JS
@@ -24,8 +24,8 @@ const RICH_TEXT_CONFIG = {
  * @returns String limpio (solo texto)
  */
 export function sanitizeText(input: string): string {
-  if (!input) return ""
-  return DOMPurify.sanitize(input, DEFAULT_CONFIG)
+  if (!input) return "";
+  return DOMPurify.sanitize(input, DEFAULT_CONFIG);
 }
 
 /**
@@ -34,8 +34,8 @@ export function sanitizeText(input: string): string {
  * @returns String con formato básico seguro
  */
 export function sanitizeRichText(input: string): string {
-  if (!input) return ""
-  return DOMPurify.sanitize(input, RICH_TEXT_CONFIG)
+  if (!input) return "";
+  return DOMPurify.sanitize(input, RICH_TEXT_CONFIG);
 }
 
 /**
@@ -44,11 +44,11 @@ export function sanitizeRichText(input: string): string {
  * @returns Email limpio o string vacío si es inválido
  */
 export function sanitizeEmail(email: string): string {
-  if (!email) return ""
-  const cleaned = sanitizeText(email).trim().toLowerCase()
+  if (!email) return "";
+  const cleaned = sanitizeText(email).trim().toLowerCase();
   // Validación básica de email
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(cleaned) ? cleaned : ""
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(cleaned) ? cleaned : "";
 }
 
 /**
@@ -57,9 +57,9 @@ export function sanitizeEmail(email: string): string {
  * @returns Teléfono limpio
  */
 export function sanitizePhone(phone: string): string {
-  if (!phone) return ""
+  if (!phone) return "";
   // Solo permite números, espacios, guiones, paréntesis y el signo +
-  return phone.replace(/[^\d\s\-+()]/g, "").trim()
+  return phone.replace(/[^\d\s\-+()]/g, "").trim();
 }
 
 /**
@@ -68,20 +68,23 @@ export function sanitizePhone(phone: string): string {
  * @returns Objeto con todos los strings sanitizados
  */
 export function sanitizeObject(obj: Record<string, any>): Record<string, any> {
-  const sanitized: Record<string, any> = { ...obj }
-  
+  const sanitized: Record<string, any> = { ...obj };
+
   for (const key in sanitized) {
     if (typeof sanitized[key] === "string") {
       // Usar rich text solo para campos de descripción
-      if (key.toLowerCase().includes("descripcion") || key.toLowerCase().includes("description")) {
-        sanitized[key] = sanitizeRichText(sanitized[key])
+      if (
+        key.toLowerCase().includes("descripcion") ||
+        key.toLowerCase().includes("description")
+      ) {
+        sanitized[key] = sanitizeRichText(sanitized[key]);
       } else {
-        sanitized[key] = sanitizeText(sanitized[key])
+        sanitized[key] = sanitizeText(sanitized[key]);
       }
     }
   }
-  
-  return sanitized
+
+  return sanitized;
 }
 
 /**
@@ -90,15 +93,18 @@ export function sanitizeObject(obj: Record<string, any>): Record<string, any> {
  * @param type Tipo de sanitización ('text' | 'rich' | 'email' | 'phone')
  * @returns Valor sanitizado
  */
-export function useSanitizedInput(value: string, type: "text" | "rich" | "email" | "phone" = "text"): string {
+export function useSanitizedInput(
+  value: string,
+  type: "text" | "rich" | "email" | "phone" = "text",
+): string {
   switch (type) {
     case "rich":
-      return sanitizeRichText(value)
+      return sanitizeRichText(value);
     case "email":
-      return sanitizeEmail(value)
+      return sanitizeEmail(value);
     case "phone":
-      return sanitizePhone(value)
+      return sanitizePhone(value);
     default:
-      return sanitizeText(value)
+      return sanitizeText(value);
   }
 }

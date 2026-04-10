@@ -1,93 +1,99 @@
-"use client"
+"use client";
 
-import { Suspense, useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { authClient } from "@/lib/auth/client"
+import { Suspense, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth/client";
 
 function VerificarContent() {
-  const router = useRouter()
-  const [status, setStatus] = useState<"verificando" | "exito" | "error" | "esperando">("verificando")
-  const [mensaje, setMensaje] = useState("")
-  const [codigo, setCodigo] = useState("")
-  const [email, setEmail] = useState("")
-  const [enviando, setEnviando] = useState(false)
+  const router = useRouter();
+  const [status, setStatus] = useState<
+    "verificando" | "exito" | "error" | "esperando"
+  >("verificando");
+  const [mensaje, setMensaje] = useState("");
+  const [codigo, setCodigo] = useState("");
+  const [email, setEmail] = useState("");
+  const [enviando, setEnviando] = useState(false);
 
   useEffect(() => {
-    checkSession()
-  }, [])
+    checkSession();
+  }, []);
 
   async function checkSession() {
     try {
-      const { data } = await authClient.getSession()
+      const { data } = await authClient.getSession();
       if (data?.session?.user) {
         if (data.session.user.emailVerified) {
-          setStatus("exito")
-          setMensaje("¡Tu correo ya está verificado!")
-          setTimeout(() => router.push("/"), 2500)
+          setStatus("exito");
+          setMensaje("¡Tu correo ya está verificado!");
+          setTimeout(() => router.push("/"), 2500);
         } else {
-          setEmail(data.session.user.email)
-          setStatus("esperando")
-          setMensaje("Tu correo aún no está verificado. Ingresá el código que te enviamos.")
+          setEmail(data.session.user.email);
+          setStatus("esperando");
+          setMensaje(
+            "Tu correo aún no está verificado. Ingresá el código que te enviamos.",
+          );
         }
       } else {
-        setStatus("error")
-        setMensaje("No hay sesión activa. Iniciá sesión para verificar tu email.")
+        setStatus("error");
+        setMensaje(
+          "No hay sesión activa. Iniciá sesión para verificar tu email.",
+        );
       }
     } catch {
-      setStatus("error")
-      setMensaje("Error al verificar la sesión")
+      setStatus("error");
+      setMensaje("Error al verificar la sesión");
     }
   }
 
   async function handleVerificar(e: React.FormEvent) {
-    e.preventDefault()
-    setEnviando(true)
+    e.preventDefault();
+    setEnviando(true);
 
     try {
       const { data, error } = await authClient.emailOtp.verifyEmail({
         email,
         otp: codigo,
-      })
+      });
 
       if (error) {
-        setMensaje(error.message || "Código inválido")
-        setEnviando(false)
-        return
+        setMensaje(error.message || "Código inválido");
+        setEnviando(false);
+        return;
       }
 
       if (data?.session) {
-        setStatus("exito")
-        setMensaje("¡Correo verificado exitosamente!")
-        setTimeout(() => router.push("/"), 2500)
+        setStatus("exito");
+        setMensaje("¡Correo verificado exitosamente!");
+        setTimeout(() => router.push("/"), 2500);
       } else {
-        setStatus("exito")
-        setMensaje("¡Correo verificado! Ya podés iniciar sesión.")
-        setTimeout(() => router.push("/?login=verificado"), 2500)
+        setStatus("exito");
+        setMensaje("¡Correo verificado! Ya podés iniciar sesión.");
+        setTimeout(() => router.push("/?login=verificado"), 2500);
       }
     } catch {
-      setMensaje("Error al verificar. Intentá de nuevo.")
+      setMensaje("Error al verificar. Intentá de nuevo.");
     } finally {
-      setEnviando(false)
+      setEnviando(false);
     }
   }
 
   async function handleReenviar() {
-    setEnviando(true)
+    setEnviando(true);
     try {
       const { error } = await authClient.sendVerificationEmail({
         email,
         callbackURL: window.location.origin,
-      })
+      });
 
       if (error) {
-        setMensaje(error.message || "Error al reenviar")
+        setMensaje(error.message || "Error al reenviar");
       } else {
-        setMensaje("¡Código reenviado! Revisa tu correo.")
+        setMensaje("¡Código reenviado! Revisa tu correo.");
       }
     } catch {
-      setMensaje("Error al reenviar el código")
+      setMensaje("Error al reenviar el código");
     } finally {
-      setEnviando(false)
+      setEnviando(false);
     }
   }
 
@@ -96,7 +102,7 @@ function VerificarContent() {
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
       </div>
-    )
+    );
   }
 
   if (status === "exito") {
@@ -104,14 +110,24 @@ function VerificarContent() {
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <div className="max-w-md w-full text-center space-y-6">
           <div className="rounded-full bg-green-100 p-4 mx-auto w-fit">
-            <svg className="h-12 w-12 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            <svg
+              className="h-12 w-12 text-green-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
             </svg>
           </div>
           <h2 className="text-xl font-semibold text-green-600">{mensaje}</h2>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -125,7 +141,9 @@ function VerificarContent() {
         {status === "esperando" && (
           <form onSubmit={handleVerificar} className="space-y-4">
             <div>
-              <label className="text-sm font-medium">Código de verificación</label>
+              <label className="text-sm font-medium">
+                Código de verificación
+              </label>
               <input
                 type="text"
                 value={codigo}
@@ -164,17 +182,19 @@ function VerificarContent() {
         )}
       </div>
     </div>
-  )
+  );
 }
 
 export default function VerificarPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-background p-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+        </div>
+      }
+    >
       <VerificarContent />
     </Suspense>
-  )
+  );
 }

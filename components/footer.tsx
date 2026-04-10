@@ -1,29 +1,29 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { useEffect, useState, memo } from "react"
+import Link from "next/link";
+import { useEffect, useState, memo } from "react";
 
 export const Footer = memo(function Footer() {
-  const [reunidas, setReunidas] = useState<number | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [reunidas, setReunidas] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Set minimal delay to show loading state briefly, then fetch async
     const timer = setTimeout(() => {
-      fetch("/api/stats", { priority: 'low' } as any)
+      fetch("/api/stats", { priority: "low" } as any)
         .then((res) => res.json())
         .then((data) => {
-          setReunidas(data.mascotasReunidas ?? 0)
-          setIsLoading(false)
+          setReunidas(data.mascotasReunidas ?? 0);
+          setIsLoading(false);
         })
         .catch(() => {
-          setReunidas(0)
-          setIsLoading(false)
-        })
-    }, 0)
+          setReunidas(0);
+          setIsLoading(false);
+        });
+    }, 0);
 
-    return () => clearTimeout(timer)
-  }, [])
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <footer className="border-t border-border">
@@ -31,10 +31,21 @@ export const Footer = memo(function Footer() {
         <div className="mx-auto max-w-7xl px-4 flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12">
           <p className="text-sm text-foreground flex items-center gap-2 min-h-[2.5rem] flex-wrap justify-center">
             {/* Reserve space for stat counter (CLS prevention) */}
-            <span className="text-2xl font-bold text-[#d66528] leading-none min-w-[60px] text-center" aria-live="polite" aria-atomic="true">
-              {!isLoading && reunidas !== null ? reunidas : isLoading ? "..." : "0"}
+            <span
+              className="text-2xl font-bold text-[#d66528] leading-none min-w-[60px] text-center"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              {!isLoading && reunidas !== null
+                ? reunidas
+                : isLoading
+                  ? "..."
+                  : "0"}
             </span>
-            <Link href="/reunidas" className="text-[#FF8A65] font-medium hover:underline">
+            <Link
+              href="/reunidas"
+              className="text-[#FF8A65] font-medium hover:underline"
+            >
               mascotas reunidas con sus familias
             </Link>
           </p>
@@ -56,8 +67,8 @@ export const Footer = memo(function Footer() {
               className="italic"
             >
               Feedback
-            </a>
-            {" "}|{" "}Encontra Tu Mascota |{" "}
+            </a>{" "}
+            | Encontra Tu Mascota |{" "}
             <a
               href="https://eugeniosaintemarie.github.io?ref=encontratumascota"
               target="_blank"
@@ -69,5 +80,5 @@ export const Footer = memo(function Footer() {
         </div>
       </div>
     </footer>
-  )
-})
+  );
+});

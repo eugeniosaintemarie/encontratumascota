@@ -1,19 +1,19 @@
-"use client"
+"use client";
 
-import React, { useState, useEffect } from "react"
-import { createPortal } from "react-dom"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Checkbox } from "@/components/ui/checkbox"
+} from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   AlertCircle,
   AlertTriangle,
@@ -26,82 +26,80 @@ import {
   X,
   Pencil,
   Trash2,
-} from "lucide-react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import LocationAutocomplete from "@/components/location-autocomplete"
-import { usePublicaciones } from "@/lib/publicaciones-context"
-import { useAuth } from "@/lib/auth-context"
-import { tipoMascotaLabels, razasLabels } from "@/lib/labels"
-import { especieSexoToTipo } from "@/lib/types"
-import { isMestizoRaza } from "@/lib/utils"
-import { authClient, logout } from "@/lib/auth/client"
-import type { Usuario } from "@/lib/types"
-import { sanitizeText, sanitizePhone, sanitizeEmail } from "@/lib/sanitize"
-import { toast } from "sonner"
+} from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import LocationAutocomplete from "@/components/location-autocomplete";
+import { usePublicaciones } from "@/lib/publicaciones-context";
+import { useAuth } from "@/lib/auth-context";
+import { tipoMascotaLabels, razasLabels } from "@/lib/labels";
+import { especieSexoToTipo } from "@/lib/types";
+import { isMestizoRaza } from "@/lib/utils";
+import { authClient, logout } from "@/lib/auth/client";
+import type { Usuario } from "@/lib/types";
+import { sanitizeText, sanitizePhone, sanitizeEmail } from "@/lib/sanitize";
+import { toast } from "sonner";
 
 interface PerfilModalProps {
-  isOpen: boolean
-  onClose: () => void
-  currentUser: Usuario | null
-  onLogout: () => void | Promise<void>
-  onPasswordChange?: () => void
+  isOpen: boolean;
+  onClose: () => void;
+  currentUser: Usuario | null;
+  onLogout: () => void | Promise<void>;
+  onPasswordChange?: () => void;
 }
 
-function SimpleModal({ 
-  isOpen, 
-  onClose, 
-  children 
-}: { 
-  isOpen: boolean
-  onClose: () => void
-  children: React.ReactNode 
+function SimpleModal({
+  isOpen,
+  onClose,
+  children,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
 }) {
-  const [mounted, setMounted] = useState(false)
-  
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
-    setMounted(true)
-  }, [])
-  
+    setMounted(true);
+  }, []);
+
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = "hidden"
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = ""
+      document.body.style.overflow = "";
     }
     return () => {
-      document.body.style.overflow = ""
-    }
-  }, [isOpen])
-  
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isOpen) {
-        onClose()
+        onClose();
       }
-    }
-    document.addEventListener("keydown", handleEscape)
-    return () => document.removeEventListener("keydown", handleEscape)
-  }, [isOpen, onClose])
-  
-  if (!mounted || !isOpen) return null
-  
+    };
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [isOpen, onClose]);
+
+  if (!mounted || !isOpen) return null;
+
   return createPortal(
-    <div 
+    <div
       className="fixed inset-0 z-[100] flex items-center justify-center p-4"
       onClick={onClose}
     >
       <div className="fixed inset-0 bg-black/50" />
-      <div 
+      <div
         className="relative z-10 bg-background rounded-lg border shadow-lg w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-6">
-          {children}
-        </div>
+        <div className="p-6">{children}</div>
       </div>
     </div>,
-    document.body
-  )
+    document.body,
+  );
 }
 
 export function PerfilModal({
@@ -110,31 +108,31 @@ export function PerfilModal({
   currentUser,
   onPasswordChange,
 }: PerfilModalProps) {
-  const [activeTab, setActiveTab] = useState("publicaciones")
-  const [ubicacionPerfil, setUbicacionPerfil] = useState("")
-  const [contactoTelefonoPerfil, setContactoTelefonoPerfil] = useState("")
-  const [mostrarContactoPerfil, setMostrarContactoPerfil] = useState(false)
-  const [perfilSaving, setPerfilSaving] = useState(false)
-  const [perfilSuccess, setPerfilSuccess] = useState(false)
-  const [perfilError, setPerfilError] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState("publicaciones");
+  const [ubicacionPerfil, setUbicacionPerfil] = useState("");
+  const [contactoTelefonoPerfil, setContactoTelefonoPerfil] = useState("");
+  const [mostrarContactoPerfil, setMostrarContactoPerfil] = useState(false);
+  const [perfilSaving, setPerfilSaving] = useState(false);
+  const [perfilSuccess, setPerfilSuccess] = useState(false);
+  const [perfilError, setPerfilError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!currentUser) return
-    setUbicacionPerfil(currentUser.ubicacion ?? "")
-    setContactoTelefonoPerfil(currentUser.contactoTelefono ?? "")
-    setMostrarContactoPerfil(currentUser.mostrarContactoPublico ?? false)
-  }, [currentUser])
+    if (!currentUser) return;
+    setUbicacionPerfil(currentUser.ubicacion ?? "");
+    setContactoTelefonoPerfil(currentUser.contactoTelefono ?? "");
+    setMostrarContactoPerfil(currentUser.mostrarContactoPublico ?? false);
+  }, [currentUser]);
 
   const handleSaveContacto = async (event: React.FormEvent) => {
-    event.preventDefault()
+    event.preventDefault();
     if (!currentUser) {
-      setPerfilError("No se pudo cargar el usuario autenticado")
-      return
+      setPerfilError("No se pudo cargar el usuario autenticado");
+      return;
     }
 
-    setPerfilError(null)
-    setPerfilSuccess(false)
-    setPerfilSaving(true)
+    setPerfilError(null);
+    setPerfilSuccess(false);
+    setPerfilSaving(true);
 
     try {
       const response = await fetch("/api/profile", {
@@ -145,217 +143,248 @@ export function PerfilModal({
           contactoTelefono: sanitizePhone(contactoTelefonoPerfil),
           mostrarContactoPublico: mostrarContactoPerfil,
         }),
-      })
+      });
 
-      const data = await response.json().catch(() => ({}))
+      const data = await response.json().catch(() => ({}));
       if (!response.ok) {
-        throw new Error(data.error || "No se pudo actualizar el perfil")
+        throw new Error(data.error || "No se pudo actualizar el perfil");
       }
 
-      setPerfilSuccess(true)
+      setPerfilSuccess(true);
       if (typeof window !== "undefined") {
-        window.dispatchEvent(new CustomEvent("demo-session-updated"))
+        window.dispatchEvent(new CustomEvent("demo-session-updated"));
       }
-      setTimeout(() => setPerfilSuccess(false), 3000)
+      setTimeout(() => setPerfilSuccess(false), 3000);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Error al guardar los datos"
-      setPerfilError(message)
+      const message =
+        error instanceof Error ? error.message : "Error al guardar los datos";
+      setPerfilError(message);
     } finally {
-      setPerfilSaving(false)
+      setPerfilSaving(false);
     }
-  }
+  };
 
-  const [selectedPublicacion, setSelectedPublicacion] = useState<string>("")
-  const [closeReason, setCloseReason] = useState<"ubicada" | "transitada" | "">("")
-  const [closeSuccess, setCloseSuccess] = useState(false)
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
+  const [selectedPublicacion, setSelectedPublicacion] = useState<string>("");
+  const [closeReason, setCloseReason] = useState<"ubicada" | "transitada" | "">(
+    "",
+  );
+  const [closeSuccess, setCloseSuccess] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const [transitoNombre, setTransitoNombre] = useState("")
-  const [transitoTelefono, setTransitoTelefono] = useState("")
-  const [transitoEmail, setTransitoEmail] = useState("")
+  const [transitoNombre, setTransitoNombre] = useState("");
+  const [transitoTelefono, setTransitoTelefono] = useState("");
+  const [transitoEmail, setTransitoEmail] = useState("");
 
-  const [advertenciaTransferenciaMultiple, setAdvertenciaTransferenciaMultiple] = useState(false)
-  const [contactoAnterior, setContactoAnterior] = useState<{ nombre: string; telefono: string; email: string } | null>(null)
-  const [confirmarTransferenciaMultiple, setConfirmarTransferenciaMultiple] = useState(false)
+  const [
+    advertenciaTransferenciaMultiple,
+    setAdvertenciaTransferenciaMultiple,
+  ] = useState(false);
+  const [contactoAnterior, setContactoAnterior] = useState<{
+    nombre: string;
+    telefono: string;
+    email: string;
+  } | null>(null);
+  const [confirmarTransferenciaMultiple, setConfirmarTransferenciaMultiple] =
+    useState(false);
 
-  const [currentPassword, setCurrentPassword] = useState("")
-  const [newPassword, setNewPassword] = useState("")
-  const [confirmNewPassword, setConfirmNewPassword] = useState("")
-  const [passwordError, setPasswordError] = useState<string | null>(null)
-  const [passwordSuccess, setPasswordSuccess] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const { publicaciones, cerrarPublicacion, eliminarPublicacion } = usePublicaciones()
-  const { openPublicarModalForEdit, closePerfilModal } = useAuth()
+  const { publicaciones, cerrarPublicacion, eliminarPublicacion } =
+    usePublicaciones();
+  const { openPublicarModalForEdit, closePerfilModal } = useAuth();
 
   const userPublicaciones = publicaciones.filter(
-    (pub) => pub.usuarioId === currentUser?.id && pub.activa
-  )
+    (pub) => pub.usuarioId === currentUser?.id && pub.activa,
+  );
 
   const handleEditPublicacion = () => {
-    const pub = publicaciones.find((p) => p.id === selectedPublicacion)
-    if (!pub) return
-    closePerfilModal()
-    openPublicarModalForEdit(pub)
-  }
+    const pub = publicaciones.find((p) => p.id === selectedPublicacion);
+    if (!pub) return;
+    closePerfilModal();
+    openPublicarModalForEdit(pub);
+  };
 
   const handleDeletePublicacion = async () => {
-    if (!selectedPublicacion) return
-    setIsDeleting(true)
+    if (!selectedPublicacion) return;
+    setIsDeleting(true);
     try {
-      await eliminarPublicacion(selectedPublicacion)
-      setSelectedPublicacion("")
-      setShowDeleteConfirm(false)
-      toast.success("Publicación eliminada exitosamente")
+      await eliminarPublicacion(selectedPublicacion);
+      setSelectedPublicacion("");
+      setShowDeleteConfirm(false);
+      toast.success("Publicación eliminada exitosamente");
     } catch (error) {
-      console.error("Error eliminando publicación:", error)
-      toast.error("Error al eliminar la publicación")
+      console.error("Error eliminando publicación:", error);
+      toast.error("Error al eliminar la publicación");
     } finally {
-      setIsDeleting(false)
+      setIsDeleting(false);
     }
-  }
+  };
 
   const handleClosePublicacion = async () => {
-    if (!selectedPublicacion || !closeReason) return
+    if (!selectedPublicacion || !closeReason) return;
 
     if (closeReason === "transitada") {
-      if (!transitoNombre.trim() || !transitoTelefono.trim() || !transitoEmail.trim()) return
+      if (
+        !transitoNombre.trim() ||
+        !transitoTelefono.trim() ||
+        !transitoEmail.trim()
+      )
+        return;
     }
 
     if (advertenciaTransferenciaMultiple && !confirmarTransferenciaMultiple) {
-      return
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
-      const motivo = closeReason === "transitada" ? "en_transito" : "encontrado_dueno"
-      const transitoContacto = closeReason === "transitada"
-        ? {
-          nombre: sanitizeText(transitoNombre),
-          telefono: sanitizePhone(transitoTelefono),
-          email: sanitizeEmail(transitoEmail)
-        }
-        : undefined
+      const motivo =
+        closeReason === "transitada" ? "en_transito" : "encontrado_dueno";
+      const transitoContacto =
+        closeReason === "transitada"
+          ? {
+              nombre: sanitizeText(transitoNombre),
+              telefono: sanitizePhone(transitoTelefono),
+              email: sanitizeEmail(transitoEmail),
+            }
+          : undefined;
 
-      if (motivo === "en_transito" && transitoContacto && !advertenciaTransferenciaMultiple) {
-        const res = await fetch(`/api/publicaciones/${selectedPublicacion}/cerrar`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ motivo, transitoContacto }),
-        })
+      if (
+        motivo === "en_transito" &&
+        transitoContacto &&
+        !advertenciaTransferenciaMultiple
+      ) {
+        const res = await fetch(
+          `/api/publicaciones/${selectedPublicacion}/cerrar`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ motivo, transitoContacto }),
+          },
+        );
 
-        const data = await res.json()
+        const data = await res.json();
 
         if (!res.ok && data.advertenciaTransferenciaMultiple) {
-          setAdvertenciaTransferenciaMultiple(true)
-          setContactoAnterior(data.contactoAnterior || null)
-          setIsLoading(false)
-          return
+          setAdvertenciaTransferenciaMultiple(true);
+          setContactoAnterior(data.contactoAnterior || null);
+          setIsLoading(false);
+          return;
         }
 
         if (!res.ok) {
-          const message = data.error || "Error al cerrar la publicación"
-          console.error("Error cerrando publicacion:", message)
-          setIsLoading(false)
-          return
+          const message = data.error || "Error al cerrar la publicación";
+          console.error("Error cerrando publicacion:", message);
+          setIsLoading(false);
+          return;
         }
       }
 
-      await cerrarPublicacion(selectedPublicacion, motivo, transitoContacto, confirmarTransferenciaMultiple)
+      await cerrarPublicacion(
+        selectedPublicacion,
+        motivo,
+        transitoContacto,
+        confirmarTransferenciaMultiple,
+      );
 
-      setIsLoading(false)
-      setCloseSuccess(true)
-      setSelectedPublicacion("")
-      setCloseReason("")
-      setTransitoNombre("")
-      setTransitoTelefono("")
-      setTransitoEmail("")
-      setAdvertenciaTransferenciaMultiple(false)
-      setContactoAnterior(null)
-      setConfirmarTransferenciaMultiple(false)
+      setIsLoading(false);
+      setCloseSuccess(true);
+      setSelectedPublicacion("");
+      setCloseReason("");
+      setTransitoNombre("");
+      setTransitoTelefono("");
+      setTransitoEmail("");
+      setAdvertenciaTransferenciaMultiple(false);
+      setContactoAnterior(null);
+      setConfirmarTransferenciaMultiple(false);
 
-      setTimeout(() => setCloseSuccess(false), 3000)
+      setTimeout(() => setCloseSuccess(false), 3000);
     } catch (error) {
-      console.error("Error en handleClosePublicacion:", error)
-      setIsLoading(false)
+      console.error("Error en handleClosePublicacion:", error);
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setPasswordError(null)
-    setPasswordSuccess(false)
+    e.preventDefault();
+    setPasswordError(null);
+    setPasswordSuccess(false);
 
     if (newPassword.length < 8) {
-      setPasswordError("La nueva contraseña debe tener al menos 8 caracteres")
-      return
+      setPasswordError("La nueva contraseña debe tener al menos 8 caracteres");
+      return;
     }
 
     if (!/[A-Z]/.test(newPassword)) {
-      setPasswordError("La contraseña debe incluir al menos una mayúscula")
-      return
+      setPasswordError("La contraseña debe incluir al menos una mayúscula");
+      return;
     }
 
     if (!/[0-9]/.test(newPassword)) {
-      setPasswordError("La contraseña debe incluir al menos un número")
-      return
+      setPasswordError("La contraseña debe incluir al menos un número");
+      return;
     }
 
     if (newPassword !== confirmNewPassword) {
-      setPasswordError("Las contraseñas no coinciden")
-      return
+      setPasswordError("Las contraseñas no coinciden");
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
       const result = await authClient.changePassword({
         currentPassword,
         newPassword,
-      })
+      });
 
       if (result.error) {
-        setPasswordError(result.error.message || "Error al cambiar contraseña")
+        setPasswordError(result.error.message || "Error al cambiar contraseña");
       } else {
-        setPasswordSuccess(true)
-        setCurrentPassword("")
-        setNewPassword("")
-        setConfirmNewPassword("")
-        onPasswordChange?.()
-        setTimeout(() => setPasswordSuccess(false), 3000)
+        setPasswordSuccess(true);
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmNewPassword("");
+        onPasswordChange?.();
+        setTimeout(() => setPasswordSuccess(false), 3000);
       }
     } catch {
-      setPasswordError("Error de conexión. Intentá de nuevo.")
+      setPasswordError("Error de conexión. Intentá de nuevo.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleClose = () => {
-    setSelectedPublicacion("")
-    setCloseReason("")
-    setCloseSuccess(false)
-    setTransitoNombre("")
-    setTransitoTelefono("")
-    setTransitoEmail("")
-    setCurrentPassword("")
-    setNewPassword("")
-    setConfirmNewPassword("")
-    setPasswordError(null)
-    setPasswordSuccess(false)
-    setPerfilError(null)
-    setPerfilSuccess(false)
-    setShowDeleteConfirm(false)
-    onClose()
-  }
+    setSelectedPublicacion("");
+    setCloseReason("");
+    setCloseSuccess(false);
+    setTransitoNombre("");
+    setTransitoTelefono("");
+    setTransitoEmail("");
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmNewPassword("");
+    setPasswordError(null);
+    setPasswordSuccess(false);
+    setPerfilError(null);
+    setPerfilSuccess(false);
+    setShowDeleteConfirm(false);
+    onClose();
+  };
 
   const handleLogout = () => {
-    logout()
-  }
+    logout();
+  };
 
-  if (!currentUser) return null
+  if (!currentUser) return null;
 
   return (
     <SimpleModal isOpen={isOpen} onClose={handleClose}>
@@ -377,7 +406,9 @@ export function PerfilModal({
 
       <div className="mb-4 p-3 rounded-lg bg-muted/50 flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-foreground">{currentUser.nombreUsuario}</p>
+          <p className="text-sm font-medium text-foreground">
+            {currentUser.nombreUsuario}
+          </p>
           <p className="text-xs text-muted-foreground">{currentUser.email}</p>
         </div>
         <Button variant="outline" size="sm" onClick={handleLogout}>
@@ -410,28 +441,41 @@ export function PerfilModal({
                     Modo demo - Solo visualización
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Estás viendo {userPublicaciones.length} publicación{userPublicaciones.length !== 1 ? 'es' : ''} de ejemplo.
-                    En el modo demo no podés cerrar publicaciones.
+                    Estás viendo {userPublicaciones.length} publicación
+                    {userPublicaciones.length !== 1 ? "es" : ""} de ejemplo. En
+                    el modo demo no podés cerrar publicaciones.
                   </p>
                 </div>
               ) : (
-                <Select value={selectedPublicacion} onValueChange={setSelectedPublicacion}>
+                <Select
+                  value={selectedPublicacion}
+                  onValueChange={setSelectedPublicacion}
+                >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Elegir publicacion..." />
                   </SelectTrigger>
                   <SelectContent>
                     {userPublicaciones.map((pub) => {
-                      const tipo = tipoMascotaLabels[especieSexoToTipo(pub.mascota.especie, pub.mascota.sexo)]
-                      const esHembraMascota = pub.mascota.sexo === "hembra"
+                      const tipo =
+                        tipoMascotaLabels[
+                          especieSexoToTipo(
+                            pub.mascota.especie,
+                            pub.mascota.sexo,
+                          )
+                        ];
+                      const esHembraMascota = pub.mascota.sexo === "hembra";
                       const raza = isMestizoRaza(pub.mascota.raza)
-                        ? `${esHembraMascota ? "Mestiza" : "Mestizo"} (♀ ${pub.mascota.madreRaza ? razasLabels[pub.mascota.madreRaza] : "?"} + ♂ ${pub.mascota.padreRaza ?razasLabels[pub.mascota.padreRaza] : "?"})`
-                        : razasLabels[pub.mascota.raza]
-                      const color = pub.mascota.color ? ` ${pub.mascota.color}` : ""
+                        ? `${esHembraMascota ? "Mestiza" : "Mestizo"} (♀ ${pub.mascota.madreRaza ? razasLabels[pub.mascota.madreRaza] : "?"} + ♂ ${pub.mascota.padreRaza ? razasLabels[pub.mascota.padreRaza] : "?"})`
+                        : razasLabels[pub.mascota.raza];
+                      const color = pub.mascota.color
+                        ? ` ${pub.mascota.color}`
+                        : "";
                       return (
                         <SelectItem key={pub.id} value={pub.id}>
-                          {tipo} {raza}{color}
+                          {tipo} {raza}
+                          {color}
                         </SelectItem>
-                      )
+                      );
                     })}
                   </SelectContent>
                 </Select>
@@ -491,27 +535,34 @@ export function PerfilModal({
                 </div>
               )}
 
-              {!currentUser?.isReadOnly && selectedPublicacion && !showDeleteConfirm && (
-                <Select value={closeReason} onValueChange={(v) => setCloseReason(v as "ubicada" | "transitada")}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Seleccionar motivo de cierre..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ubicada">
-                      <div className="flex items-center gap-2">
-                        <Home className="h-4 w-4" />
-                        Mascota ubicada con su familia
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="transitada">
-                      <div className="flex items-center gap-2">
-                        <PawPrint className="h-4 w-4" />
-                        Mascota transitada a nuevo cuidador
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
+              {!currentUser?.isReadOnly &&
+                selectedPublicacion &&
+                !showDeleteConfirm && (
+                  <Select
+                    value={closeReason}
+                    onValueChange={(v) =>
+                      setCloseReason(v as "ubicada" | "transitada")
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Seleccionar motivo de cierre..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ubicada">
+                        <div className="flex items-center gap-2">
+                          <Home className="h-4 w-4" />
+                          Mascota ubicada con su familia
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="transitada">
+                        <div className="flex items-center gap-2">
+                          <PawPrint className="h-4 w-4" />
+                          Mascota transitada a nuevo cuidador
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
 
               {closeReason === "transitada" && (
                 <>
@@ -525,27 +576,44 @@ export function PerfilModal({
                         Esta mascota ya fue transitada anteriormente a:
                       </p>
                       <div className="rounded-lg bg-white dark:bg-black/30 p-2 space-y-1 text-xs">
-                        <p className="font-medium text-foreground">{contactoAnterior.nombre}</p>
-                        <p className="text-muted-foreground">{contactoAnterior.telefono}</p>
-                        <p className="text-muted-foreground truncate" title={contactoAnterior.email}>{contactoAnterior.email}</p>
+                        <p className="font-medium text-foreground">
+                          {contactoAnterior.nombre}
+                        </p>
+                        <p className="text-muted-foreground">
+                          {contactoAnterior.telefono}
+                        </p>
+                        <p
+                          className="text-muted-foreground truncate"
+                          title={contactoAnterior.email}
+                        >
+                          {contactoAnterior.email}
+                        </p>
                       </div>
                       <p className="text-xs text-orange-800 dark:text-orange-200">
-                        Transferencias múltiples pueden complicar el seguimiento. ¿Estás seguro de que querés transferirla nuevamente?
+                        Transferencias múltiples pueden complicar el
+                        seguimiento. ¿Estás seguro de que querés transferirla
+                        nuevamente?
                       </p>
                       <div className="flex items-start space-x-2">
                         <Checkbox
                           id="confirm-transfer"
                           checked={confirmarTransferenciaMultiple}
-                          onCheckedChange={(checked) => setConfirmarTransferenciaMultiple(!!checked)}
+                          onCheckedChange={(checked) =>
+                            setConfirmarTransferenciaMultiple(!!checked)
+                          }
                         />
-                        <label htmlFor="confirm-transfer" className="text-xs text-orange-800 dark:text-orange-200 cursor-pointer">
+                        <label
+                          htmlFor="confirm-transfer"
+                          className="text-xs text-orange-800 dark:text-orange-200 cursor-pointer"
+                        >
                           Confirmo que deseo transferir esta mascota nuevamente
                         </label>
                       </div>
                     </div>
                   )}
 
-                  {!advertenciaTransferenciaMultiple || confirmarTransferenciaMultiple ? (
+                  {!advertenciaTransferenciaMultiple ||
+                  confirmarTransferenciaMultiple ? (
                     <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-3">
                       <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                         <UserPlus className="h-4 w-4 text-primary" />
@@ -589,12 +657,23 @@ export function PerfilModal({
                     !selectedPublicacion ||
                     !closeReason ||
                     isLoading ||
-                    (closeReason === "transitada" && !confirmarTransferenciaMultiple && advertenciaTransferenciaMultiple) ||
-                    (closeReason === "transitada" && (!transitoNombre.trim() || !transitoTelefono.trim() || !transitoEmail.trim()))
+                    (closeReason === "transitada" &&
+                      !confirmarTransferenciaMultiple &&
+                      advertenciaTransferenciaMultiple) ||
+                    (closeReason === "transitada" &&
+                      (!transitoNombre.trim() ||
+                        !transitoTelefono.trim() ||
+                        !transitoEmail.trim()))
                   }
                   className="w-full"
                 >
-                  {isLoading ? "Cerrando..." : advertenciaTransferenciaMultiple ? "Confirmar transferencia" : closeReason === "transitada" ? "Dar tránsito" : "Cerrar publicación"}
+                  {isLoading
+                    ? "Cerrando..."
+                    : advertenciaTransferenciaMultiple
+                      ? "Confirmar transferencia"
+                      : closeReason === "transitada"
+                        ? "Dar tránsito"
+                        : "Cerrar publicación"}
                 </Button>
               )}
             </div>
@@ -617,7 +696,9 @@ export function PerfilModal({
             {perfilSuccess && (
               <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
-                <AlertDescription className="text-green-600">Datos actualizados</AlertDescription>
+                <AlertDescription className="text-green-600">
+                  Datos actualizados
+                </AlertDescription>
               </Alert>
             )}
             <form onSubmit={handleSaveContacto} className="space-y-3">
@@ -637,7 +718,9 @@ export function PerfilModal({
                   id="perfil-contacto-telefono"
                   type="tel"
                   value={contactoTelefonoPerfil}
-                  onChange={(event) => setContactoTelefonoPerfil(event.target.value)}
+                  onChange={(event) =>
+                    setContactoTelefonoPerfil(event.target.value)
+                  }
                   placeholder="+54 9 11 1234-5678"
                   required
                 />
@@ -646,11 +729,13 @@ export function PerfilModal({
                 <Checkbox
                   id="perfil-datos-publicos"
                   checked={mostrarContactoPerfil}
-                  onCheckedChange={(checked) => setMostrarContactoPerfil(checked === true)}
+                  onCheckedChange={(checked) =>
+                    setMostrarContactoPerfil(checked === true)
+                  }
                 />
                 <div className="space-y-0.5 leading-none">
-                  <label 
-                    htmlFor="perfil-datos-publicos" 
+                  <label
+                    htmlFor="perfil-datos-publicos"
                     className="text-sm font-medium cursor-pointer"
                   >
                     Datos públicos
@@ -708,7 +793,9 @@ export function PerfilModal({
               </p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirm-new-password">Confirmar nueva contraseña</Label>
+              <Label htmlFor="confirm-new-password">
+                Confirmar nueva contraseña
+              </Label>
               <Input
                 id="confirm-new-password"
                 type="password"
@@ -725,5 +812,5 @@ export function PerfilModal({
         </TabsContent>
       </Tabs>
     </SimpleModal>
-  )
+  );
 }

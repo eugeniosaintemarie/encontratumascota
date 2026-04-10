@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import { useState, useRef, useCallback, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Slider } from "@/components/ui/slider"
-import { ZoomIn, ZoomOut, Check, RotateCcw } from "lucide-react"
+import { useState, useRef, useCallback, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { ZoomIn, ZoomOut, Check, RotateCcw } from "lucide-react";
 
 interface ImageCropEditorProps {
-  imageFile: File
-  onCropComplete: (blob: Blob, previewUrl: string) => void
-  onCancel: () => void
+  imageFile: File;
+  onCropComplete: (blob: Blob, previewUrl: string) => void;
+  onCancel: () => void;
 }
 
 export function ImageCropEditor({
@@ -16,182 +16,187 @@ export function ImageCropEditor({
   onCropComplete,
   onCancel,
 }: ImageCropEditorProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const [imageSrc, setImageSrc] = useState<string | null>(null)
-  const [imageEl, setImageEl] = useState<HTMLImageElement | null>(null)
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const [imageEl, setImageEl] = useState<HTMLImageElement | null>(null);
 
   // Crop state: offset of image relative to the square viewport, and scale
-  const [offsetX, setOffsetX] = useState(0)
-  const [offsetY, setOffsetY] = useState(0)
-  const [scale, setScale] = useState(1)
-  const [minScale, setMinScale] = useState(1)
-  const [isDragging, setIsDragging] = useState(false)
-  const dragStart = useRef({ x: 0, y: 0, ox: 0, oy: 0 })
+  const [offsetX, setOffsetX] = useState(0);
+  const [offsetY, setOffsetY] = useState(0);
+  const [scale, setScale] = useState(1);
+  const [minScale, setMinScale] = useState(1);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStart = useRef({ x: 0, y: 0, ox: 0, oy: 0 });
 
   // Viewport size (square, fits container)
-  const VIEWPORT = 300
+  const VIEWPORT = 300;
 
   // Load file into image
   useEffect(() => {
-    const url = URL.createObjectURL(imageFile)
-    setImageSrc(url)
+    const url = URL.createObjectURL(imageFile);
+    setImageSrc(url);
 
-    const img = new window.Image()
+    const img = new window.Image();
     img.onload = () => {
-      setImageEl(img)
+      setImageEl(img);
 
       // Calculate minimum scale so image covers the viewport
-      const scaleX = VIEWPORT / img.width
-      const scaleY = VIEWPORT / img.height
-      const fitScale = Math.max(scaleX, scaleY)
-      setMinScale(fitScale)
-      setScale(fitScale)
+      const scaleX = VIEWPORT / img.width;
+      const scaleY = VIEWPORT / img.height;
+      const fitScale = Math.max(scaleX, scaleY);
+      setMinScale(fitScale);
+      setScale(fitScale);
 
       // Center
-      setOffsetX((VIEWPORT - img.width * fitScale) / 2)
-      setOffsetY((VIEWPORT - img.height * fitScale) / 2)
-    }
-    img.src = url
+      setOffsetX((VIEWPORT - img.width * fitScale) / 2);
+      setOffsetY((VIEWPORT - img.height * fitScale) / 2);
+    };
+    img.src = url;
 
-    return () => URL.revokeObjectURL(url)
-  }, [imageFile])
+    return () => URL.revokeObjectURL(url);
+  }, [imageFile]);
 
   // Constrain offsets so image always covers the viewport
   const constrain = useCallback(
     (ox: number, oy: number, s: number) => {
-      if (!imageEl) return { ox, oy }
-      const w = imageEl.width * s
-      const h = imageEl.height * s
+      if (!imageEl) return { ox, oy };
+      const w = imageEl.width * s;
+      const h = imageEl.height * s;
 
       // Image left edge must be <= 0 (viewport left)
       // Image right edge must be >= VIEWPORT
-      const nx = Math.min(0, Math.max(VIEWPORT - w, ox))
-      const ny = Math.min(0, Math.max(VIEWPORT - h, oy))
+      const nx = Math.min(0, Math.max(VIEWPORT - w, ox));
+      const ny = Math.min(0, Math.max(VIEWPORT - h, oy));
 
-      return { ox: nx, oy: ny }
+      return { ox: nx, oy: ny };
     },
-    [imageEl]
-  )
+    [imageEl],
+  );
 
   // Update offsets when scale changes
   useEffect(() => {
-    if (!imageEl) return
-    const { ox, oy } = constrain(offsetX, offsetY, scale)
+    if (!imageEl) return;
+    const { ox, oy } = constrain(offsetX, offsetY, scale);
     if (ox !== offsetX || oy !== offsetY) {
-      setOffsetX(ox)
-      setOffsetY(oy)
+      setOffsetX(ox);
+      setOffsetY(oy);
     }
-  }, [scale, imageEl, constrain, offsetX, offsetY])
+  }, [scale, imageEl, constrain, offsetX, offsetY]);
 
   // Draw preview
   useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas || !imageEl) return
-    const ctx = canvas.getContext("2d")!
-    canvas.width = VIEWPORT
-    canvas.height = VIEWPORT
+    const canvas = canvasRef.current;
+    if (!canvas || !imageEl) return;
+    const ctx = canvas.getContext("2d")!;
+    canvas.width = VIEWPORT;
+    canvas.height = VIEWPORT;
 
-    ctx.clearRect(0, 0, VIEWPORT, VIEWPORT)
-    ctx.fillStyle = "#f0f0f0"
-    ctx.fillRect(0, 0, VIEWPORT, VIEWPORT)
+    ctx.clearRect(0, 0, VIEWPORT, VIEWPORT);
+    ctx.fillStyle = "#f0f0f0";
+    ctx.fillRect(0, 0, VIEWPORT, VIEWPORT);
 
     ctx.drawImage(
       imageEl,
       offsetX,
       offsetY,
       imageEl.width * scale,
-      imageEl.height * scale
-    )
-  }, [imageEl, offsetX, offsetY, scale])
+      imageEl.height * scale,
+    );
+  }, [imageEl, offsetX, offsetY, scale]);
 
   // Drag handlers
   const handlePointerDown = (e: React.PointerEvent) => {
-    setIsDragging(true)
-    dragStart.current = { x: e.clientX, y: e.clientY, ox: offsetX, oy: offsetY }
-      ; (e.target as HTMLElement).setPointerCapture(e.pointerId)
-  }
+    setIsDragging(true);
+    dragStart.current = {
+      x: e.clientX,
+      y: e.clientY,
+      ox: offsetX,
+      oy: offsetY,
+    };
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  };
 
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDragging) return
-    const dx = e.clientX - dragStart.current.x
-    const dy = e.clientY - dragStart.current.y
+    if (!isDragging) return;
+    const dx = e.clientX - dragStart.current.x;
+    const dy = e.clientY - dragStart.current.y;
     const { ox, oy } = constrain(
       dragStart.current.ox + dx,
       dragStart.current.oy + dy,
-      scale
-    )
-    setOffsetX(ox)
-    setOffsetY(oy)
-  }
+      scale,
+    );
+    setOffsetX(ox);
+    setOffsetY(oy);
+  };
 
   const handlePointerUp = () => {
-    setIsDragging(false)
-  }
+    setIsDragging(false);
+  };
 
   const handleScaleChange = (value: number[]) => {
-    const newScale = value[0]
+    const newScale = value[0];
 
     // Zoom towards center
     if (imageEl) {
-      const centerX = VIEWPORT / 2
-      const centerY = VIEWPORT / 2
-      const imgX = (centerX - offsetX) / scale
-      const imgY = (centerY - offsetY) / scale
-      const newOx = centerX - imgX * newScale
-      const newOy = centerY - imgY * newScale
-      const { ox, oy } = constrain(newOx, newOy, newScale)
-      setOffsetX(ox)
-      setOffsetY(oy)
+      const centerX = VIEWPORT / 2;
+      const centerY = VIEWPORT / 2;
+      const imgX = (centerX - offsetX) / scale;
+      const imgY = (centerY - offsetY) / scale;
+      const newOx = centerX - imgX * newScale;
+      const newOy = centerY - imgY * newScale;
+      const { ox, oy } = constrain(newOx, newOy, newScale);
+      setOffsetX(ox);
+      setOffsetY(oy);
     }
 
-    setScale(newScale)
-  }
+    setScale(newScale);
+  };
 
   const handleReset = () => {
-    if (!imageEl) return
-    const scaleX = VIEWPORT / imageEl.width
-    const scaleY = VIEWPORT / imageEl.height
-    const fitScale = Math.max(scaleX, scaleY)
-    setScale(fitScale)
-    setOffsetX((VIEWPORT - imageEl.width * fitScale) / 2)
-    setOffsetY((VIEWPORT - imageEl.height * fitScale) / 2)
-  }
+    if (!imageEl) return;
+    const scaleX = VIEWPORT / imageEl.width;
+    const scaleY = VIEWPORT / imageEl.height;
+    const fitScale = Math.max(scaleX, scaleY);
+    setScale(fitScale);
+    setOffsetX((VIEWPORT - imageEl.width * fitScale) / 2);
+    setOffsetY((VIEWPORT - imageEl.height * fitScale) / 2);
+  };
 
   const handleConfirm = () => {
-    if (!imageEl) return
+    if (!imageEl) return;
 
     // Render at 1080x1080 for high quality
-    const outputSize = 1080
-    const outCanvas = document.createElement("canvas")
-    outCanvas.width = outputSize
-    outCanvas.height = outputSize
-    const ctx = outCanvas.getContext("2d")!
+    const outputSize = 1080;
+    const outCanvas = document.createElement("canvas");
+    outCanvas.width = outputSize;
+    outCanvas.height = outputSize;
+    const ctx = outCanvas.getContext("2d")!;
 
     // Map viewport coordinates back to image coordinates
-    const ratio = outputSize / VIEWPORT
+    const ratio = outputSize / VIEWPORT;
     ctx.drawImage(
       imageEl,
       offsetX * ratio,
       offsetY * ratio,
       imageEl.width * scale * ratio,
-      imageEl.height * scale * ratio
-    )
+      imageEl.height * scale * ratio,
+    );
 
     outCanvas.toBlob(
       (blob) => {
         if (blob) {
-          const previewUrl = URL.createObjectURL(blob)
-          onCropComplete(blob, previewUrl)
+          const previewUrl = URL.createObjectURL(blob);
+          onCropComplete(blob, previewUrl);
         }
       },
       "image/jpeg",
-      0.88
-    )
-  }
+      0.88,
+    );
+  };
 
-  if (!imageSrc) return null
+  if (!imageSrc) return null;
 
   return (
     <div className="space-y-3">
@@ -204,7 +209,11 @@ export function ImageCropEditor({
         <div
           ref={containerRef}
           className="relative overflow-hidden rounded-lg border-2 border-dashed border-primary/40 bg-muted"
-          style={{ width: VIEWPORT, height: VIEWPORT, cursor: isDragging ? "grabbing" : "grab" }}
+          style={{
+            width: VIEWPORT,
+            height: VIEWPORT,
+            cursor: isDragging ? "grabbing" : "grab",
+          }}
         >
           <canvas
             ref={canvasRef}
@@ -255,5 +264,5 @@ export function ImageCropEditor({
         </Button>
       </div>
     </div>
-  )
+  );
 }

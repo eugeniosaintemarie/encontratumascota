@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
-import { Header } from "@/components/header"
-import { PublicacionCard } from "@/components/publicacion-card"
-import { Footer } from "@/components/footer"
-import { useAuth } from "@/lib/auth-context"
-import type { Publicacion } from "@/lib/types"
+import { Header } from "@/components/header";
+import { PublicacionCard } from "@/components/publicacion-card";
+import { Footer } from "@/components/footer";
+import { useAuth } from "@/lib/auth-context";
+import type { Publicacion } from "@/lib/types";
 
 interface PublicacionDetailProps {
-  publicacion: Publicacion
+  publicacion: Publicacion;
 }
 
 export function PublicacionDetail({ publicacion }: PublicacionDetailProps) {
-  const { isAuthenticated, requireAuth } = useAuth()
+  const { isAuthenticated, requireAuth } = useAuth();
 
   return (
     <div className="min-h-screen bg-background">
@@ -25,5 +25,5 @@ export function PublicacionDetail({ publicacion }: PublicacionDetailProps) {
       </main>
       <Footer />
     </div>
-  )
+  );
 }

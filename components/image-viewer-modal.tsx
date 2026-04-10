@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import { useEffect, useCallback } from "react"
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
-import { X } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useEffect, useCallback } from "react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface ImageViewerModalProps {
-  isOpen: boolean
-  onClose: () => void
-  imageUrl: string
-  alt?: string
+  isOpen: boolean;
+  onClose: () => void;
+  imageUrl: string;
+  alt?: string;
 }
 
 export function ImageViewerModal({
@@ -22,24 +22,24 @@ export function ImageViewerModal({
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        onClose()
+        onClose();
       }
     },
-    [onClose]
-  )
+    [onClose],
+  );
 
   useEffect(() => {
     if (isOpen) {
-      document.addEventListener("keydown", handleKeyDown)
+      document.addEventListener("keydown", handleKeyDown);
       // Prevent body scroll when modal is open
-      document.body.style.overflow = "hidden"
+      document.body.style.overflow = "hidden";
     }
 
     return () => {
-      document.removeEventListener("keydown", handleKeyDown)
-      document.body.style.overflow = "unset"
-    }
-  }, [isOpen, handleKeyDown])
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen, handleKeyDown]);
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -71,5 +71,5 @@ export function ImageViewerModal({
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

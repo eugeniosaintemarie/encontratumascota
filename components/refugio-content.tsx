@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import { ListadoPublicaciones } from "@/components/listado-publicaciones"
-import Link from "next/link"
-import { HeartHandshake } from "lucide-react"
-import type { Publicacion } from "@/lib/types"
+import { ListadoPublicaciones } from "@/components/listado-publicaciones";
+import Link from "next/link";
+import { HeartHandshake } from "lucide-react";
+import type { Publicacion } from "@/lib/types";
 
 interface RefugioContentProps {
-  publicaciones: Publicacion[]
-  nombreRefugio: string
-  usuarioId: string
+  publicaciones: Publicacion[];
+  nombreRefugio: string;
+  usuarioId: string;
 }
 
 export function RefugioContent({
@@ -19,13 +19,15 @@ export function RefugioContent({
     return (
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-4">Refugio no encontrado</h1>
+          <h1 className="text-2xl font-bold text-foreground mb-4">
+            Refugio no encontrado
+          </h1>
           <p className="text-muted-foreground mb-6">
             No hay publicaciones para este refugio.
           </p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -39,7 +41,9 @@ export function RefugioContent({
             <HeartHandshake className="h-4 w-4" />
             Red de refugios
           </Link>
-          <h1 className="mt-2 text-3xl font-bold text-foreground sm:text-4xl">{nombreRefugio}</h1>
+          <h1 className="mt-2 text-3xl font-bold text-foreground sm:text-4xl">
+            {nombreRefugio}
+          </h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
             {publicaciones.length} mascota
             {publicaciones.length !== 1 ? "s" : ""} en adopción
@@ -58,5 +62,5 @@ export function RefugioContent({
         />
       </div>
     </main>
-  )
+  );
 }

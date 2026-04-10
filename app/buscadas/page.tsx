@@ -1,79 +1,90 @@
-"use client"
+"use client";
 
-import { useState, useMemo, useEffect } from "react"
-import { useItemsPerPage } from "@/hooks/use-items-per-page"
-import { PublicacionCard } from "@/components/publicacion-card"
-import { FiltrosPublicaciones } from "@/components/filtros-publicaciones"
-import { Header } from "@/components/header"
-import { PawPrint, ChevronLeft, ChevronRight } from "lucide-react"
-import { Footer } from "@/components/footer"
-import { usePublicaciones } from "@/lib/publicaciones-context"
-import { useAuth } from "@/lib/auth-context"
-import type { TipoMascota } from "@/lib/types"
-import { tipoMascotaToEspecie, tipoMascotaToSexo } from "@/lib/types"
-import { Button } from "@/components/ui/button"
+import { useState, useMemo, useEffect } from "react";
+import { useItemsPerPage } from "@/hooks/use-items-per-page";
+import { PublicacionCard } from "@/components/publicacion-card";
+import { FiltrosPublicaciones } from "@/components/filtros-publicaciones";
+import { Header } from "@/components/header";
+import { PawPrint, ChevronLeft, ChevronRight } from "lucide-react";
+import { Footer } from "@/components/footer";
+import { usePublicaciones } from "@/lib/publicaciones-context";
+import { useAuth } from "@/lib/auth-context";
+import type { TipoMascota } from "@/lib/types";
+import { tipoMascotaToEspecie, tipoMascotaToSexo } from "@/lib/types";
+import { Button } from "@/components/ui/button";
 
 export default function BuscadosPage() {
-  const [tipoMascota, setTipoMascota] = useState<TipoMascota | "todos">("todos")
-  const [ubicacion, setUbicacion] = useState("")
-  const [raza, setRaza] = useState<string | "todos">("todos")
-  const [fechaDesde, setFechaDesde] = useState<string | undefined>(undefined)
-  const [currentPage, setCurrentPage] = useState(1)
+  const [tipoMascota, setTipoMascota] = useState<TipoMascota | "todos">(
+    "todos",
+  );
+  const [ubicacion, setUbicacion] = useState("");
+  const [raza, setRaza] = useState<string | "todos">("todos");
+  const [fechaDesde, setFechaDesde] = useState<string | undefined>(undefined);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const { isAuthenticated, requireAuth } = useAuth()
+  const { isAuthenticated, requireAuth } = useAuth();
 
-  const { publicaciones } = usePublicaciones()
-  const { itemsPerPage, columns } = useItemsPerPage()
+  const { publicaciones } = usePublicaciones();
+  const { itemsPerPage, columns } = useItemsPerPage();
 
   const publicacionesBuscadas = useMemo(() => {
     return publicaciones.filter((pub) => {
       // Solo mostrar publicaciones "buscadas" (mascotas perdidas por sus dueños)
-      if (pub.tipoPublicacion !== "buscada") return false
+      if (pub.tipoPublicacion !== "buscada") return false;
       if (tipoMascota !== "todos") {
-        const especieFiltro = tipoMascotaToEspecie(tipoMascota)
-        const sexoFiltro = tipoMascotaToSexo(tipoMascota)
-        if (pub.mascota.especie !== especieFiltro || pub.mascota.sexo !== sexoFiltro) return false
+        const especieFiltro = tipoMascotaToEspecie(tipoMascota);
+        const sexoFiltro = tipoMascotaToSexo(tipoMascota);
+        if (
+          pub.mascota.especie !== especieFiltro ||
+          pub.mascota.sexo !== sexoFiltro
+        )
+          return false;
       }
-      if (raza !== "todos" && pub.mascota.raza !== raza) return false
+      if (raza !== "todos" && pub.mascota.raza !== raza) return false;
       if (
         ubicacion &&
         !pub.ubicacion.toLowerCase().includes(ubicacion.toLowerCase())
       )
-        return false
+        return false;
       // Filtrar por fechaDesde
       if (fechaDesde) {
         try {
-          const since = new Date(fechaDesde)
-          if (isNaN(since.getTime())) return false
-          if (pub.fechaPublicacion < since) return false
-        } catch { /* ignore parse errors */ }
+          const since = new Date(fechaDesde);
+          if (isNaN(since.getTime())) return false;
+          if (pub.fechaPublicacion < since) return false;
+        } catch {
+          /* ignore parse errors */
+        }
       }
       // Solo mostrar activas
-      return pub.activa
-    })
-  }, [tipoMascota, raza, ubicacion, fechaDesde, publicaciones])
+      return pub.activa;
+    });
+  }, [tipoMascota, raza, ubicacion, fechaDesde, publicaciones]);
 
-  const totalPages = Math.ceil(publicacionesBuscadas.length / itemsPerPage)
+  const totalPages = Math.ceil(publicacionesBuscadas.length / itemsPerPage);
   const paginatedPublicaciones = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage
-    return publicacionesBuscadas.slice(startIndex, startIndex + itemsPerPage)
-  }, [publicacionesBuscadas, currentPage, itemsPerPage])
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return publicacionesBuscadas.slice(startIndex, startIndex + itemsPerPage);
+  }, [publicacionesBuscadas, currentPage, itemsPerPage]);
 
   // Reset page when itemsPerPage changes (responsive)
   useEffect(() => {
-    setCurrentPage(1)
-  }, [itemsPerPage])
+    setCurrentPage(1);
+  }, [itemsPerPage]);
 
   const hasActiveFilters =
-    tipoMascota !== "todos" || raza !== "todos" || ubicacion !== "" || !!fechaDesde
+    tipoMascota !== "todos" ||
+    raza !== "todos" ||
+    ubicacion !== "" ||
+    !!fechaDesde;
 
   const clearFilters = () => {
-    setTipoMascota("todos")
-    setRaza("todos")
-    setUbicacion("")
-    setFechaDesde(undefined)
-    setCurrentPage(1)
-  }
+    setTipoMascota("todos");
+    setRaza("todos");
+    setUbicacion("");
+    setFechaDesde(undefined);
+    setCurrentPage(1);
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -89,12 +100,16 @@ export default function BuscadosPage() {
             fechaDesde={fechaDesde}
             transitoUrgente={false}
             hideTipoSelector={true}
-            onTipoPublicacionChange={() => { /* noop: not applicable for buscados */ }}
+            onTipoPublicacionChange={() => {
+              /* noop: not applicable for buscados */
+            }}
             onTipoMascotaChange={setTipoMascota}
             onRazaChange={setRaza}
             onUbicacionChange={setUbicacion}
             onFechaDesdeChange={setFechaDesde}
-            onTransitoUrgenteChange={() => { /* noop */ }}
+            onTransitoUrgenteChange={() => {
+              /* noop */
+            }}
             onClearFilters={clearFilters}
             onSearch={() => {}}
             hasActiveFilters={hasActiveFilters}
@@ -125,7 +140,7 @@ export default function BuscadosPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
                   >
                     <ChevronLeft className="h-4 w-4" />
@@ -136,7 +151,9 @@ export default function BuscadosPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    onClick={() =>
+                      setCurrentPage((p) => Math.min(totalPages, p + 1))
+                    }
                     disabled={currentPage === totalPages}
                   >
                     <ChevronRight className="h-4 w-4" />
@@ -150,7 +167,8 @@ export default function BuscadosPage() {
                 <PawPrint className="h-12 w-12 text-muted-foreground" />
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2 text-center">
-                Todavía no hay mascotas perdidas que estén siendo buscadas por sus familias
+                Todavía no hay mascotas perdidas que estén siendo buscadas por
+                sus familias
               </h3>
             </div>
           )}
@@ -159,5 +177,5 @@ export default function BuscadosPage() {
 
       <Footer />
     </div>
-  )
+  );
 }

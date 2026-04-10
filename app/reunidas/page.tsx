@@ -1,49 +1,55 @@
-"use client"
+"use client";
 
-import { useState, useMemo, useEffect } from "react"
-import { useItemsPerPage } from "@/hooks/use-items-per-page"
-import { PublicacionCard } from "@/components/publicacion-card"
-import { FiltrosPublicaciones } from "@/components/filtros-publicaciones"
-import { Header } from "@/components/header"
-import { PawPrint } from "lucide-react"
-import { Footer } from "@/components/footer"
-import { usePublicaciones } from "@/lib/publicaciones-context"
-import { useAuth } from "@/lib/auth-context"
-import type { TipoMascota } from "@/lib/types"
-import { tipoMascotaToEspecie, tipoMascotaToSexo } from "@/lib/types"
+import { useState, useMemo, useEffect } from "react";
+import { useItemsPerPage } from "@/hooks/use-items-per-page";
+import { PublicacionCard } from "@/components/publicacion-card";
+import { FiltrosPublicaciones } from "@/components/filtros-publicaciones";
+import { Header } from "@/components/header";
+import { PawPrint } from "lucide-react";
+import { Footer } from "@/components/footer";
+import { usePublicaciones } from "@/lib/publicaciones-context";
+import { useAuth } from "@/lib/auth-context";
+import type { TipoMascota } from "@/lib/types";
+import { tipoMascotaToEspecie, tipoMascotaToSexo } from "@/lib/types";
 
 export default function ReunidasPage() {
-  const [tipoMascota, setTipoMascota] = useState<TipoMascota | "todos">("todos")
-  const [ubicacion, setUbicacion] = useState("")
-  const [raza, setRaza] = useState<string | "todos">("todos")
+  const [tipoMascota, setTipoMascota] = useState<TipoMascota | "todos">(
+    "todos",
+  );
+  const [ubicacion, setUbicacion] = useState("");
+  const [raza, setRaza] = useState<string | "todos">("todos");
 
-  const { isAuthenticated, requireAuth } = useAuth()
+  const { isAuthenticated, requireAuth } = useAuth();
 
-  const { publicaciones, refetch } = usePublicaciones()
-  const { itemsPerPage, columns } = useItemsPerPage()
+  const { publicaciones, refetch } = usePublicaciones();
+  const { itemsPerPage, columns } = useItemsPerPage();
 
   // Cargar publicaciones inactivas al montar
   useEffect(() => {
-    refetch({ includeInactive: true })
-  }, [refetch])
+    refetch({ includeInactive: true });
+  }, [refetch]);
 
   const publicacionesReunidas = useMemo(() => {
     return publicaciones.filter((pub) => {
       if (tipoMascota !== "todos") {
-        const especieFiltro = tipoMascotaToEspecie(tipoMascota)
-        const sexoFiltro = tipoMascotaToSexo(tipoMascota)
-        if (pub.mascota.especie !== especieFiltro || pub.mascota.sexo !== sexoFiltro) return false
+        const especieFiltro = tipoMascotaToEspecie(tipoMascota);
+        const sexoFiltro = tipoMascotaToSexo(tipoMascota);
+        if (
+          pub.mascota.especie !== especieFiltro ||
+          pub.mascota.sexo !== sexoFiltro
+        )
+          return false;
       }
-      if (raza !== "todos" && pub.mascota.raza !== raza) return false
+      if (raza !== "todos" && pub.mascota.raza !== raza) return false;
       if (
         ubicacion &&
         !pub.ubicacion.toLowerCase().includes(ubicacion.toLowerCase())
       )
-        return false
+        return false;
       // Reunidas = publicacion cerrada (no activa)
-      return pub.activa === false
-    })
-  }, [tipoMascota, raza, ubicacion, publicaciones])
+      return pub.activa === false;
+    });
+  }, [tipoMascota, raza, ubicacion, publicaciones]);
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -58,7 +64,9 @@ export default function ReunidasPage() {
             ubicacion={ubicacion}
             fechaDesde={undefined}
             transitoUrgente={false}
-            onTipoPublicacionChange={() => { /* noop: fixed to adopcion */ }}
+            onTipoPublicacionChange={() => {
+              /* noop: fixed to adopcion */
+            }}
             hideTipoSelector={true}
             wideUbicacion={true}
             onTipoMascotaChange={(v) => setTipoMascota(v)}
@@ -67,35 +75,43 @@ export default function ReunidasPage() {
             onFechaDesdeChange={() => {}}
             onTransitoUrgenteChange={() => {}}
             onClearFilters={() => {
-              setTipoMascota("todos")
-              setRaza("todos")
-              setUbicacion("")
+              setTipoMascota("todos");
+              setRaza("todos");
+              setUbicacion("");
             }}
             onSearch={() => {}}
-            hasActiveFilters={tipoMascota !== "todos" || raza !== "todos" || ubicacion !== ""}
+            hasActiveFilters={
+              tipoMascota !== "todos" || raza !== "todos" || ubicacion !== ""
+            }
           />
 
           {publicacionesReunidas.length > 0 ? (
             <div className="responsive-cols">
-              {publicacionesReunidas.slice(0, itemsPerPage).map((publicacion) => (
-                <PublicacionCard
-                  key={publicacion.id}
-                  publicacion={publicacion}
-                  isAuthenticated={isAuthenticated}
-                  onRequireAuth={requireAuth}
-                />
-              ))}
+              {publicacionesReunidas
+                .slice(0, itemsPerPage)
+                .map((publicacion) => (
+                  <PublicacionCard
+                    key={publicacion.id}
+                    publicacion={publicacion}
+                    isAuthenticated={isAuthenticated}
+                    onRequireAuth={requireAuth}
+                  />
+                ))}
 
               {/* Fill last row with invisible placeholders so layout looks full */}
               {(() => {
-                const shown = publicacionesReunidas.slice(0, itemsPerPage)
-                const remainder = shown.length % (columns || 1)
-                const toFill = remainder === 0 ? 0 : (columns || 1) - remainder
+                const shown = publicacionesReunidas.slice(0, itemsPerPage);
+                const remainder = shown.length % (columns || 1);
+                const toFill = remainder === 0 ? 0 : (columns || 1) - remainder;
                 return Array.from({ length: toFill }).map((_, i) => (
-                  <div key={`placeholder-reunidas-${i}`} className="invisible" aria-hidden>
+                  <div
+                    key={`placeholder-reunidas-${i}`}
+                    className="invisible"
+                    aria-hidden
+                  >
                     <div className="group flex flex-col h-full" />
                   </div>
-                ))
+                ));
               })()}
             </div>
           ) : (
@@ -114,5 +130,5 @@ export default function ReunidasPage() {
 
       <Footer />
     </div>
-  )
+  );
 }

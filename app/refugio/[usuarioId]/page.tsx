@@ -1,27 +1,34 @@
-import { mockPublicaciones } from "@/lib/mock-data"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-import { RefugioContent } from "@/components/refugio-content"
-import { headers } from "next/headers"
-import { isDemoHost } from "@/lib/env"
-import { formatHeartEmojiSpacing } from "@/lib/utils"
+import { mockPublicaciones } from "@/lib/mock-data";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
+import { RefugioContent } from "@/components/refugio-content";
+import { headers } from "next/headers";
+import { isDemoHost } from "@/lib/env";
+import { formatHeartEmojiSpacing } from "@/lib/utils";
 
-export default async function RefugioPage({ params }: { params: Promise<{ usuarioId: string }> }) {
-  const { usuarioId } = await params
-  const host = (await headers()).get("host") ?? undefined
-  const isDemo = isDemoHost(host)
+export default async function RefugioPage({
+  params,
+}: {
+  params: Promise<{ usuarioId: string }>;
+}) {
+  const { usuarioId } = await params;
+  const host = (await headers()).get("host") ?? undefined;
+  const isDemo = isDemoHost(host);
 
-  let publicacionesRefugio: typeof mockPublicaciones
-  let nombreRefugio: string
+  let publicacionesRefugio: typeof mockPublicaciones;
+  let nombreRefugio: string;
 
   if (isDemo) {
     publicacionesRefugio = mockPublicaciones.filter(
-      (pub) => pub.usuarioId === usuarioId && pub.esRefugio === true
-    )
-    nombreRefugio = formatHeartEmojiSpacing(publicacionesRefugio[0]?.contactoNombre || "Refugio")
+      (pub) => pub.usuarioId === usuarioId && pub.esRefugio === true,
+    );
+    nombreRefugio = formatHeartEmojiSpacing(
+      publicacionesRefugio[0]?.contactoNombre || "Refugio",
+    );
   } else {
-    const { getPublicaciones } = await import("@/lib/actions/publicaciones")
-    const { getRefugioProfileByAuthUserId } = await import("@/lib/actions/refugios")
+    const { getPublicaciones } = await import("@/lib/actions/publicaciones");
+    const { getRefugioProfileByAuthUserId } =
+      await import("@/lib/actions/refugios");
 
     const publicacionesProd = await getPublicaciones(
       {
@@ -30,12 +37,16 @@ export default async function RefugioPage({ params }: { params: Promise<{ usuari
         soloRefugios: true,
         soloActivas: true,
       },
-      { forceDemo: false }
-    )
+      { forceDemo: false },
+    );
 
-    const perfil = await getRefugioProfileByAuthUserId(usuarioId)
-    publicacionesRefugio = publicacionesProd as any
-    nombreRefugio = formatHeartEmojiSpacing(perfil?.nombreRefugio || publicacionesProd[0]?.contactoNombre || "Refugio")
+    const perfil = await getRefugioProfileByAuthUserId(usuarioId);
+    publicacionesRefugio = publicacionesProd as any;
+    nombreRefugio = formatHeartEmojiSpacing(
+      perfil?.nombreRefugio ||
+        publicacionesProd[0]?.contactoNombre ||
+        "Refugio",
+    );
   }
 
   return (
@@ -48,7 +59,5 @@ export default async function RefugioPage({ params }: { params: Promise<{ usuari
       />
       <Footer />
     </div>
-  )
+  );
 }
-
-

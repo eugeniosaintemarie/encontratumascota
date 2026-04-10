@@ -1,11 +1,11 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import "tailwindcss";
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
 /* Optimize font loading to prevent layout shift */
 @font-face {
-  font-family: 'Inter';
+  font-family: "Inter";
   font-display: swap;
 }
 
@@ -45,14 +45,14 @@
   --sidebar-border: oklch(0.88 0.01 90);
   --sidebar-ring: oklch(0.63 0.22 34);
   /* Link color (light theme) */
-  --color-link: #FF7E70;
+  --color-link: #ff7e70;
   /* Custom brand colors */
-  --salmon: #FF7E70;
-  --salmon-10: rgba(255,126,112,0.1);
-  --salmon-50: rgba(255,126,112,0.5);
-  --pink: #FFB5C0;
-  --pink-10: rgba(255,181,192,0.1);
-  --pink-50: rgba(255,181,192,0.5);
+  --salmon: #ff7e70;
+  --salmon-10: rgba(255, 126, 112, 0.1);
+  --salmon-50: rgba(255, 126, 112, 0.5);
+  --pink: #ffb5c0;
+  --pink-10: rgba(255, 181, 192, 0.1);
+  --pink-50: rgba(255, 181, 192, 0.5);
 }
 
 /* Ensure proper focus visible indicators for accessibility */
@@ -153,17 +153,17 @@ input[type="radio"] + label {
   /* Link color (dark theme) - keep existing accent in dark */
   --color-link: var(--salmon);
   /* Dark equivalents for brand colors */
-  --salmon: #61302B;
-  --salmon-10: rgba(97,48,43,0.1);
-  --salmon-50: rgba(97,48,43,0.5);
-  --pink: #330F14;
-  --pink-10: rgba(51,15,20,0.1);
-  --pink-50: rgba(51,15,20,0.5);
+  --salmon: #61302b;
+  --salmon-10: rgba(97, 48, 43, 0.1);
+  --salmon-50: rgba(97, 48, 43, 0.5);
+  --pink: #330f14;
+  --pink-10: rgba(51, 15, 20, 0.1);
+  --pink-50: rgba(51, 15, 20, 0.5);
 }
 
 @theme inline {
-  --font-sans: 'Inter', 'Inter Fallback', sans-serif;
-  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  --font-sans: "Inter", "Inter Fallback", sans-serif;
+  --font-mono: "Geist Mono", "Geist Mono Fallback";
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -296,4 +296,3 @@ input[type="date"]::-webkit-inner-spin-button {
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
-

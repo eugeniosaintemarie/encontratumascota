@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server"
-import { cookies } from "next/headers"
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
 /**
  * Endpoint dedicado para cerrar sesion.
@@ -9,15 +9,16 @@ import { cookies } from "next/headers"
  */
 export async function GET(request: Request) {
   // Intentar llamar al upstream sign-out para invalidar la sesion server-side
-  const baseUrl = process.env.NEON_AUTH_BASE_URL
+  const baseUrl = process.env.NEON_AUTH_BASE_URL;
   if (baseUrl) {
     try {
-      const cookieStore = await cookies()
-      const cookieHeader = cookieStore.getAll()
+      const cookieStore = await cookies();
+      const cookieHeader = cookieStore
+        .getAll()
         .map((c) => `${c.name}=${c.value}`)
-        .join("; ")
+        .join("; ");
 
-      const origin = new URL(request.url).origin
+      const origin = new URL(request.url).origin;
 
       await fetch(`${baseUrl}/sign-out`, {
         method: "POST",
@@ -27,14 +28,14 @@ export async function GET(request: Request) {
           Origin: origin,
         },
         body: "{}",
-      })
+      });
     } catch (e) {
-      console.error("[logout] upstream sign-out failed:", e)
+      console.error("[logout] upstream sign-out failed:", e);
     }
   }
 
   // Redirigir a home
-  const response = NextResponse.redirect(new URL("/", request.url))
+  const response = NextResponse.redirect(new URL("/", request.url));
 
   // Borrar TODAS las cookies de neon-auth.
   // IMPORTANTE: usamos solo headers.append() porque response.cookies.set()
@@ -45,26 +46,26 @@ export async function GET(request: Request) {
     "__Secure-neon-auth.local.session_data",
     "__Secure-neon-auth.dont_remember",
     "__Secure-neon-auth.session_challange",
-  ]
+  ];
 
   for (const name of cookieNames) {
     // Variante SameSite=Lax
     response.headers.append(
       "Set-Cookie",
-      `${name}=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax`
-    )
+      `${name}=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax`,
+    );
     // Variante SameSite=None; Partitioned (usada por neon-auth upstream)
     response.headers.append(
       "Set-Cookie",
-      `${name}=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=None; Partitioned`
-    )
+      `${name}=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=None; Partitioned`,
+    );
   }
 
   // Borrar cookie de sesion demo si existe
   response.headers.append(
     "Set-Cookie",
-    `demo_session=; Max-Age=0; Path=/; HttpOnly; SameSite=Lax`
-  )
+    `demo_session=; Max-Age=0; Path=/; HttpOnly; SameSite=Lax`,
+  );
 
-  return response
+  return response;
 }

@@ -1,22 +1,22 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback } from "react";
 
 export interface UseDemoSessionReturn {
   /** Demo user object if demo session is active */
-  demoUser: any | null
+  demoUser: any | null;
   /** Active server session (non-demo) */
-  sessionUser: any | null
+  sessionUser: any | null;
   /** Combined active user (session or demo) */
-  user: any | null
+  user: any | null;
   /** Setter for demo user (useful for manual updates after auth) */
-  setDemoUser: (user: any | null) => void
+  setDemoUser: (user: any | null) => void;
   /** Combined auth state: true if either real session or demo session exists */
-  isAuthenticated: boolean
+  isAuthenticated: boolean;
   /** Refreshes the demo session manually */
-  refreshDemoSession: () => Promise<boolean>
+  refreshDemoSession: () => Promise<boolean>;
   /** Current user ID from session or demo */
-  userId: string | undefined
+  userId: string | undefined;
 }
 
 /**
@@ -25,56 +25,64 @@ export interface UseDemoSessionReturn {
  * when no real Neon auth session exists.
  */
 export function useDemoSession(): UseDemoSessionReturn {
-  const [sessionUser, setSessionUser] = useState<any | null>(null)
-  const [demoUser, setDemoUser] = useState<any | null>(null)
+  const [sessionUser, setSessionUser] = useState<any | null>(null);
+  const [demoUser, setDemoUser] = useState<any | null>(null);
 
   const refreshDemoSession = useCallback(async () => {
     try {
-      const { fetchServerSessionWithRetry } = await import("@/lib/auth/client")
-      const user = await fetchServerSessionWithRetry({ attempts: 4, initialDelayMs: 200 })
+      const { fetchServerSessionWithRetry } = await import("@/lib/auth/client");
+      const user = await fetchServerSessionWithRetry({
+        attempts: 4,
+        initialDelayMs: 200,
+      });
 
       if (!user) {
-        setSessionUser(null)
-        setDemoUser(null)
-        return false
+        setSessionUser(null);
+        setDemoUser(null);
+        return false;
       }
 
-      const cookies = typeof document !== "undefined" ? document.cookie : ""
-      const isDemo = cookies.includes("demo_public=1") || Boolean((user as any)?.isReadOnly)
+      const cookies = typeof document !== "undefined" ? document.cookie : "";
+      const isDemo =
+        cookies.includes("demo_public=1") || Boolean((user as any)?.isReadOnly);
 
       if (isDemo) {
-        setDemoUser(user)
-        setSessionUser(null)
+        setDemoUser(user);
+        setSessionUser(null);
       } else {
-        setSessionUser(user)
-        setDemoUser(null)
+        setSessionUser(user);
+        setDemoUser(null);
       }
 
-      return true
+      return true;
     } catch {
       // Ignore errors - demo session will simply not be set
-      setSessionUser(null)
-      setDemoUser(null)
-      return false
+      setSessionUser(null);
+      setDemoUser(null);
+      return false;
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
-    void refreshDemoSession()
-  }, [refreshDemoSession])
+    void refreshDemoSession();
+  }, [refreshDemoSession]);
 
   // Listen for demo session updates from auth-modal
   useEffect(() => {
     const handleDemoSessionUpdate = () => {
-      void refreshDemoSession()
-    }
-    window.addEventListener("demo-session-updated", handleDemoSessionUpdate)
-    return () => window.removeEventListener("demo-session-updated", handleDemoSessionUpdate)
-  }, [refreshDemoSession])
+      void refreshDemoSession();
+    };
+    window.addEventListener("demo-session-updated", handleDemoSessionUpdate);
+    return () =>
+      window.removeEventListener(
+        "demo-session-updated",
+        handleDemoSessionUpdate,
+      );
+  }, [refreshDemoSession]);
 
-  const isAuthenticated = !!sessionUser || !!demoUser
-  const userId = sessionUser?.id ?? demoUser?.id
-  const activeUser = sessionUser ?? demoUser
+  const isAuthenticated = !!sessionUser || !!demoUser;
+  const userId = sessionUser?.id ?? demoUser?.id;
+  const activeUser = sessionUser ?? demoUser;
 
   return {
     sessionUser,
@@ -84,5 +92,5 @@ export function useDemoSession(): UseDemoSessionReturn {
     isAuthenticated,
     refreshDemoSession,
     userId,
-  }
+  };
 }

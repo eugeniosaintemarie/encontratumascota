@@ -1,23 +1,29 @@
-import { NextResponse } from "next/server"
-import { isDemoRequest } from "@/lib/env"
+import { NextResponse } from "next/server";
+import { isDemoRequest } from "@/lib/env";
 
 export async function POST(request: Request) {
   if (!isDemoRequest(request)) {
-    return NextResponse.json({ error: "Not allowed" }, { status: 403 })
+    return NextResponse.json({ error: "Not allowed" }, { status: 403 });
   }
 
   try {
-    const body = await request.json()
-    const { email, password } = body || {}
+    const body = await request.json();
+    const { email, password } = body || {};
 
     if (!email || !password) {
-      return NextResponse.json({ error: "Missing credentials" }, { status: 400 })
+      return NextResponse.json(
+        { error: "Missing credentials" },
+        { status: 400 },
+      );
     }
 
     // Solo permite login demo (no admin) - modo solo lectura
-    const valid = email === "demo" && password === "demo"
+    const valid = email === "demo" && password === "demo";
     if (!valid) {
-      return NextResponse.json({ error: "Credenciales invalidas" }, { status: 401 })
+      return NextResponse.json(
+        { error: "Credenciales invalidas" },
+        { status: 401 },
+      );
     }
 
     const user = {
@@ -26,25 +32,25 @@ export async function POST(request: Request) {
       email: "demo@encontratumascota.ar",
       createdAt: new Date().toISOString(),
       isReadOnly: true, // Flag para indicar modo solo lectura
-    }
+    };
 
-    const payload = { user }
-    const encoded = Buffer.from(JSON.stringify(payload)).toString("base64")
+    const payload = { user };
+    const encoded = Buffer.from(JSON.stringify(payload)).toString("base64");
 
     // Only set Secure if request is HTTPS
-    const origin = new URL(request.url).origin
-    const isSecure = origin.startsWith("https:")
+    const origin = new URL(request.url).origin;
+    const isSecure = origin.startsWith("https:");
 
-    const cookie = `demo_session=${encodeURIComponent(encoded)}; Path=/; Max-Age=${60 * 60 * 24 * 7}; HttpOnly; ${isSecure ? "Secure; " : ""}SameSite=Lax`
+    const cookie = `demo_session=${encodeURIComponent(encoded)}; Path=/; Max-Age=${60 * 60 * 24 * 7}; HttpOnly; ${isSecure ? "Secure; " : ""}SameSite=Lax`;
 
-    const res = NextResponse.json({ ok: true })
-    res.headers.append("Set-Cookie", cookie)
+    const res = NextResponse.json({ ok: true });
+    res.headers.append("Set-Cookie", cookie);
     // Also set a non-HttpOnly flag so the client can detect demo login immediately
-    const publicCookie = `demo_public=1; Path=/; Max-Age=${60 * 60 * 24 * 7}; ${isSecure ? "Secure; " : ""}SameSite=Lax`
-    res.headers.append("Set-Cookie", publicCookie)
-    return res
+    const publicCookie = `demo_public=1; Path=/; Max-Age=${60 * 60 * 24 * 7}; ${isSecure ? "Secure; " : ""}SameSite=Lax`;
+    res.headers.append("Set-Cookie", publicCookie);
+    return res;
   } catch (e) {
-    console.error("[demo-login]", e)
-    return NextResponse.json({ error: "Error interno" }, { status: 500 })
+    console.error("[demo-login]", e);
+    return NextResponse.json({ error: "Error interno" }, { status: 500 });
   }
 }

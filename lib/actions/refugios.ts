@@ -1,21 +1,21 @@
-"use server"
+"use server";
 
-import { eq, inArray, desc } from "drizzle-orm"
+import { eq, inArray, desc } from "drizzle-orm";
 
 export interface RefugioProfile {
-  authUserId: string
-  esRefugio: boolean
-  nombreRefugio?: string | null
-  ubicacion?: string | null
-  contactoNombre?: string | null
-  contactoTelefono?: string | null
-  contactoEmail?: string | null
-  mostrarContactoPublico?: boolean
+  authUserId: string;
+  esRefugio: boolean;
+  nombreRefugio?: string | null;
+  ubicacion?: string | null;
+  contactoNombre?: string | null;
+  contactoTelefono?: string | null;
+  contactoEmail?: string | null;
+  mostrarContactoPublico?: boolean;
 }
 
 export async function setRefugioProfile(input: RefugioProfile) {
-  const { db } = await import("@/lib/db")
-  const { usuariosPerfil } = await import("@/lib/db/schema")
+  const { db } = await import("@/lib/db");
+  const { usuariosPerfil } = await import("@/lib/db/schema");
 
   const [row] = await db
     .insert(usuariosPerfil)
@@ -43,39 +43,39 @@ export async function setRefugioProfile(input: RefugioProfile) {
         updatedAt: new Date(),
       },
     })
-    .returning()
+    .returning();
 
-  return row
+  return row;
 }
 
 export async function getRefugioProfileByAuthUserId(authUserId: string) {
-  const { db } = await import("@/lib/db")
-  const { usuariosPerfil } = await import("@/lib/db/schema")
+  const { db } = await import("@/lib/db");
+  const { usuariosPerfil } = await import("@/lib/db/schema");
 
   const rows = await db
     .select()
     .from(usuariosPerfil)
     .where(eq(usuariosPerfil.authUserId, authUserId))
-    .limit(1)
+    .limit(1);
 
-  return rows[0] ?? null
+  return rows[0] ?? null;
 }
 
 export async function getRefugioProfileMapByAuthUserIds(authUserIds: string[]) {
-  if (authUserIds.length === 0) return new Map<string, RefugioProfile>()
+  if (authUserIds.length === 0) return new Map<string, RefugioProfile>();
 
-  const uniqueIds = Array.from(new Set(authUserIds.filter(Boolean)))
-  if (uniqueIds.length === 0) return new Map<string, RefugioProfile>()
+  const uniqueIds = Array.from(new Set(authUserIds.filter(Boolean)));
+  if (uniqueIds.length === 0) return new Map<string, RefugioProfile>();
 
-  const { db } = await import("@/lib/db")
-  const { usuariosPerfil } = await import("@/lib/db/schema")
+  const { db } = await import("@/lib/db");
+  const { usuariosPerfil } = await import("@/lib/db/schema");
 
   const rows = await db
     .select()
     .from(usuariosPerfil)
-    .where(inArray(usuariosPerfil.authUserId, uniqueIds))
+    .where(inArray(usuariosPerfil.authUserId, uniqueIds));
 
-  const profileMap = new Map<string, RefugioProfile>()
+  const profileMap = new Map<string, RefugioProfile>();
   for (const row of rows) {
     profileMap.set(row.authUserId, {
       authUserId: row.authUserId,
@@ -86,21 +86,21 @@ export async function getRefugioProfileMapByAuthUserIds(authUserIds: string[]) {
       contactoTelefono: row.contactoTelefono,
       contactoEmail: row.contactoEmail,
       mostrarContactoPublico: row.mostrarContactoPublico,
-    })
+    });
   }
 
-  return profileMap
+  return profileMap;
 }
 
 export async function listRefugioProfiles(onlyRefugios = true) {
-  const { db } = await import("@/lib/db")
-  const { usuariosPerfil } = await import("@/lib/db/schema")
+  const { db } = await import("@/lib/db");
+  const { usuariosPerfil } = await import("@/lib/db/schema");
 
   const rows = await db
     .select()
     .from(usuariosPerfil)
     .where(onlyRefugios ? eq(usuariosPerfil.esRefugio, true) : undefined)
-    .orderBy(desc(usuariosPerfil.updatedAt))
+    .orderBy(desc(usuariosPerfil.updatedAt));
 
-  return rows
+  return rows;
 }

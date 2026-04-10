@@ -1,51 +1,56 @@
-import { NextResponse } from "next/server"
-import { getServerSession } from "@/lib/auth/server"
-import { isDemoRequest } from "@/lib/env"
+import { NextResponse } from "next/server";
+import { getServerSession } from "@/lib/auth/server";
+import { isDemoRequest } from "@/lib/env";
 
-const isDevelopment = process.env.NODE_ENV !== "production"
+const isDevelopment = process.env.NODE_ENV !== "production";
 
 export async function GET(request: Request) {
-  const cookieHeader = request.headers.get("cookie") || ""
+  const cookieHeader = request.headers.get("cookie") || "";
   if (isDevelopment) {
     console.debug("[api/auth/me] incoming cookies", {
       snippet: cookieHeader.slice(0, 120),
-      hasSessionToken: cookieHeader.includes("__Secure-neon-auth.session_token"),
-      hasDemoSession: cookieHeader.includes("demo_session") || cookieHeader.includes("demo_public"),
+      hasSessionToken: cookieHeader.includes(
+        "__Secure-neon-auth.session_token",
+      ),
+      hasDemoSession:
+        cookieHeader.includes("demo_session") ||
+        cookieHeader.includes("demo_public"),
       isDemoRequest: isDemoRequest(request),
-    })
+    });
   }
   try {
-    const session = await getServerSession(request)
+    const session = await getServerSession(request);
     if (!session || !session.user) {
       if (isDevelopment) {
-        console.debug("[api/auth/me] session missing", { session })
+        console.debug("[api/auth/me] session missing", { session });
       }
-      return NextResponse.json({ user: null })
+      return NextResponse.json({ user: null });
     }
 
     if (isDemoRequest(request)) {
-      return NextResponse.json({ user: session.user })
+      return NextResponse.json({ user: session.user });
     }
 
-    const sessionUser = session.user as any
-    const authUserId = sessionUser?.id ? String(sessionUser.id) : ""
+    const sessionUser = session.user as any;
+    const authUserId = sessionUser?.id ? String(sessionUser.id) : "";
     if (!authUserId) {
-      return NextResponse.json({ user: session.user })
+      return NextResponse.json({ user: session.user });
     }
 
-    let profile = null
+    let profile = null;
     try {
-      const { getRefugioProfileByAuthUserId } = await import("@/lib/actions/refugios")
-      profile = await getRefugioProfileByAuthUserId(authUserId)
+      const { getRefugioProfileByAuthUserId } =
+        await import("@/lib/actions/refugios");
+      profile = await getRefugioProfileByAuthUserId(authUserId);
     } catch (error) {
-      console.error("[api/auth/me] failed to fetch refugio profile", error)
+      console.error("[api/auth/me] failed to fetch refugio profile", error);
     }
 
-    const contactoNombre = profile?.contactoNombre ?? sessionUser?.name ?? null
-    const contactoTelefono = profile?.contactoTelefono ?? null
-    const contactoEmail = profile?.contactoEmail ?? sessionUser?.email ?? null
-    const mostrarContactoPublico = profile?.mostrarContactoPublico ?? false
-    const ubicacion = profile?.ubicacion ?? null
+    const contactoNombre = profile?.contactoNombre ?? sessionUser?.name ?? null;
+    const contactoTelefono = profile?.contactoTelefono ?? null;
+    const contactoEmail = profile?.contactoEmail ?? sessionUser?.email ?? null;
+    const mostrarContactoPublico = profile?.mostrarContactoPublico ?? false;
+    const ubicacion = profile?.ubicacion ?? null;
 
     return NextResponse.json({
       user: {
@@ -58,9 +63,9 @@ export async function GET(request: Request) {
         contactoEmail,
         mostrarContactoPublico,
       },
-    })
+    });
   } catch (e) {
-    console.error("/api/auth/me error", e)
-    return NextResponse.json({ user: null }, { status: 500 })
+    console.error("/api/auth/me error", e);
+    return NextResponse.json({ user: null }, { status: 500 });
   }
 }

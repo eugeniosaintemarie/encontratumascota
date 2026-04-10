@@ -1,50 +1,50 @@
-import Link from "next/link"
-import { headers } from "next/headers"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { HeartHandshake, MapPin, PawPrint } from "lucide-react"
-import { mockPublicaciones } from "@/lib/mock-data"
-import { isDemoHost } from "@/lib/env"
-import { formatHeartEmojiSpacing } from "@/lib/utils"
+import Link from "next/link";
+import { headers } from "next/headers";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { HeartHandshake, MapPin, PawPrint } from "lucide-react";
+import { mockPublicaciones } from "@/lib/mock-data";
+import { isDemoHost } from "@/lib/env";
+import { formatHeartEmojiSpacing } from "@/lib/utils";
 
 interface RefugioLandingItem {
-  usuarioId: string
-  nombre: string
-  ubicacion: string
-  publicacionesActivas: number
+  usuarioId: string;
+  nombre: string;
+  ubicacion: string;
+  publicacionesActivas: number;
 }
 
 function getDemoRefugios(): RefugioLandingItem[] {
   const refugioPublicaciones = mockPublicaciones.filter(
-    (pub) => pub.esRefugio === true && pub.tipoPublicacion === "adopcion"
-  )
+    (pub) => pub.esRefugio === true && pub.tipoPublicacion === "adopcion",
+  );
 
-  const grouped = new Map<string, RefugioLandingItem>()
+  const grouped = new Map<string, RefugioLandingItem>();
 
   for (const pub of refugioPublicaciones) {
-    const existing = grouped.get(pub.usuarioId)
+    const existing = grouped.get(pub.usuarioId);
     if (!existing) {
       grouped.set(pub.usuarioId, {
         usuarioId: pub.usuarioId,
         nombre: formatHeartEmojiSpacing(pub.contactoNombre),
         ubicacion: pub.ubicacion,
         publicacionesActivas: pub.activa ? 1 : 0,
-      })
-      continue
+      });
+      continue;
     }
 
-    existing.publicacionesActivas += pub.activa ? 1 : 0
+    existing.publicacionesActivas += pub.activa ? 1 : 0;
   }
 
-  return Array.from(grouped.values())
+  return Array.from(grouped.values());
 }
 
 async function getProdRefugios(): Promise<RefugioLandingItem[]> {
   try {
-    const { listRefugioProfiles } = await import("@/lib/actions/refugios")
-    const { getPublicaciones } = await import("@/lib/actions/publicaciones")
+    const { listRefugioProfiles } = await import("@/lib/actions/refugios");
+    const { getPublicaciones } = await import("@/lib/actions/publicaciones");
 
     const [profiles, publicacionesRefugio] = await Promise.all([
       listRefugioProfiles(true),
@@ -54,17 +54,17 @@ async function getProdRefugios(): Promise<RefugioLandingItem[]> {
           soloRefugios: true,
           soloActivas: true,
         },
-        { forceDemo: false }
+        { forceDemo: false },
       ),
-    ])
+    ]);
 
-    const counts = new Map<string, number>()
-    const ubicaciones = new Map<string, string>()
+    const counts = new Map<string, number>();
+    const ubicaciones = new Map<string, string>();
 
     for (const pub of publicacionesRefugio) {
-      counts.set(pub.usuarioId, (counts.get(pub.usuarioId) || 0) + 1)
+      counts.set(pub.usuarioId, (counts.get(pub.usuarioId) || 0) + 1);
       if (!ubicaciones.has(pub.usuarioId)) {
-        ubicaciones.set(pub.usuarioId, pub.ubicacion)
+        ubicaciones.set(pub.usuarioId, pub.ubicacion);
       }
     }
 
@@ -73,17 +73,17 @@ async function getProdRefugios(): Promise<RefugioLandingItem[]> {
       nombre: formatHeartEmojiSpacing(profile.nombreRefugio || "Refugio"),
       ubicacion: ubicaciones.get(profile.authUserId) || "Argentina",
       publicacionesActivas: counts.get(profile.authUserId) || 0,
-    }))
+    }));
   } catch {
-    return []
+    return [];
   }
 }
 
 export default async function RefugiosPage() {
-  const host = (await headers()).get("host") ?? undefined
-  const isDemo = isDemoHost(host)
+  const host = (await headers()).get("host") ?? undefined;
+  const isDemo = isDemoHost(host);
 
-  const refugios = isDemo ? getDemoRefugios() : await getProdRefugios()
+  const refugios = isDemo ? getDemoRefugios() : await getProdRefugios();
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -97,9 +97,12 @@ export default async function RefugiosPage() {
                 <HeartHandshake className="h-4 w-4" />
                 Red de refugios
               </p>
-              <h1 className="mt-2 text-3xl font-bold text-foreground sm:text-4xl">Refugios</h1>
+              <h1 className="mt-2 text-3xl font-bold text-foreground sm:text-4xl">
+                Refugios
+              </h1>
               <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
-                Conocé los refugios que publican en la plataforma y explorá sus mascotas en adopción
+                Conocé los refugios que publican en la plataforma y explorá sus
+                mascotas en adopción
               </p>
             </div>
           </div>
@@ -110,13 +113,18 @@ export default async function RefugiosPage() {
             <div className="rounded-2xl border border-dashed bg-muted/20 p-10 text-center">
               <PawPrint className="mx-auto mb-3 h-10 w-10 text-muted-foreground/60" />
               <h2 className="text-lg font-semibold text-foreground">
-                {isDemo ? "Todavía no hay refugios publicados" : "No hay refugios para mostrar actualmente"}
+                {isDemo
+                  ? "Todavía no hay refugios publicados"
+                  : "No hay refugios para mostrar actualmente"}
               </h2>
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {refugios.map((refugio) => (
-                <Card key={refugio.usuarioId} className="border-border/80 gap-1">
+                <Card
+                  key={refugio.usuarioId}
+                  className="border-border/80 gap-1"
+                >
                   <div className="px-6 pb-0">
                     <h2 className="text-lg font-semibold leading-tight text-foreground">
                       {refugio.nombre}
@@ -130,7 +138,8 @@ export default async function RefugiosPage() {
                       </p>
                       <p>
                         {refugio.publicacionesActivas} mascota
-                        {refugio.publicacionesActivas !== 1 ? "s" : ""} en adopción
+                        {refugio.publicacionesActivas !== 1 ? "s" : ""} en
+                        adopción
                       </p>
                     </div>
 
@@ -149,5 +158,5 @@ export default async function RefugiosPage() {
 
       <Footer />
     </div>
-  )
+  );
 }

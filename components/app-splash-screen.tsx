@@ -1,35 +1,45 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import Image from "next/image"
+import { useEffect, useState } from "react";
+import Image from "next/image";
 
-const SPLASH_VISIBLE_MS = 850
-const SPLASH_FADE_MS = 350
+const SPLASH_VISIBLE_MS = 850;
+const SPLASH_FADE_MS = 350;
 
 export function AppSplashScreen() {
-  const [isVisible, setIsVisible] = useState(false)
-  const [isFadingOut, setIsFadingOut] = useState(false)
+  const [isVisible, setIsVisible] = useState(false);
+  const [isFadingOut, setIsFadingOut] = useState(false);
 
   useEffect(() => {
-    const navigatorWithStandalone = navigator as Navigator & { standalone?: boolean }
-    const isStandalone = window.matchMedia("(display-mode: standalone)").matches || navigatorWithStandalone.standalone === true
+    const navigatorWithStandalone = navigator as Navigator & {
+      standalone?: boolean;
+    };
+    const isStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      navigatorWithStandalone.standalone === true;
 
     if (!isStandalone) {
-      return
+      return;
     }
 
-    setIsVisible(true)
-    const fadeTimer = window.setTimeout(() => setIsFadingOut(true), SPLASH_VISIBLE_MS)
-    const hideTimer = window.setTimeout(() => setIsVisible(false), SPLASH_VISIBLE_MS + SPLASH_FADE_MS)
+    setIsVisible(true);
+    const fadeTimer = window.setTimeout(
+      () => setIsFadingOut(true),
+      SPLASH_VISIBLE_MS,
+    );
+    const hideTimer = window.setTimeout(
+      () => setIsVisible(false),
+      SPLASH_VISIBLE_MS + SPLASH_FADE_MS,
+    );
 
     return () => {
-      window.clearTimeout(fadeTimer)
-      window.clearTimeout(hideTimer)
-    }
-  }, [])
+      window.clearTimeout(fadeTimer);
+      window.clearTimeout(hideTimer);
+    };
+  }, []);
 
   if (!isVisible) {
-    return null
+    return null;
   }
 
   return (
@@ -51,10 +61,15 @@ export function AppSplashScreen() {
           />
         </div>
         <div>
-          <p className="text-2xl font-semibold tracking-tight text-[#d66528]">Encontra Tu Mascota</p>
-          <p className="mt-1 text-sm text-muted-foreground">Plataforma colaborativa para reunir mascotas perdidas, encontradas y en adopción con sus familias</p>
+          <p className="text-2xl font-semibold tracking-tight text-[#d66528]">
+            Encontra Tu Mascota
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Plataforma colaborativa para reunir mascotas perdidas, encontradas y
+            en adopción con sus familias
+          </p>
         </div>
       </div>
     </div>
-  )
+  );
 }

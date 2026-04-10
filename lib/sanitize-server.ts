@@ -14,7 +14,7 @@ const XSS_PATTERNS = [
   /<embed[^>]*>.*?<\/embed>/gi, // Embeds
   /<form[^>]*>.*?<\/form>/gi, // Forms
   /<[^>]+>/gi, // Cualquier etiqueta HTML
-]
+];
 
 /**
  * Sanitiza un string eliminando HTML/JS peligroso
@@ -22,16 +22,16 @@ const XSS_PATTERNS = [
  * @returns String limpio
  */
 export function sanitizeText(input: string): string {
-  if (!input) return ""
-  
-  let cleaned = input
-  
+  if (!input) return "";
+
+  let cleaned = input;
+
   // Eliminar patrones XSS conocidos
-  XSS_PATTERNS.forEach(pattern => {
-    cleaned = cleaned.replace(pattern, "")
-  })
-  
-  return cleaned.trim()
+  XSS_PATTERNS.forEach((pattern) => {
+    cleaned = cleaned.replace(pattern, "");
+  });
+
+  return cleaned.trim();
 }
 
 /**
@@ -40,14 +40,14 @@ export function sanitizeText(input: string): string {
  * @returns Email limpio o vacio si es invalido
  */
 export function sanitizeEmail(email: string): string {
-  if (!email) return ""
-  
+  if (!email) return "";
+
   // Eliminar espacios y convertir a minusculas
-  const cleaned = email.trim().toLowerCase()
-  
+  const cleaned = email.trim().toLowerCase();
+
   // Validacion basica de email
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(cleaned) ? cleaned : ""
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(cleaned) ? cleaned : "";
 }
 
 /**
@@ -56,9 +56,9 @@ export function sanitizeEmail(email: string): string {
  * @returns Telefono limpio
  */
 export function sanitizePhone(phone: string): string {
-  if (!phone) return ""
+  if (!phone) return "";
   // Solo permite numeros, espacios, guiones, parentesis y el signo +
-  return phone.replace(/[^\d\s\-+()]/g, "").trim()
+  return phone.replace(/[^\d\s\-+()]/g, "").trim();
 }
 
 /**
@@ -67,10 +67,10 @@ export function sanitizePhone(phone: string): string {
  * @returns Texto con formato basico seguro
  */
 export function sanitizeRichText(input: string): string {
-  if (!input) return ""
-  
-  let cleaned = input
-  
+  if (!input) return "";
+
+  let cleaned = input;
+
   // Eliminar scripts y elementos peligrosos pero permitir formato basico
   const dangerousPatterns = [
     /<script[^>]*>.*?<\/script>/gi,
@@ -80,13 +80,13 @@ export function sanitizeRichText(input: string): string {
     /<form[^>]*>.*?<\/form>/gi,
     /<[^>]+on\w+=[^>]*>/gi,
     /javascript:/gi,
-  ]
-  
-  dangerousPatterns.forEach(pattern => {
-    cleaned = cleaned.replace(pattern, "")
-  })
-  
-  return cleaned.trim()
+  ];
+
+  dangerousPatterns.forEach((pattern) => {
+    cleaned = cleaned.replace(pattern, "");
+  });
+
+  return cleaned.trim();
 }
 
 /**
@@ -95,20 +95,23 @@ export function sanitizeRichText(input: string): string {
  * @returns Objeto sanitizado
  */
 export function sanitizeObject(obj: Record<string, any>): Record<string, any> {
-  const sanitized: Record<string, any> = {}
-  
+  const sanitized: Record<string, any> = {};
+
   for (const key in obj) {
     if (typeof obj[key] === "string") {
       // Usar rich text solo para campos de descripcion
-      if (key.toLowerCase().includes("descripcion") || key.toLowerCase().includes("description")) {
-        sanitized[key] = sanitizeRichText(obj[key])
+      if (
+        key.toLowerCase().includes("descripcion") ||
+        key.toLowerCase().includes("description")
+      ) {
+        sanitized[key] = sanitizeRichText(obj[key]);
       } else {
-        sanitized[key] = sanitizeText(obj[key])
+        sanitized[key] = sanitizeText(obj[key]);
       }
     } else {
-      sanitized[key] = obj[key]
+      sanitized[key] = obj[key];
     }
   }
-  
-  return sanitized
+
+  return sanitized;
 }

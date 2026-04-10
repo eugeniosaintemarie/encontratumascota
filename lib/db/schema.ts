@@ -1,8 +1,15 @@
-import { pgTable, text, timestamp, boolean, uuid, json } from "drizzle-orm/pg-core"
-import { nanoid } from "nanoid"
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  uuid,
+  json,
+} from "drizzle-orm/pg-core";
+import { nanoid } from "nanoid";
 
 // Helper: genera un ID corto alfanumérico (10 chars)
-const shortId = () => nanoid(10)
+const shortId = () => nanoid(10);
 
 // ─── Usuarios ───────────────────────────────────────────────
 export const usuarios = pgTable("usuarios", {
@@ -10,8 +17,10 @@ export const usuarios = pgTable("usuarios", {
   nombreUsuario: text("nombre_usuario").notNull(),
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
-  fechaRegistro: timestamp("fecha_registro", { withTimezone: true }).defaultNow().notNull(),
-})
+  fechaRegistro: timestamp("fecha_registro", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
 
 // Perfil extendido por usuario de auth (produccion)
 // Guardamos flags de negocio desacoplados de Neon Auth.
@@ -23,9 +32,13 @@ export const usuariosPerfil = pgTable("usuarios_perfil", {
   contactoNombre: text("contacto_nombre"),
   contactoTelefono: text("contacto_telefono"),
   contactoEmail: text("contacto_email"),
-  mostrarContactoPublico: boolean("mostrar_contacto_publico").default(false).notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-})
+  mostrarContactoPublico: boolean("mostrar_contacto_publico")
+    .default(false)
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
 
 // ─── Publicaciones ──────────────────────────────────────────
 export const publicaciones = pgTable("publicaciones", {
@@ -45,14 +58,18 @@ export const publicaciones = pgTable("publicaciones", {
   // Datos de la publicacion
   tipoPublicacion: text("tipo_publicacion").default("perdida").notNull(), // "perdida" | "adopcion" | "buscada"
   ubicacion: text("ubicacion").notNull(),
-  fechaPublicacion: timestamp("fecha_publicacion", { withTimezone: true }).defaultNow().notNull(),
+  fechaPublicacion: timestamp("fecha_publicacion", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
   fechaEncuentro: timestamp("fecha_encuentro", { withTimezone: true }), // Solo para perdida
 
   // Contacto
   contactoNombre: text("contacto_nombre").notNull(),
   contactoTelefono: text("contacto_telefono").notNull(),
   contactoEmail: text("contacto_email").notNull(),
-  mostrarContactoPublico: boolean("mostrar_contacto_publico").default(false).notNull(),
+  mostrarContactoPublico: boolean("mostrar_contacto_publico")
+    .default(false)
+    .notNull(),
 
   // Relacion con usuario (Neon Auth usa IDs de texto)
   usuarioId: text("usuario_id").notNull(),
@@ -70,10 +87,14 @@ export const publicaciones = pgTable("publicaciones", {
 
   // Historial de transferencias (JSON array de cuidadores anteriores)
   // Estructura: [{ nombre: string, telefono: string, email: string, fecha: timestamp }, ...]
-  historialTransferencias: json("historial_transferencias").$type<Array<{
-    nombre: string
-    telefono: string
-    email: string
-    fecha: string // ISO timestamp
-  }>>().default([]),
-})
+  historialTransferencias: json("historial_transferencias")
+    .$type<
+      Array<{
+        nombre: string;
+        telefono: string;
+        email: string;
+        fecha: string; // ISO timestamp
+      }>
+    >()
+    .default([]),
+});

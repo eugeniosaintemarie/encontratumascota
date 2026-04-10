@@ -1,24 +1,29 @@
-import { Resend } from "resend"
+import { Resend } from "resend";
 
 const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
-  : null
+  : null;
 
-console.log("[Resend] RESEND_API_KEY present:", !!process.env.RESEND_API_KEY)
-console.log("[Resend] RESEND_API_KEY value:", process.env.RESEND_API_KEY ? "set (len=" + process.env.RESEND_API_KEY.length + ")" : "NOT SET")
+console.log("[Resend] RESEND_API_KEY present:", !!process.env.RESEND_API_KEY);
+console.log(
+  "[Resend] RESEND_API_KEY value:",
+  process.env.RESEND_API_KEY
+    ? "set (len=" + process.env.RESEND_API_KEY.length + ")"
+    : "NOT SET",
+);
 
 export async function sendEmail({
   to,
   subject,
   html,
 }: {
-  to: string
-  subject: string
-  html: string
+  to: string;
+  subject: string;
+  html: string;
 }) {
   if (!resend) {
-    console.warn("[Resend] API key no configurada, email no enviado")
-    return { success: false, error: "API key no configurada" }
+    console.warn("[Resend] API key no configurada, email no enviado");
+    return { success: false, error: "API key no configurada" };
   }
 
   try {
@@ -27,18 +32,18 @@ export async function sendEmail({
       to,
       subject,
       html,
-    })
+    });
 
     if (result.error) {
-      console.error("[Resend] Error enviando email:", result.error)
-      return { success: false, error: result.error }
+      console.error("[Resend] Error enviando email:", result.error);
+      return { success: false, error: result.error };
     }
 
-    console.log("[Resend] Email enviado exitosamente:", result.data?.id)
-    return { success: true, id: result.data?.id }
+    console.log("[Resend] Email enviado exitosamente:", result.data?.id);
+    return { success: true, id: result.data?.id };
   } catch (error) {
-    console.error("[Resend] Error:", error)
-    return { success: false, error: String(error) }
+    console.error("[Resend] Error:", error);
+    return { success: false, error: String(error) };
   }
 }
 
@@ -47,16 +52,16 @@ export async function sendTestEmail(to: string) {
     to,
     subject: "Test - Encontrá Tu Mascota",
     html: "<p>¡Configuración de Resend funcionando correctamente! 🎉</p>",
-  })
+  });
 }
 
 export async function sendVerificationEmail(
   email: string,
   token: string,
-  baseUrl: string
+  baseUrl: string,
 ) {
-  const verifyUrl = `${baseUrl}/verificar?token=${token}`
-  
+  const verifyUrl = `${baseUrl}/verificar?token=${token}`;
+
   const html = `
     <!DOCTYPE html>
     <html>
@@ -100,11 +105,11 @@ export async function sendVerificationEmail(
       </p>
     </body>
     </html>
-  `
+  `;
 
   return sendEmail({
     to: email,
     subject: "🐾 Verifica tu correo electrónico - Encontrá Tu Mascota",
     html,
-  })
+  });
 }
