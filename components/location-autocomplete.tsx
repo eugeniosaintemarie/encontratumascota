@@ -449,11 +449,6 @@ export default function LocationAutocomplete({
           ))}
         </ul>
       )}
-      {showOnlySuggestedHint && (
-        <p id={hintId} className="mt-1 text-xs text-muted-foreground">
-          Selecciona una ubicacion sugerida de la lista.
-        </p>
-      )}
     </div>
   );
 }
