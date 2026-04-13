@@ -111,7 +111,8 @@ export function FiltrosPublicaciones({
                 onChange={(v) => onUbicacionChange(v)}
                 onSelect={(place) => onUbicacionChange(place.address)}
                 placeholder="Buscar por ubicación..."
-                showDropdown={false}
+                showDropdown={true}
+                onlySuggested={true}
                 className="bg-[var(--salmon)] placeholder:text-white text-white !text-base placeholder:!text-base"
               />
             </div>

@@ -143,6 +143,7 @@ interface Props {
   onSelect?: (place: PlaceResult) => void;
   className?: string;
   showDropdown?: boolean;
+  onlySuggested?: boolean;
 }
 
 function loadGoogleScript(key: string) {
@@ -173,6 +174,7 @@ export default function LocationAutocomplete({
   onSelect,
   className,
   showDropdown = true,
+  onlySuggested = false,
 }: Props) {
   const [query, setQuery] = useState(value || "");
   const [predictions, setPredictions] = useState<PredictionItem[]>([]);
@@ -402,8 +404,21 @@ export default function LocationAutocomplete({
         placeholder={placeholder}
         value={query}
         onChange={(e) => {
-          setQuery(e.target.value);
-          onChange?.(e.target.value);
+          const nextValue = e.target.value;
+          setQuery(nextValue);
+          if (!onlySuggested) {
+            onChange?.(nextValue);
+          }
+        }}
+        onBlur={() => {
+          if (onlySuggested) {
+            setQuery(value || "");
+          }
+        }}
+        onKeyDown={(e) => {
+          if (onlySuggested && e.key === "Enter") {
+            e.preventDefault();
+          }
         }}
         onFocus={() => {
           /* show predictions if any */
