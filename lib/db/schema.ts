@@ -3,24 +3,12 @@ import {
   text,
   timestamp,
   boolean,
-  uuid,
   json,
 } from "drizzle-orm/pg-core";
 import { nanoid } from "nanoid";
 
 // Helper: genera un ID corto alfanumérico (10 chars)
 const shortId = () => nanoid(10);
-
-// ─── Usuarios ───────────────────────────────────────────────
-export const usuarios = pgTable("usuarios", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  nombreUsuario: text("nombre_usuario").notNull(),
-  email: text("email").notNull().unique(),
-  passwordHash: text("password_hash").notNull(),
-  fechaRegistro: timestamp("fecha_registro", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
 
 // Perfil extendido por usuario de auth (produccion)
 // Guardamos flags de negocio desacoplados de Neon Auth.
