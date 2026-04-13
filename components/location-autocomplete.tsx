@@ -179,6 +179,7 @@ export default function LocationAutocomplete({
   const hintId = useId();
   const [query, setQuery] = useState(value || "");
   const [predictions, setPredictions] = useState<PredictionItem[]>([]);
+  const [isFocused, setIsFocused] = useState(false);
   const svcRef = useRef<GoogleAutocompleteService | null>(null);
   const sourceRef = useRef<"google" | "nominatim" | null>(null);
   const timerRef = useRef<number | null>(null);
@@ -232,8 +233,21 @@ export default function LocationAutocomplete({
       setPredictions([]);
       return;
     }
+    if (!isFocused) {
+      setPredictions([]);
+      return;
+    }
     if (timerRef.current) window.clearTimeout(timerRef.current);
     if (!query) {
+      setPredictions([]);
+      return;
+    }
+    const normalizedCommitted = committedValueRef.current.trim().toLowerCase();
+    if (
+      onlySuggested &&
+      normalizedQuery.length > 0 &&
+      normalizedQuery === normalizedCommitted
+    ) {
       setPredictions([]);
       return;
     }
@@ -318,7 +332,7 @@ export default function LocationAutocomplete({
         setPredictions([]);
       }
     }, 250);
-  }, [query]);
+  }, [isFocused, normalizedQuery, onlySuggested, query, showDropdown]);
 
   const handleSelect = async (p: PredictionItem) => {
     let address = p.description || "";
@@ -427,6 +441,7 @@ export default function LocationAutocomplete({
           }
         }}
         onBlur={() => {
+          setIsFocused(false);
           if (onlySuggested) {
             setQuery(committedValueRef.current);
           }
@@ -437,10 +452,10 @@ export default function LocationAutocomplete({
           }
         }}
         onFocus={() => {
-          /* show predictions if any */
+          setIsFocused(true);
         }}
       />
-      {predictions.length > 0 && (
+      {isFocused && predictions.length > 0 && (
         <ul className="absolute z-[200] mt-1 w-full rounded-md bg-popover shadow-md max-h-52 overflow-auto">
           {predictions.map((p) => (
             <li
