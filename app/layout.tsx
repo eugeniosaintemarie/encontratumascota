@@ -16,6 +16,11 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const viewport: Viewport = {
   themeColor: "#FF5722",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
 };
 
 const siteUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
@@ -125,10 +130,6 @@ export default function RootLayout({
         )}
         {/* SEO Meta Tags */}
         <meta name="theme-color" content="#FF5722" />
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1, viewport-fit=cover"
-        />
         <link rel="canonical" href={siteUrl} />
         {/* Organization Schema */}
         <Script
