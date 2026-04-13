@@ -94,24 +94,25 @@ export function sanitizeRichText(input: string): string {
  * @param obj Objeto con strings a sanitizar
  * @returns Objeto sanitizado
  */
-export function sanitizeObject(obj: Record<string, any>): Record<string, any> {
-  const sanitized: Record<string, any> = {};
+export function sanitizeObject<T extends Record<string, unknown>>(obj: T): T {
+  const sanitized: Record<string, unknown> = {};
 
   for (const key in obj) {
-    if (typeof obj[key] === "string") {
+    const value = obj[key];
+    if (typeof value === "string") {
       // Usar rich text solo para campos de descripcion
       if (
         key.toLowerCase().includes("descripcion") ||
         key.toLowerCase().includes("description")
       ) {
-        sanitized[key] = sanitizeRichText(obj[key]);
+        sanitized[key] = sanitizeRichText(value);
       } else {
-        sanitized[key] = sanitizeText(obj[key]);
+        sanitized[key] = sanitizeText(value);
       }
     } else {
-      sanitized[key] = obj[key];
+      sanitized[key] = value;
     }
   }
 
-  return sanitized;
+  return sanitized as T;
 }

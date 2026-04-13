@@ -4,6 +4,37 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth/client";
 
+type SessionUser = {
+  email?: string;
+  emailVerified?: boolean;
+};
+
+function getSessionUser(payload: unknown): SessionUser | null {
+  if (!payload || typeof payload !== "object") return null;
+  const data = payload as Record<string, unknown>;
+
+  const session = data.session;
+  if (session && typeof session === "object") {
+    const sessionUser = (session as Record<string, unknown>).user;
+    if (sessionUser && typeof sessionUser === "object") {
+      return sessionUser as SessionUser;
+    }
+  }
+
+  const user = data.user;
+  if (user && typeof user === "object") {
+    return user as SessionUser;
+  }
+
+  return null;
+}
+
+function hasSessionLikeData(payload: unknown): boolean {
+  if (!payload || typeof payload !== "object") return false;
+  const data = payload as Record<string, unknown>;
+  return "session" in data || "token" in data;
+}
+
 function VerificarContent() {
   const router = useRouter();
   const [status, setStatus] = useState<
@@ -20,14 +51,15 @@ function VerificarContent() {
 
   async function checkSession() {
     try {
-      const { data } = await authClient.getSession();
-      if (data?.session?.user) {
-        if (data.session.user.emailVerified) {
+      const result = await authClient.getSession();
+      const user = getSessionUser(result?.data);
+      if (user) {
+        if (user.emailVerified) {
           setStatus("exito");
           setMensaje("¡Tu correo ya está verificado!");
           setTimeout(() => router.push("/"), 2500);
         } else {
-          setEmail(data.session.user.email);
+          setEmail(user.email || "");
           setStatus("esperando");
           setMensaje(
             "Tu correo aún no está verificado. Ingresá el código que te enviamos.",
@@ -61,7 +93,7 @@ function VerificarContent() {
         return;
       }
 
-      if (data?.session) {
+      if (hasSessionLikeData(data)) {
         setStatus("exito");
         setMensaje("¡Correo verificado exitosamente!");
         setTimeout(() => router.push("/"), 2500);

@@ -2,6 +2,13 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "@/lib/auth/server";
 import { isDemoRequest } from "@/lib/env";
 
+type SessionUser = { email?: string | null };
+type RefugioPayload = {
+  authUserId?: string;
+  esRefugio?: boolean;
+  nombreRefugio?: string;
+};
+
 function isAuthorizedAdmin(request: Request, email?: string | null) {
   const adminApiKey = process.env.ADMIN_API_KEY;
   const headerApiKey = request.headers.get("x-admin-key");
@@ -29,7 +36,7 @@ export async function PATCH(request: Request) {
     }
 
     const session = await getServerSession(request);
-    const sessionUser = session?.user as any;
+    const sessionUser = session?.user as SessionUser | undefined;
     const email = sessionUser?.email as string | undefined;
 
     if (!isAuthorizedAdmin(request, email)) {
@@ -39,7 +46,7 @@ export async function PATCH(request: Request) {
       );
     }
 
-    const body = await request.json();
+    const body = (await request.json()) as RefugioPayload;
     const authUserId = String(body?.authUserId || "").trim();
     const esRefugio = Boolean(body?.esRefugio);
     const nombreRefugio = body?.nombreRefugio

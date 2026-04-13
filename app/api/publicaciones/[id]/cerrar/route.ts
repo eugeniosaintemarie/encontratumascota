@@ -5,8 +5,16 @@ import {
   sanitizePhone,
   sanitizeEmail,
 } from "@/lib/sanitize-server";
+import type { Publicacion } from "@/lib/types";
 
 type RouteParams = { params: Promise<{ id: string }> };
+type SessionUser = { id: string; isReadOnly?: boolean };
+type Transferencia = NonNullable<Publicacion["historialTransferencias"]>[number];
+type CerrarPayload = {
+  motivo: "encontrado_dueno" | "adoptado" | "en_transito" | "otro";
+  transitoContacto?: { nombre: string; telefono: string; email: string };
+  confirmarTransferenciaMultiple?: boolean;
+};
 
 // POST /api/publicaciones/[id]/cerrar (requiere ser el dueno)
 export async function POST(request: Request, { params }: RouteParams) {
@@ -18,8 +26,10 @@ export async function POST(request: Request, { params }: RouteParams) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 
+    const sessionUser = session.user as SessionUser;
+
     // Bloquear usuarios demo (modo solo lectura)
-    if ((session.user as any).isReadOnly) {
+    if (sessionUser.isReadOnly) {
       return NextResponse.json(
         { error: "Modo demo solo permite visualización" },
         { status: 403 },
@@ -40,12 +50,12 @@ export async function POST(request: Request, { params }: RouteParams) {
         { status: 404 },
       );
     }
-    if (existing.usuarioId !== session.user.id) {
+    if (existing.usuarioId !== sessionUser.id) {
       return NextResponse.json({ error: "No autorizado" }, { status: 403 });
     }
 
     const { motivo, transitoContacto, confirmarTransferenciaMultiple } =
-      await request.json();
+      (await request.json()) as CerrarPayload;
 
     // Sanitizar datos de contacto de transito si existen
     const transitoContactoSanitizado = transitoContacto
@@ -67,7 +77,10 @@ export async function POST(request: Request, { params }: RouteParams) {
       | undefined;
 
     if (motivo === "en_transito" && transitoContactoSanitizado) {
-      const historialActual = (existing.historialTransferencias as any[]) || [];
+      const historialActual: Transferencia[] =
+        existing.historialTransferencias != null
+          ? [...existing.historialTransferencias]
+          : [];
 
       // Si ya tiene una transferencia previa, mostrar advertencia
       if (historialActual.length > 0) {

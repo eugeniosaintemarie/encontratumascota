@@ -64,6 +64,13 @@
       "when": 1771510000000,
       "tag": "0008_drop_legacy_usuarios",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1771520000000,
+      "tag": "0009_add_query_indexes",
+      "breakpoints": true
     }
   ]
 }

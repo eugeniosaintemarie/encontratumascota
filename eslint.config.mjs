@@ -4,7 +4,7 @@ import tseslint from "typescript-eslint"
 
 /** @type {import('eslint').Linter.Config[]} */
 const config = [
-  { ignores: [".next/**", "node_modules/**", "drizzle/**"] },
+  { ignores: [".next/**", "node_modules/**", "drizzle/**", ".agents/**"] },
   { files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"] },
   { languageOptions: { globals: globals.browser } },
   pluginJs.configs.recommended,

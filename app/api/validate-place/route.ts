@@ -3,8 +3,34 @@ import { NextRequest, NextResponse } from "next/server";
 type VerifyResponse = {
   ok: boolean;
   provider?: "google" | "nominatim";
-  place?: any;
+  place?: unknown;
   error?: string;
+};
+
+type VerifyBody = {
+  placeId?: string;
+  lat?: number;
+  lng?: number;
+};
+
+type NominatimReverse = {
+  display_name?: string;
+  lat?: string;
+  lon?: string;
+};
+
+type GoogleDetailsResponse = {
+  status?: string;
+  result?: {
+    place_id?: string;
+    formatted_address?: string;
+    geometry?: {
+      location?: {
+        lat?: number;
+        lng?: number;
+      };
+    };
+  };
 };
 
 function haversineDistance(
@@ -29,7 +55,7 @@ function haversineDistance(
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const body = (await req.json()) as VerifyBody;
     const { placeId, lat, lng } = body || {};
     if (!placeId)
       return NextResponse.json(
@@ -56,7 +82,7 @@ export async function POST(req: NextRequest) {
           { ok: false, error: "nominatim error" } as VerifyResponse,
           { status: 502 },
         );
-      const data = await res.json();
+      const data = (await res.json()) as NominatimReverse;
       const verified = !!data && !!data.display_name;
       return NextResponse.json({
         ok: true,
@@ -64,8 +90,8 @@ export async function POST(req: NextRequest) {
         place: {
           placeId,
           address: data.display_name,
-          lat: parseFloat(data.lat || lat),
-          lng: parseFloat(data.lon || lng),
+          lat: parseFloat(String(data.lat ?? lat ?? 0)),
+          lng: parseFloat(String(data.lon ?? lng ?? 0)),
           raw: data,
           verified,
         },
@@ -89,13 +115,19 @@ export async function POST(req: NextRequest) {
         { ok: false, error: "google api error" } as VerifyResponse,
         { status: 502 },
       );
-    const data = await res.json();
+    const data = (await res.json()) as GoogleDetailsResponse;
     if (data.status !== "OK")
       return NextResponse.json(
         { ok: false, error: data.status || "no details" } as VerifyResponse,
         { status: 400 },
       );
     const detail = data.result;
+    if (!detail) {
+      return NextResponse.json(
+        { ok: false, error: "no details" } as VerifyResponse,
+        { status: 400 },
+      );
+    }
     const address = detail.formatted_address;
     const plat = detail.geometry?.location?.lat;
     const plng = detail.geometry?.location?.lng;
@@ -123,9 +155,10 @@ export async function POST(req: NextRequest) {
         verified,
       },
     } as VerifyResponse);
-  } catch (err: any) {
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
     return NextResponse.json(
-      { ok: false, error: String(err?.message || err) } as VerifyResponse,
+      { ok: false, error: errorMessage } as VerifyResponse,
       { status: 500 },
     );
   }

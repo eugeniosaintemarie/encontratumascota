@@ -26,6 +26,36 @@ interface AuthModalProps {
   onAuthSuccess?: () => void;
 }
 
+type SessionUser = {
+  emailVerified?: boolean;
+};
+
+function getSessionUser(payload: unknown): SessionUser | null {
+  if (!payload || typeof payload !== "object") return null;
+  const data = payload as Record<string, unknown>;
+
+  const session = data.session;
+  if (session && typeof session === "object") {
+    const sessionUser = (session as Record<string, unknown>).user;
+    if (sessionUser && typeof sessionUser === "object") {
+      return sessionUser as SessionUser;
+    }
+  }
+
+  const user = data.user;
+  if (user && typeof user === "object") {
+    return user as SessionUser;
+  }
+
+  return null;
+}
+
+function hasSessionLikeData(payload: unknown): boolean {
+  if (!payload || typeof payload !== "object") return false;
+  const data = payload as Record<string, unknown>;
+  return "session" in data || "token" in data;
+}
+
 export function AuthModal({
   isOpen,
   onClose,
@@ -236,10 +266,8 @@ export function AuthModal({
           console.error("[handleLogin] getSession failed:", sessionErr);
         }
 
-        if (
-          sessionData?.data?.session?.user &&
-          !sessionData.data.session.user.emailVerified
-        ) {
+        const sessionUser = getSessionUser(sessionData?.data);
+        if (sessionUser && sessionUser.emailVerified === false) {
           logout();
           setError(
             "Tu email aún no está verificado. Revisa tu correo y seguí las instrucciones",
@@ -392,7 +420,7 @@ export function AuthModal({
         return;
       }
 
-      if (data?.session) {
+      if (hasSessionLikeData(data)) {
         const sessionReady = await refreshSession();
         if (sessionReady) {
           onAuthSuccess?.();

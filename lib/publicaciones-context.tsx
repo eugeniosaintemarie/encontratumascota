@@ -12,6 +12,19 @@ import {
 import { toast } from "sonner";
 import type { Publicacion } from "./types";
 
+type ApiPublicacion = Omit<Publicacion, "fechaPublicacion" | "fechaEncuentro"> & {
+  fechaPublicacion: string | Date;
+  fechaEncuentro?: string | Date | null;
+};
+
+function parseApiPublicacionDates(p: ApiPublicacion): Publicacion {
+  return {
+    ...p,
+    fechaPublicacion: new Date(p.fechaPublicacion),
+    fechaEncuentro: p.fechaEncuentro ? new Date(p.fechaEncuentro) : null,
+  };
+}
+
 interface PublicacionesContextType {
   publicaciones: Publicacion[];
   loading: boolean;
@@ -92,11 +105,9 @@ export function PublicacionesProvider({ children }: { children: ReactNode }) {
           try {
             const data = JSON.parse(errorText);
             if (data.publicaciones && Array.isArray(data.publicaciones)) {
-              const pubs = data.publicaciones.map((p: any) => ({
-                ...p,
-                fechaPublicacion: new Date(p.fechaPublicacion),
-                fechaEncuentro: new Date(p.fechaEncuentro),
-              }));
+              const pubs = (data.publicaciones as ApiPublicacion[]).map(
+                parseApiPublicacionDates,
+              );
               const shouldShuffle =
                 isInitialLoadRef.current && !options?.skipShuffle;
               setPublicaciones(shouldShuffle ? shuffleArray(pubs) : pubs);
@@ -109,11 +120,9 @@ export function PublicacionesProvider({ children }: { children: ReactNode }) {
         } else {
           const data = await res.json();
           if (data.publicaciones) {
-            const pubs = data.publicaciones.map((p: any) => ({
-              ...p,
-              fechaPublicacion: new Date(p.fechaPublicacion),
-              fechaEncuentro: new Date(p.fechaEncuentro),
-            }));
+            const pubs = (data.publicaciones as ApiPublicacion[]).map(
+              parseApiPublicacionDates,
+            );
             // Solo mezclar en la carga inicial para dar visibilidad a todas
             // En actualizaciones posteriores mantener el orden estable
             const shouldShuffle =

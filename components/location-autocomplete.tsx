@@ -10,6 +10,132 @@ type PlaceResult = {
   placeId?: string;
 };
 
+type PredictionSource = "google" | "nominatim" | "local" | "photon";
+
+type PredictionItem = {
+  id: string;
+  description: string;
+  raw: unknown;
+  source: PredictionSource;
+  lat?: number;
+  lon?: number;
+};
+
+type GooglePrediction = {
+  place_id: string;
+  description: string;
+};
+
+type GoogleAutocompleteService = {
+  getPlacePredictions: (
+    request: {
+      input: string;
+      componentRestrictions?: { country: string };
+      types?: string[];
+    },
+    callback: (predictions: GooglePrediction[] | null) => void,
+  ) => void;
+};
+
+type GooglePlaceDetail = {
+  formatted_address?: string;
+  geometry?: {
+    location?: {
+      lat?: () => number;
+      lng?: () => number;
+    };
+  };
+};
+
+type GooglePlacesService = {
+  getDetails: (
+    request: { placeId?: string },
+    callback: (detail: GooglePlaceDetail | null) => void,
+  ) => void;
+};
+
+type GooglePlacesApi = {
+  AutocompleteService: new () => GoogleAutocompleteService;
+  PlacesService: new (container: HTMLElement) => GooglePlacesService;
+};
+
+type GoogleMapsWindow = Window & {
+  google?: {
+    maps?: {
+      places?: GooglePlacesApi;
+    };
+  };
+};
+
+type ApiPrediction = {
+  id: string;
+  description: string;
+  raw?: unknown;
+  provider?: string;
+  lat?: number;
+  lon?: number;
+};
+
+type NominatimRaw = {
+  display_name?: string;
+  lat?: string | number;
+  lon?: string | number;
+  place_id?: string | number;
+  osm_type?: string;
+  osm_id?: string | number;
+};
+
+type LocalRaw = {
+  province?: string;
+  name?: string;
+  city?: string;
+  lat?: number;
+  lon?: number;
+  lng?: number;
+};
+
+type PhotonRaw = {
+  properties?: {
+    name?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+  };
+  geometry?: {
+    coordinates?: number[];
+  };
+};
+
+function getGooglePlacesApi(): GooglePlacesApi | null {
+  if (typeof window === "undefined") return null;
+  const googleWindow = window as GoogleMapsWindow;
+  return googleWindow.google?.maps?.places ?? null;
+}
+
+function parseNumber(value: unknown): number | undefined {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const parsed = Number.parseFloat(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+  return undefined;
+}
+
+function normalizeSource(
+  provider: string | undefined,
+  fallback: PredictionSource,
+): PredictionSource {
+  if (
+    provider === "google" ||
+    provider === "nominatim" ||
+    provider === "local" ||
+    provider === "photon"
+  ) {
+    return provider;
+  }
+  return fallback;
+}
+
 interface Props {
   value?: string;
   placeholder?: string;
@@ -21,12 +147,7 @@ interface Props {
 
 function loadGoogleScript(key: string) {
   if (typeof window === "undefined") return Promise.reject();
-  if (
-    (window as any).google &&
-    (window as any).google.maps &&
-    (window as any).google.maps.places
-  )
-    return Promise.resolve();
+  if (getGooglePlacesApi()) return Promise.resolve();
   return new Promise<void>((resolve, reject) => {
     const existing = document.querySelector(`script[data-google-maps]`);
     if (existing) {
@@ -54,8 +175,8 @@ export default function LocationAutocomplete({
   showDropdown = true,
 }: Props) {
   const [query, setQuery] = useState(value || "");
-  const [predictions, setPredictions] = useState<any[]>([]);
-  const svcRef = useRef<any | null>(null);
+  const [predictions, setPredictions] = useState<PredictionItem[]>([]);
+  const svcRef = useRef<GoogleAutocompleteService | null>(null);
   const sourceRef = useRef<"google" | "nominatim" | null>(null);
   const timerRef = useRef<number | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -73,9 +194,13 @@ export default function LocationAutocomplete({
     loadGoogleScript(key)
       .then(() => {
         if (!mounted) return;
-        svcRef.current = new (
-          window as any
-        ).google.maps.places.AutocompleteService();
+        const placesApi = getGooglePlacesApi();
+        if (!placesApi) {
+          sourceRef.current = "nominatim";
+          svcRef.current = null;
+          return;
+        }
+        svcRef.current = new placesApi.AutocompleteService();
         sourceRef.current = "google";
       })
       .catch(() => {
@@ -106,7 +231,7 @@ export default function LocationAutocomplete({
             componentRestrictions: { country: "ar" },
             types: ["geocode"],
           },
-          (preds: any[]) => {
+          (preds: GooglePrediction[] | null) => {
             setPredictions(
               (preds || []).map((p) => ({
                 id: p.place_id,
@@ -130,12 +255,13 @@ export default function LocationAutocomplete({
           if (localRes.ok) {
             const localData = await localRes.json();
             if (Array.isArray(localData) && localData.length > 0) {
+              const items = localData as ApiPrediction[];
               setPredictions(
-                localData.map((d: any) => ({
+                items.map((d) => ({
                   id: d.id,
                   description: d.description,
                   raw: d.raw,
-                  source: d.provider || "local",
+                  source: normalizeSource(d.provider, "local"),
                   lat: d.lat,
                   lon: d.lon,
                 })),
@@ -158,12 +284,13 @@ export default function LocationAutocomplete({
         }
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
+          const items = data as ApiPrediction[];
           setPredictions(
-            data.map((d: any) => ({
+            items.map((d) => ({
               id: d.id,
               description: d.description,
               raw: d.raw,
-              source: d.provider || "nominatim",
+              source: normalizeSource(d.provider, "nominatim"),
               lat: d.lat,
               lon: d.lon,
             })),
@@ -178,7 +305,7 @@ export default function LocationAutocomplete({
     }, 250);
   }, [query]);
 
-  const handleSelect = async (p: any) => {
+  const handleSelect = async (p: PredictionItem) => {
     let address = p.description || "";
     let lat: number | undefined = p.lat;
     let lng: number | undefined = p.lon;
@@ -186,13 +313,13 @@ export default function LocationAutocomplete({
 
     if (p.source === "google") {
       placeId = p.id;
-      const svc = new (window as any).google.maps.places.PlacesService(
-        document.createElement("div"),
-      );
-      svc.getDetails({ placeId }, (detail: any) => {
-        const a = detail.formatted_address || p.description || "";
-        const plat = detail.geometry?.location?.lat?.();
-        const plng = detail.geometry?.location?.lng?.();
+      const placesApi = getGooglePlacesApi();
+      if (!placesApi) return;
+      const svc = new placesApi.PlacesService(document.createElement("div"));
+      svc.getDetails({ placeId }, (detail: GooglePlaceDetail | null) => {
+        const a = detail?.formatted_address || p.description || "";
+        const plat = detail?.geometry?.location?.lat?.();
+        const plng = detail?.geometry?.location?.lng?.();
         setQuery(a);
         setPredictions([]);
         onChange?.(a);
@@ -204,48 +331,51 @@ export default function LocationAutocomplete({
     }
 
     // Handle other providers (nominatim, photon, local)
-    const raw = p.raw || {};
+    const raw = p.raw ?? {};
     // Nominatim
     if (p.source === "nominatim") {
-      address = raw.display_name || address || "";
-      lat = lat ?? (raw.lat ? parseFloat(raw.lat) : undefined);
-      lng = lng ?? (raw.lon ? parseFloat(raw.lon) : undefined);
+      const nominatimRaw = raw as NominatimRaw;
+      address = nominatimRaw.display_name || address || "";
+      lat = lat ?? parseNumber(nominatimRaw.lat);
+      lng = lng ?? parseNumber(nominatimRaw.lon);
       placeId =
         placeId ||
-        `nominatim:${raw.place_id || `${raw.osm_type}_${raw.osm_id}`}`;
+        `nominatim:${nominatimRaw.place_id || `${nominatimRaw.osm_type}_${nominatimRaw.osm_id}`}`;
     }
 
     // Local dataset
     if (p.source === "local") {
       // raw expected: { province, name, city, lat, lng }
+      const localRaw = raw as LocalRaw;
       address =
         address ||
-        (raw.name
-          ? `${raw.name}${raw.city ? ", " + raw.city : ""}${raw.province ? ", " + raw.province : ""}`
+        (localRaw.name
+          ? `${localRaw.name}${localRaw.city ? ", " + localRaw.city : ""}${localRaw.province ? ", " + localRaw.province : ""}`
           : "");
-      lat = lat ?? raw.lat;
+      lat = lat ?? localRaw.lat;
       // ensure correct precedence: use nullish coalescing then fallback to raw.lng
-      lng = lng ?? raw.lon ?? raw.lng;
+      lng = lng ?? localRaw.lon ?? localRaw.lng;
     }
 
     // Photon
     if (p.source === "photon") {
       // raw is feature
+      const photonRaw = raw as PhotonRaw;
       address =
         address ||
-        (raw.properties
+        (photonRaw.properties
           ? [
-              raw.properties.name,
-              raw.properties.city,
-              raw.properties.state,
-              raw.properties.country,
+              photonRaw.properties.name,
+              photonRaw.properties.city,
+              photonRaw.properties.state,
+              photonRaw.properties.country,
             ]
               .filter(Boolean)
               .join(", ")
           : "");
-      if (!lat && raw.geometry && raw.geometry.coordinates) {
-        lng = lng ?? raw.geometry.coordinates[0];
-        lat = lat ?? raw.geometry.coordinates[1];
+      if (!lat && photonRaw.geometry?.coordinates) {
+        lng = lng ?? photonRaw.geometry.coordinates[0];
+        lat = lat ?? photonRaw.geometry.coordinates[1];
       }
     }
 

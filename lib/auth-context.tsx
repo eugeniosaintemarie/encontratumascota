@@ -10,7 +10,7 @@ import {
 } from "react";
 import { useDemoSession } from "@/hooks/use-demo-session";
 import { logout as authLogout } from "@/lib/auth/client";
-import type { Publicacion } from "@/lib/types";
+import type { Publicacion, Usuario } from "@/lib/types";
 
 interface AuthModalState {
   isOpen: boolean;
@@ -21,7 +21,7 @@ interface AuthContextType {
   // Auth state
   isAuthenticated: boolean;
   userId: string | undefined;
-  demoUser: any | null;
+  demoUser: Usuario | null;
   refreshSession: () => Promise<boolean>;
 
   // Modal state

@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "@/lib/auth/server";
 import { isDemoRequest } from "@/lib/env";
 
+type SessionUser = {
+  id?: string;
+  name?: string | null;
+  email?: string | null;
+};
+
 const isDevelopment = process.env.NODE_ENV !== "production";
 
 export async function GET(request: Request) {
@@ -31,7 +37,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ user: session.user });
     }
 
-    const sessionUser = session.user as any;
+    const sessionUser = session.user as SessionUser;
     const authUserId = sessionUser?.id ? String(sessionUser.id) : "";
     if (!authUserId) {
       return NextResponse.json({ user: session.user });

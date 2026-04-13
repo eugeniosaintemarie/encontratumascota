@@ -3,9 +3,11 @@ import type { Usuario } from "./types";
 // ─── Mapear usuario de Neon Auth a nuestro tipo ──────────────
 export function mapNeonUser(user: {
   id: string;
-  name: string;
+  name?: string;
   email: string;
-  createdAt: Date | string;
+  createdAt?: Date | string;
+  nombreUsuario?: string;
+  fechaRegistro?: Date | string;
   isReadOnly?: boolean;
   esRefugio?: boolean;
   nombreRefugio?: string | null;
@@ -15,11 +17,15 @@ export function mapNeonUser(user: {
   contactoEmail?: string | null;
   mostrarContactoPublico?: boolean;
 }): Usuario {
+  const resolvedName =
+    user.name ?? user.nombreUsuario ?? user.email.split("@")[0] ?? "usuario";
+  const resolvedCreatedAt = user.createdAt ?? user.fechaRegistro ?? new Date();
+
   return {
     id: user.id,
-    nombreUsuario: user.name,
+    nombreUsuario: resolvedName,
     email: user.email,
-    fechaRegistro: new Date(user.createdAt),
+    fechaRegistro: new Date(resolvedCreatedAt),
     isReadOnly: user.isReadOnly,
     esRefugio: user.esRefugio,
     nombreRefugio: user.nombreRefugio,

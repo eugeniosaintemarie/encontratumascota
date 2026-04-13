@@ -1,5 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 
+type NominatimPlace = {
+  place_id?: string | number;
+  osm_type?: string;
+  osm_id?: string | number;
+  display_name?: string;
+  lat?: string | number;
+  lon?: string | number;
+};
+
+type PhotonFeature = {
+  properties?: {
+    osm_id?: string | number;
+    osm_key?: string;
+    osm_type?: string;
+    name?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+  };
+  geometry?: {
+    coordinates?: number[];
+  };
+};
+
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
@@ -22,16 +46,19 @@ export async function GET(req: NextRequest) {
         },
       });
       if (res.ok) {
-        const data = await res.json();
+        const data = (await res.json()) as unknown;
         if (Array.isArray(data) && data.length > 0) {
-          const out = data.map((d: any) => ({
-            id: d.place_id || `${d.osm_type}_${d.osm_id}`,
-            description: d.display_name,
-            lat: parseFloat(d.lat),
-            lon: parseFloat(d.lon),
-            provider: "nominatim",
-            raw: d,
-          }));
+          const out = data.map((item) => {
+            const d = item as NominatimPlace;
+            return {
+              id: d.place_id || `${d.osm_type}_${d.osm_id}`,
+              description: d.display_name,
+              lat: parseFloat(String(d.lat ?? "0")),
+              lon: parseFloat(String(d.lon ?? "0")),
+              provider: "nominatim",
+              raw: d,
+            };
+          });
           return NextResponse.json(out);
         }
       }
@@ -50,23 +77,24 @@ export async function GET(req: NextRequest) {
         },
       });
       if (pres.ok) {
-        const pdata = await pres.json();
+        const pdata = (await pres.json()) as {
+          features?: PhotonFeature[];
+        };
         const feats = pdata.features || [];
-        const out = feats.map((f: any) => ({
-          id: `photon_${f.properties.osm_id || f.properties.osm_key || f.properties.osm_type}`,
-          description: [
-            f.properties.name,
-            f.properties.city,
-            f.properties.state,
-            f.properties.country,
-          ]
-            .filter(Boolean)
-            .join(", "),
-          lat: f.geometry?.coordinates?.[1],
-          lon: f.geometry?.coordinates?.[0],
-          provider: "photon",
-          raw: f,
-        }));
+        const out = feats.map((f) => {
+          const props = f.properties || {};
+          const coordinates = f.geometry?.coordinates || [];
+          return {
+            id: `photon_${props.osm_id || props.osm_key || props.osm_type}`,
+            description: [props.name, props.city, props.state, props.country]
+              .filter(Boolean)
+              .join(", "),
+            lat: coordinates[1],
+            lon: coordinates[0],
+            provider: "photon",
+            raw: f,
+          };
+        });
         return NextResponse.json(out);
       }
     } catch (e) {

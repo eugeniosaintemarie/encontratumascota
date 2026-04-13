@@ -1,16 +1,20 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import type { Usuario } from "@/lib/types";
+
+type SessionUser = Usuario;
+type DemoUser = Usuario & { isReadOnly?: boolean };
 
 export interface UseDemoSessionReturn {
   /** Demo user object if demo session is active */
-  demoUser: any | null;
+  demoUser: DemoUser | null;
   /** Active server session (non-demo) */
-  sessionUser: any | null;
+  sessionUser: SessionUser | null;
   /** Combined active user (session or demo) */
-  user: any | null;
+  user: SessionUser | DemoUser | null;
   /** Setter for demo user (useful for manual updates after auth) */
-  setDemoUser: (user: any | null) => void;
+  setDemoUser: (user: DemoUser | null) => void;
   /** Combined auth state: true if either real session or demo session exists */
   isAuthenticated: boolean;
   /** Refreshes the demo session manually */
@@ -25,8 +29,8 @@ export interface UseDemoSessionReturn {
  * when no real Neon auth session exists.
  */
 export function useDemoSession(): UseDemoSessionReturn {
-  const [sessionUser, setSessionUser] = useState<any | null>(null);
-  const [demoUser, setDemoUser] = useState<any | null>(null);
+  const [sessionUser, setSessionUser] = useState<SessionUser | null>(null);
+  const [demoUser, setDemoUser] = useState<DemoUser | null>(null);
 
   const refreshDemoSession = useCallback(async () => {
     try {
@@ -42,15 +46,17 @@ export function useDemoSession(): UseDemoSessionReturn {
         return false;
       }
 
+      const typedUser = user as SessionUser;
+
       const cookies = typeof document !== "undefined" ? document.cookie : "";
       const isDemo =
-        cookies.includes("demo_public=1") || Boolean((user as any)?.isReadOnly);
+        cookies.includes("demo_public=1") || Boolean(typedUser.isReadOnly);
 
       if (isDemo) {
-        setDemoUser(user);
+        setDemoUser(typedUser as DemoUser);
         setSessionUser(null);
       } else {
-        setSessionUser(user);
+        setSessionUser(typedUser);
         setDemoUser(null);
       }
 

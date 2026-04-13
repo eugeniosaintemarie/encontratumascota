@@ -2,6 +2,8 @@ import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 import { getServerSession } from "@/lib/auth/server";
 
+type SessionUser = { isReadOnly?: boolean };
+
 export async function POST(request: Request) {
   try {
     // Verificar sesión y permisos de escritura
@@ -10,8 +12,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 
+    const sessionUser = session.user as SessionUser;
+
     // Bloquear usuarios demo (modo solo lectura)
-    if ((session.user as any).isReadOnly) {
+    if (sessionUser.isReadOnly) {
       return NextResponse.json(
         { error: "Modo demo solo permite visualización" },
         { status: 403 },

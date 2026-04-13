@@ -1,10 +1,10 @@
 "use server";
 
-import { eq, and, ilike, desc } from "drizzle-orm";
+import { eq, and, ilike, desc, type SQL } from "drizzle-orm";
 import type { Especie, Sexo, Raza } from "@/lib/types";
 import { mockPublicaciones } from "@/lib/mock-data";
 import { isDemoHost } from "@/lib/env";
-import type { Publicacion } from "@/lib/types";
+import type { Publicacion, TipoPublicacion } from "@/lib/types";
 import type { publicaciones as publicacionesTable } from "@/lib/db/schema";
 
 const isDemoEnv = isDemoHost(undefined);
@@ -61,11 +61,11 @@ export async function getPublicaciones(
   filtros?: FiltrosPublicaciones,
   opts?: { forceDemo?: boolean },
 ) {
-  const conditions: any[] = [];
+  const conditions: SQL[] = [];
 
   // Filtrar publicaciones de prueba si no estamos en modo demo
   const isDemo = opts?.forceDemo ?? isDemoEnv;
-  let rows: any[];
+  let rows: Array<typeof publicacionesTable.$inferSelect>;
 
   // Intentar cargar desde la base de datos primero
   try {
@@ -371,11 +371,11 @@ function mapRowToPublicacion(
 ): Publicacion {
   return {
     id: row.id,
-    tipoPublicacion: row.tipoPublicacion as "perdida" | "adopcion",
+    tipoPublicacion: row.tipoPublicacion as TipoPublicacion,
     mascota: {
       id: row.id,
       especie: row.especie as Especie,
-      raza: row.raza as any,
+      raza: row.raza as Raza,
       padreRaza: row.padreRaza as Raza | undefined,
       madreRaza: row.madreRaza as Raza | undefined,
       sexo: row.sexo as Sexo,
@@ -397,6 +397,7 @@ function mapRowToPublicacion(
     transitoContactoNombre: row.transitoContactoNombre,
     transitoContactoTelefono: row.transitoContactoTelefono,
     transitoContactoEmail: row.transitoContactoEmail,
-    historialTransferencias: row.historialTransferencias as any,
+    historialTransferencias:
+      row.historialTransferencias as Publicacion["historialTransferencias"],
   };
 }

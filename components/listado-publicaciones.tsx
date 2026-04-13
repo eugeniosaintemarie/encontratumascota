@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import type { TipoMascota, TipoPublicacion, Publicacion } from "@/lib/types";
 import { tipoMascotaToEspecie, tipoMascotaToSexo } from "@/lib/types";
 import { useItemsPerPage } from "@/hooks/use-items-per-page";
+import { useAuth } from "@/lib/auth-context";
 
 interface ListadoPublicacionesProps {
   isAuthenticated?: boolean;
@@ -23,7 +24,7 @@ interface ListadoPublicacionesProps {
 }
 
 export function ListadoPublicaciones({
-  isAuthenticated = false,
+  isAuthenticated,
   onRequireAuth,
   publicacionesBase,
   fixedTipoPublicacion,
@@ -31,6 +32,11 @@ export function ListadoPublicaciones({
   emptyTitle = "Todavía no hay publicaciones",
   emptyDescription = "",
 }: ListadoPublicacionesProps) {
+  const { isAuthenticated: contextIsAuthenticated, requireAuth: contextRequireAuth } =
+    useAuth();
+  const effectiveIsAuthenticated = isAuthenticated ?? contextIsAuthenticated;
+  const effectiveRequireAuth = onRequireAuth ?? contextRequireAuth;
+
   const [tipoPublicacion, setTipoPublicacion] = useState<
     TipoPublicacion | undefined
   >(fixedTipoPublicacion);
@@ -189,8 +195,8 @@ export function ListadoPublicaciones({
                   <div key={publicacion.id} className="fade-in">
                     <PublicacionCard
                       publicacion={publicacion}
-                      isAuthenticated={isAuthenticated}
-                      onRequireAuth={onRequireAuth}
+                      isAuthenticated={effectiveIsAuthenticated}
+                      onRequireAuth={effectiveRequireAuth}
                     />
                   </div>
                 ))}

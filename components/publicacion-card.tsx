@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, memo, useEffect } from "react";
+import { useState, memo, useEffect, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,6 +30,10 @@ interface PublicacionCardProps {
   onRequireAuth?: (publicacionId: string) => void;
 }
 
+type HistorialTransferenciaItem = NonNullable<
+  Publicacion["historialTransferencias"]
+>[number];
+
 export const PublicacionCard = memo(function PublicacionCard({
   publicacion,
   isAuthenticated = false,
@@ -57,12 +61,40 @@ export const PublicacionCard = memo(function PublicacionCard({
   }, []);
 
   // Obtener el historial anterior (del array historialTransferencias)
-  const historialTransferencias =
-    (publicacion.historialTransferencias as any[]) || [];
+  const historialTransferencias: HistorialTransferenciaItem[] =
+    publicacion.historialTransferencias ?? [];
   const tieneHistorial = historialTransferencias.length > 0;
   const contactoAnterior = tieneHistorial
     ? historialTransferencias[historialTransferencias.length - 1]
     : null;
+
+  const cardFlipContainerStyle: CSSProperties = {
+    perspective: "1000px",
+    minHeight: "84px",
+    flex: 1,
+  };
+
+  const cardFlipStyle: CSSProperties = {
+    transition: "transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
+    transformStyle: "preserve-3d",
+    transform: showHistory ? "rotateY(180deg)" : "rotateY(0deg)",
+    minHeight: "inherit",
+  };
+
+  const cardFaceStyle: CSSProperties = {
+    backfaceVisibility: "hidden",
+    minHeight: "inherit",
+  };
+
+  const cardBackStyle: CSSProperties = {
+    backfaceVisibility: "hidden",
+    transform: "rotateY(180deg)",
+    minHeight: "inherit",
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+  };
 
   const handleLoginClick = () => {
     if (onRequireAuth) {
@@ -158,37 +190,10 @@ export const PublicacionCard = memo(function PublicacionCard({
 
               {/* Si está en tránsito y tiene contacto de tránsito, mostrar ambos o historial */}
               {publicacion.transitoContactoNombre ? (
-                <div
-                  style={
-                    {
-                      perspective: "1000px",
-                      minHeight: "84px",
-                      flex: 1,
-                    } as any
-                  }
-                >
-                  <div
-                    style={
-                      {
-                        transition:
-                          "transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
-                        transformStyle: "preserve-3d",
-                        transform: showHistory
-                          ? "rotateY(180deg)"
-                          : "rotateY(0deg)",
-                        minHeight: "inherit",
-                      } as any
-                    }
-                  >
+                <div style={cardFlipContainerStyle}>
+                  <div style={cardFlipStyle}>
                     {/* FRENTE - Cuidador actual */}
-                    <div
-                      style={
-                        {
-                          backfaceVisibility: "hidden",
-                          minHeight: "inherit",
-                        } as any
-                      }
-                    >
+                    <div style={cardFaceStyle}>
                       <div className="space-y-0 leading-tight rounded-lg bg-transparent p-0 overflow-hidden h-full">
                         <div className="flex items-center gap-1.5 mb-1">
                           <UserPlus className="h-3.5 w-3.5 text-primary" />
@@ -217,19 +222,7 @@ export const PublicacionCard = memo(function PublicacionCard({
 
                     {/* ATRÁS - Cuidador anterior */}
                     {contactoAnterior && (
-                      <div
-                        style={
-                          {
-                            backfaceVisibility: "hidden",
-                            transform: "rotateY(180deg)",
-                            minHeight: "inherit",
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                          } as any
-                        }
-                      >
+                      <div style={cardBackStyle}>
                         <div className="space-y-0 leading-tight rounded-lg bg-transparent p-0 overflow-hidden h-full">
                           <div className="flex items-center gap-1.5 mb-1">
                             <History className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />

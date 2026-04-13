@@ -1,7 +1,13 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import type { Especie, Sexo, Raza, TipoPublicacion } from "@/lib/types";
+import type {
+  Especie,
+  Sexo,
+  Raza,
+  TipoPublicacion,
+  Usuario,
+} from "@/lib/types";
 import { usePublicaciones } from "@/lib/publicaciones-context";
 import { useImageUpload } from "@/hooks/use-image-upload";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
@@ -86,7 +92,7 @@ export interface UsePublicarReturn {
   isUploadingImage: boolean;
 
   // Demo session
-  demoUser: any | null;
+  demoUser: Usuario | null;
   userId: string | undefined;
 }
 
@@ -95,7 +101,8 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export function usePublicar(onSuccess?: () => void): UsePublicarReturn {
   const { agregarPublicacion } = usePublicaciones();
   const { uploadImage, isUploading: isUploadingImage } = useImageUpload();
-  const { demoUser, userId } = useDemoSession();
+  const { demoUser: rawDemoUser, userId } = useDemoSession();
+  const demoUser = rawDemoUser as Usuario | null;
 
   const [isLoading, setIsLoading] = useState(false);
   const [showCropEditor, setShowCropEditor] = useState(false);

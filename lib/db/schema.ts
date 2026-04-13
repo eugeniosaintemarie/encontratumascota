@@ -4,6 +4,7 @@ import {
   timestamp,
   boolean,
   json,
+  index,
 } from "drizzle-orm/pg-core";
 import { nanoid } from "nanoid";
 
@@ -12,25 +13,33 @@ const shortId = () => nanoid(10);
 
 // Perfil extendido por usuario de auth (produccion)
 // Guardamos flags de negocio desacoplados de Neon Auth.
-export const usuariosPerfil = pgTable("usuarios_perfil", {
-  authUserId: text("auth_user_id").primaryKey(),
-  esRefugio: boolean("es_refugio").default(false).notNull(),
-  nombreRefugio: text("nombre_refugio"),
-  ubicacion: text("ubicacion"),
-  contactoNombre: text("contacto_nombre"),
-  contactoTelefono: text("contacto_telefono"),
-  contactoEmail: text("contacto_email"),
-  mostrarContactoPublico: boolean("mostrar_contacto_publico")
-    .default(false)
-    .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
+export const usuariosPerfil = pgTable(
+  "usuarios_perfil",
+  {
+    authUserId: text("auth_user_id").primaryKey(),
+    esRefugio: boolean("es_refugio").default(false).notNull(),
+    nombreRefugio: text("nombre_refugio"),
+    ubicacion: text("ubicacion"),
+    contactoNombre: text("contacto_nombre"),
+    contactoTelefono: text("contacto_telefono"),
+    contactoEmail: text("contacto_email"),
+    mostrarContactoPublico: boolean("mostrar_contacto_publico")
+      .default(false)
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => ({
+    esRefugioIdx: index("usuarios_perfil_es_refugio_idx").on(table.esRefugio),
+  }),
+);
 
 // ─── Publicaciones ──────────────────────────────────────────
-export const publicaciones = pgTable("publicaciones", {
-  id: text("id").$defaultFn(shortId).primaryKey(),
+export const publicaciones = pgTable(
+  "publicaciones",
+  {
+    id: text("id").$defaultFn(shortId).primaryKey(),
 
   // Datos de la mascota (inline, sin tabla separada para simplificar)
   especie: text("especie").notNull(), // "perro" | "gato" | "otro"
@@ -75,14 +84,25 @@ export const publicaciones = pgTable("publicaciones", {
 
   // Historial de transferencias (JSON array de cuidadores anteriores)
   // Estructura: [{ nombre: string, telefono: string, email: string, fecha: timestamp }, ...]
-  historialTransferencias: json("historial_transferencias")
-    .$type<
-      Array<{
-        nombre: string;
-        telefono: string;
-        email: string;
-        fecha: string; // ISO timestamp
-      }>
-    >()
-    .default([]),
-});
+    historialTransferencias: json("historial_transferencias")
+      .$type<
+        Array<{
+          nombre: string;
+          telefono: string;
+          email: string;
+          fecha: string; // ISO timestamp
+        }>
+      >()
+      .default([]),
+  },
+  (table) => ({
+    activaIdx: index("publicaciones_activa_idx").on(table.activa),
+    tipoPublicacionIdx: index("publicaciones_tipo_publicacion_idx").on(
+      table.tipoPublicacion,
+    ),
+    usuarioIdIdx: index("publicaciones_usuario_id_idx").on(table.usuarioId),
+    fechaPublicacionIdx: index("publicaciones_fecha_publicacion_idx").on(
+      table.fechaPublicacion,
+    ),
+  }),
+);

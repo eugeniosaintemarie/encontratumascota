@@ -6,6 +6,25 @@ const RECAPTCHA_SCRIPT_ID = "recaptcha-v3-script";
 
 const siteKeyMissingWarned = new Set<string>();
 
+type GrecaptchaApi = {
+  ready: (callback: () => void) => void;
+  execute: (
+    key: string,
+    options: {
+      action: string;
+    },
+  ) => Promise<string>;
+};
+
+type WindowWithRecaptcha = Window & {
+  grecaptcha?: GrecaptchaApi;
+};
+
+function getGrecaptcha(): GrecaptchaApi | undefined {
+  if (typeof window === "undefined") return undefined;
+  return (window as WindowWithRecaptcha).grecaptcha;
+}
+
 /**
  * Hook para Google reCAPTCHA v3.
  * Carga el script bajo demanda y expone execute(action).
@@ -72,9 +91,9 @@ export function useRecaptcha() {
 
           if (
             typeof window !== "undefined" &&
-            (window as any).grecaptcha?.ready
+            getGrecaptcha()?.ready
           ) {
-            (window as any).grecaptcha.ready(() => {
+            getGrecaptcha()?.ready(() => {
               if (!abortController.signal.aborted) resolve();
             });
             return;
@@ -100,10 +119,10 @@ export function useRecaptcha() {
             }
             if (
               typeof window !== "undefined" &&
-              (window as any).grecaptcha?.ready
+              getGrecaptcha()?.ready
             ) {
               cleanup();
-              (window as any).grecaptcha.ready(() => {
+              getGrecaptcha()?.ready(() => {
                 if (!abortController.signal.aborted) resolve();
               });
             }
@@ -118,10 +137,9 @@ export function useRecaptcha() {
 
       try {
         await waitForRecaptcha();
-        const token: string = await (window as any).grecaptcha.execute(
-          siteKey,
-          { action },
-        );
+        const recaptcha = getGrecaptcha();
+        if (!recaptcha) return "";
+        const token: string = await recaptcha.execute(siteKey, { action });
         return token;
       } catch (error) {
         if ((error as Error).message === "Aborted") return "";

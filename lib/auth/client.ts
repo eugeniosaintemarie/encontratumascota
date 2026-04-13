@@ -1,21 +1,20 @@
 "use client";
 
-let authClientInstance: any = null;
+type CreateAuthClientFn =
+  typeof import("@neondatabase/auth/next")["createAuthClient"];
+type NeonAuthClient = ReturnType<CreateAuthClientFn>;
+type SignInEmailInput = Parameters<NeonAuthClient["signIn"]["email"]>[0];
+type SignInSocialInput = Parameters<NeonAuthClient["signIn"]["social"]>[0];
+type SignUpEmailInput = Parameters<NeonAuthClient["signUp"]["email"]>[0];
+type ChangePasswordInput = Parameters<NeonAuthClient["changePassword"]>[0];
 
-function getBaseUrl(): string {
-  if (typeof window !== "undefined") {
-    const origin = window.location.origin;
-    if (origin && origin !== "null") return origin;
-  }
-  return process.env.NEXT_PUBLIC_NEON_AUTH_URL || "http://localhost:3000";
-}
+let authClientInstance: NeonAuthClient | null = null;
 
 async function getAuthClientInstance() {
   if (!authClientInstance) {
     try {
       const { createAuthClient } = await import("@neondatabase/auth/next");
-      const baseUrl = getBaseUrl();
-      authClientInstance = createAuthClient(baseUrl);
+      authClientInstance = createAuthClient();
     } catch (error) {
       console.error("Error initializing Neon Auth client:", error);
       throw error;
@@ -26,22 +25,22 @@ async function getAuthClientInstance() {
 
 export const authClient = {
   signIn: {
-    async email(data: any) {
+    async email(data: SignInEmailInput) {
       const client = await getAuthClientInstance();
       return client.signIn.email(data);
     },
-    async social(data: any) {
+    async social(data: SignInSocialInput) {
       const client = await getAuthClientInstance();
       return client.signIn.social(data);
     },
   },
   signUp: {
-    async email(data: any) {
+    async email(data: SignUpEmailInput) {
       const client = await getAuthClientInstance();
       return client.signUp.email(data);
     },
   },
-  async changePassword(data: any) {
+  async changePassword(data: ChangePasswordInput) {
     const client = await getAuthClientInstance();
     return client.changePassword(data);
   },

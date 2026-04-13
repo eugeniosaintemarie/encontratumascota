@@ -24,6 +24,7 @@ import type {
   TipoPublicacion,
   Publicacion,
   TipoMascota,
+  Usuario,
 } from "@/lib/types";
 import {
   tipoMascotaToEspecie,
@@ -113,7 +114,7 @@ export function PublicarModal({
   const [isLoading, setIsLoading] = useState(false);
   const { agregarPublicacion, actualizarPublicacion } = usePublicaciones();
   const { uploadImage, isUploading: isUploadingImage } = useImageUpload();
-  const [currentUser, setCurrentUser] = useState<any | null>(null);
+  const [currentUser, setCurrentUser] = useState<Usuario | null>(null);
 
   useEffect(() => {
     void (async () => {

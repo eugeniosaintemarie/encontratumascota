@@ -67,24 +67,25 @@ export function sanitizePhone(phone: string): string {
  * @param obj Objeto con strings a sanitizar
  * @returns Objeto con todos los strings sanitizados
  */
-export function sanitizeObject(obj: Record<string, any>): Record<string, any> {
-  const sanitized: Record<string, any> = { ...obj };
+export function sanitizeObject<T extends Record<string, unknown>>(obj: T): T {
+  const sanitized: Record<string, unknown> = { ...obj };
 
   for (const key in sanitized) {
-    if (typeof sanitized[key] === "string") {
+    const value = sanitized[key];
+    if (typeof value === "string") {
       // Usar rich text solo para campos de descripción
       if (
         key.toLowerCase().includes("descripcion") ||
         key.toLowerCase().includes("description")
       ) {
-        sanitized[key] = sanitizeRichText(sanitized[key]);
+        sanitized[key] = sanitizeRichText(value);
       } else {
-        sanitized[key] = sanitizeText(sanitized[key]);
+        sanitized[key] = sanitizeText(value);
       }
     }
   }
 
-  return sanitized;
+  return sanitized as T;
 }
 
 /**

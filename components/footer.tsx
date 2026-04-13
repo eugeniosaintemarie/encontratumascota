@@ -10,7 +10,7 @@ export const Footer = memo(function Footer() {
   useEffect(() => {
     // Set minimal delay to show loading state briefly, then fetch async
     const timer = setTimeout(() => {
-      fetch("/api/stats", { priority: "low" } as any)
+      fetch("/api/stats")
         .then((res) => res.json())
         .then((data) => {
           setReunidas(data.mascotasReunidas ?? 0);

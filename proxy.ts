@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuth } from "@/lib/auth/server";
 import { isDemoRequest } from "@/lib/env";
 
-export default async function middleware(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   if (isDemoRequest(request)) {
     return NextResponse.next();
   }

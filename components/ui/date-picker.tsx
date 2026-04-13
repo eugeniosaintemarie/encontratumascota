@@ -4,7 +4,11 @@ import * as React from "react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
-interface DatePickerProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface DatePickerProps
+  extends Omit<
+    React.InputHTMLAttributes<HTMLInputElement>,
+    "onChange" | "value"
+  > {
   value?: string;
   onChange?: (v: string) => void;
   placeholder?: string;

@@ -41,7 +41,7 @@ export default async function RefugioPage({
     );
 
     const perfil = await getRefugioProfileByAuthUserId(usuarioId);
-    publicacionesRefugio = publicacionesProd as any;
+    publicacionesRefugio = publicacionesProd;
     nombreRefugio = formatHeartEmojiSpacing(
       perfil?.nombreRefugio ||
         publicacionesProd[0]?.contactoNombre ||
