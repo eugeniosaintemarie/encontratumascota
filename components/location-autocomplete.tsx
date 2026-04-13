@@ -183,6 +183,7 @@ export default function LocationAutocomplete({
   const sourceRef = useRef<"google" | "nominatim" | null>(null);
   const timerRef = useRef<number | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const committedValueRef = useRef(value || "");
 
   const normalizedQuery = query.trim().toLowerCase();
   const normalizedValue = (value || "").trim().toLowerCase();
@@ -191,7 +192,11 @@ export default function LocationAutocomplete({
     normalizedQuery.length > 0 &&
     normalizedQuery !== normalizedValue;
 
-  useEffect(() => setQuery(value || ""), [value]);
+  useEffect(() => {
+    const nextValue = value || "";
+    committedValueRef.current = nextValue;
+    setQuery(nextValue);
+  }, [value]);
 
   useEffect(() => {
     const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -330,6 +335,7 @@ export default function LocationAutocomplete({
         const a = detail?.formatted_address || p.description || "";
         const plat = detail?.geometry?.location?.lat?.();
         const plng = detail?.geometry?.location?.lng?.();
+        committedValueRef.current = a;
         setQuery(a);
         setPredictions([]);
         onChange?.(a);
@@ -391,6 +397,7 @@ export default function LocationAutocomplete({
 
     // Ensure address is string
     address = address || "";
+    committedValueRef.current = address;
     setQuery(address);
     setPredictions([]);
     onChange?.(address);
@@ -421,7 +428,7 @@ export default function LocationAutocomplete({
         }}
         onBlur={() => {
           if (onlySuggested) {
-            setQuery(value || "");
+            setQuery(committedValueRef.current);
           }
         }}
         onKeyDown={(e) => {
@@ -439,7 +446,7 @@ export default function LocationAutocomplete({
             <li
               key={`${p.source}-${p.id}`}
               className="p-2 hover:bg-muted cursor-pointer text-sm text-foreground"
-              onMouseDown={(e) => {
+              onPointerDown={(e) => {
                 e.preventDefault();
                 handleSelect(p);
               }}
