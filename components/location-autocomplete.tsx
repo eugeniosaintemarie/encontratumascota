@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 type PlaceResult = {
@@ -176,12 +176,20 @@ export default function LocationAutocomplete({
   showDropdown = true,
   onlySuggested = false,
 }: Props) {
+  const hintId = useId();
   const [query, setQuery] = useState(value || "");
   const [predictions, setPredictions] = useState<PredictionItem[]>([]);
   const svcRef = useRef<GoogleAutocompleteService | null>(null);
   const sourceRef = useRef<"google" | "nominatim" | null>(null);
   const timerRef = useRef<number | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const normalizedQuery = query.trim().toLowerCase();
+  const normalizedValue = (value || "").trim().toLowerCase();
+  const showOnlySuggestedHint =
+    onlySuggested &&
+    normalizedQuery.length > 0 &&
+    normalizedQuery !== normalizedValue;
 
   useEffect(() => setQuery(value || ""), [value]);
 
@@ -403,6 +411,7 @@ export default function LocationAutocomplete({
         )}
         placeholder={placeholder}
         value={query}
+        aria-describedby={showOnlySuggestedHint ? hintId : undefined}
         onChange={(e) => {
           const nextValue = e.target.value;
           setQuery(nextValue);
@@ -439,6 +448,11 @@ export default function LocationAutocomplete({
             </li>
           ))}
         </ul>
+      )}
+      {showOnlySuggestedHint && (
+        <p id={hintId} className="mt-1 text-xs text-muted-foreground">
+          Selecciona una ubicacion sugerida de la lista.
+        </p>
       )}
     </div>
   );
