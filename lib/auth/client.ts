@@ -2,11 +2,20 @@
 
 let authClientInstance: any = null;
 
+function getBaseUrl(): string {
+  if (typeof window !== "undefined") {
+    const origin = window.location.origin;
+    if (origin && origin !== "null") return origin;
+  }
+  return process.env.NEXT_PUBLIC_NEON_AUTH_URL || "http://localhost:3000";
+}
+
 async function getAuthClientInstance() {
   if (!authClientInstance) {
     try {
       const { createAuthClient } = await import("@neondatabase/auth/next");
-      authClientInstance = createAuthClient();
+      const baseUrl = getBaseUrl();
+      authClientInstance = createAuthClient(baseUrl);
     } catch (error) {
       console.error("Error initializing Neon Auth client:", error);
       throw error;
