@@ -91,13 +91,48 @@ export function AuthModal({
     );
   };
 
-  const showEmailVerificationStep = (email: string, message: string) => {
+  const sendVerificationCode = async (email: string, isRetry = false) => {
+    const safeEmail = sanitizeEmail(email);
+    if (!safeEmail) {
+      setError("No pudimos validar el email para enviar el codigo");
+      return;
+    }
+
+    const { error } = await authClient.sendVerificationEmail({
+      email: safeEmail,
+      callbackURL: window.location.origin,
+    });
+
+    if (error) {
+      setError(
+        error.message ||
+          "No pudimos enviar el codigo. Intenta reenviar en unos segundos",
+      );
+      return;
+    }
+
+    setError(
+      isRetry
+        ? "Codigo reenviado. Revisa tu correo"
+        : "Te enviamos un codigo de verificacion. Revisa tu correo",
+    );
+  };
+
+  const showEmailVerificationStep = (
+    email: string,
+    message: string,
+    autoSendCode = false,
+  ) => {
     const safeEmail = sanitizeEmail(email);
     setRegisterEmail(safeEmail || email.trim());
     setVerificationCode("");
     setView("register");
     setShowVerificationMessage(true);
     setError(message);
+
+    if (autoSendCode && safeEmail) {
+      void sendVerificationCode(safeEmail);
+    }
   };
 
   const handleGoogleSignIn = async () => {
@@ -164,7 +199,8 @@ export function AuthModal({
         if (isEmailNotVerifiedError(signInErr)) {
           showEmailVerificationStep(
             loginEmail,
-            "Tu email aun no esta verificado. Ingresa el codigo que te enviamos o pedi uno nuevo.",
+            "Tu email aun no esta verificado. Te enviamos un codigo para verificarlo.",
+            true,
           );
           return;
         }
@@ -180,7 +216,8 @@ export function AuthModal({
         if (errorCode === "EMAIL_NOT_VERIFIED") {
           showEmailVerificationStep(
             loginEmail,
-            "Tu email aun no esta verificado. Ingresa el codigo que te enviamos o pedi uno nuevo.",
+            "Tu email aun no esta verificado. Te enviamos un codigo para verificarlo.",
+            true,
           );
           return;
         } else if (
@@ -225,7 +262,8 @@ export function AuthModal({
       if (isEmailNotVerifiedError(err)) {
         showEmailVerificationStep(
           loginEmail,
-          "Tu email aun no esta verificado. Ingresa el codigo que te enviamos o pedi uno nuevo.",
+          "Tu email aun no esta verificado. Te enviamos un codigo para verificarlo.",
+          true,
         );
         return;
       }
@@ -375,16 +413,7 @@ export function AuthModal({
   const handleResendCode = async () => {
     setError(null);
     try {
-      const { error } = await authClient.sendVerificationEmail({
-        email: registerEmail,
-        callbackURL: window.location.origin,
-      });
-
-      if (error) {
-        setError(error.message || "Error al reenviar el código");
-      } else {
-        setError("Código reenviado. Revisa tu correo");
-      }
+      await sendVerificationCode(registerEmail, true);
     } catch {
       setError("Error al reenviar el código");
     }
