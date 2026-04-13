@@ -709,6 +709,7 @@ export function PerfilModal({
                   onChange={(v) => setUbicacionPerfil(v)}
                   onSelect={(place) => setUbicacionPerfil(place.address)}
                   placeholder="Ejemplo: Almagro"
+                  onlySuggested={true}
                   className="!bg-transparent dark:!bg-transparent placeholder:text-muted-foreground text-foreground"
                 />
               </div>
