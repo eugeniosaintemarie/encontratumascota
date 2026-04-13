@@ -115,10 +115,16 @@ export function AuthModal({
     }
 
     try {
-      const result = await authClient.signIn.email({
-        email: sanitizeEmail(loginEmail),
-        password: loginPassword,
-      });
+      let result;
+      try {
+        result = await authClient.signIn.email({
+          email: sanitizeEmail(loginEmail),
+          password: loginPassword,
+        });
+      } catch (signInErr) {
+        console.error("[handleLogin] signIn.email threw:", signInErr);
+        throw signInErr;
+      }
 
       if (result.error) {
         const errorCode = result.error.code || "";
@@ -135,11 +141,16 @@ export function AuthModal({
           setError(result.error.message || "Error al iniciar sesión");
         }
       } else {
-        const { data: sessionData } = await authClient.getSession();
+        let sessionData;
+        try {
+          sessionData = await authClient.getSession();
+        } catch (sessionErr) {
+          console.error("[handleLogin] getSession failed:", sessionErr);
+        }
 
         if (
-          sessionData?.session?.user &&
-          !sessionData.session.user.emailVerified
+          sessionData?.data?.session?.user &&
+          !sessionData.data.session.user.emailVerified
         ) {
           logout();
           setError(
@@ -158,7 +169,8 @@ export function AuthModal({
         onAuthSuccess?.();
         onClose();
       }
-    } catch {
+    } catch (err) {
+      console.error("[handleLogin] Error:", err);
       setError("Error de conexión. Intentá de nuevo");
     } finally {
       setIsLoading(false);
