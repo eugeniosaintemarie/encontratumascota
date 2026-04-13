@@ -130,14 +130,6 @@ export default function RootLayout({
           content="width=device-width, initial-scale=1, viewport-fit=cover"
         />
         <link rel="canonical" href={siteUrl} />
-        {/* Preload logo for LCP optimization */}
-        <link
-          rel="preload"
-          href="/logo.webp"
-          as="image"
-          type="image/webp"
-          fetchPriority="high"
-        />
         {/* Organization Schema */}
         <Script
           id="organization-schema"

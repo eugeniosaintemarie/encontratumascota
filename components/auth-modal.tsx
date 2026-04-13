@@ -62,6 +62,44 @@ export function AuthModal({
     }
   }, [isOpen]);
 
+  const getAuthErrorText = (value: unknown): string => {
+    if (!value) return "";
+    if (typeof value === "string") return value;
+    if (value instanceof Error) return value.message || "";
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return String(value);
+    }
+  };
+
+  const isEmailNotVerifiedError = (value: unknown): boolean => {
+    const text = getAuthErrorText(value).toLowerCase();
+    return (
+      text.includes("email_not_verified") ||
+      text.includes("email not verified") ||
+      text.includes("not verified")
+    );
+  };
+
+  const isInvalidCredentialsError = (value: unknown): boolean => {
+    const text = getAuthErrorText(value).toLowerCase();
+    return (
+      text.includes("invalid_credentials") ||
+      text.includes("invalid credentials") ||
+      text.includes("incorrect")
+    );
+  };
+
+  const showEmailVerificationStep = (email: string, message: string) => {
+    const safeEmail = sanitizeEmail(email);
+    setRegisterEmail(safeEmail || email.trim());
+    setVerificationCode("");
+    setView("register");
+    setShowVerificationMessage(true);
+    setError(message);
+  };
+
   const handleGoogleSignIn = async () => {
     setError(null);
     setIsLoading(true);
@@ -123,15 +161,28 @@ export function AuthModal({
         });
       } catch (signInErr) {
         console.error("[handleLogin] signIn.email threw:", signInErr);
+        if (isEmailNotVerifiedError(signInErr)) {
+          showEmailVerificationStep(
+            loginEmail,
+            "Tu email aun no esta verificado. Ingresa el codigo que te enviamos o pedi uno nuevo.",
+          );
+          return;
+        }
+        if (isInvalidCredentialsError(signInErr)) {
+          setError("Email o contraseña incorrectos");
+          return;
+        }
         throw signInErr;
       }
 
       if (result.error) {
         const errorCode = result.error.code || "";
         if (errorCode === "EMAIL_NOT_VERIFIED") {
-          setError(
-            "Tu email aún no está verificado. Revisa tu correo y completá la verificación",
+          showEmailVerificationStep(
+            loginEmail,
+            "Tu email aun no esta verificado. Ingresa el codigo que te enviamos o pedi uno nuevo.",
           );
+          return;
         } else if (
           errorCode === "INVALID_CREDENTIALS" ||
           result.error.message?.includes("incorrect")
@@ -171,6 +222,17 @@ export function AuthModal({
       }
     } catch (err) {
       console.error("[handleLogin] Error:", err);
+      if (isEmailNotVerifiedError(err)) {
+        showEmailVerificationStep(
+          loginEmail,
+          "Tu email aun no esta verificado. Ingresa el codigo que te enviamos o pedi uno nuevo.",
+        );
+        return;
+      }
+      if (isInvalidCredentialsError(err)) {
+        setError("Email o contraseña incorrectos");
+        return;
+      }
       setError("Error de conexión. Intentá de nuevo");
     } finally {
       setIsLoading(false);
@@ -338,7 +400,11 @@ export function AuthModal({
       <DialogContent className="bg-background sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {view === "login" ? "Iniciar sesión" : "Registrarse"}
+            {showVerificationMessage
+              ? "Verificar correo"
+              : view === "login"
+                ? "Iniciar sesión"
+                : "Registrarse"}
           </DialogTitle>
         </DialogHeader>
 
