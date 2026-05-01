@@ -6,6 +6,9 @@ import { useEffect, useState, memo } from "react";
 export const Footer = memo(function Footer() {
   const [reunidas, setReunidas] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [repoHref, setRepoHref] = useState(
+    "https://github.com/eugeniosaintemarie/encontratumascota",
+  );
 
   useEffect(() => {
     // Set minimal delay to show loading state briefly, then fetch async
@@ -23,6 +26,27 @@ export const Footer = memo(function Footer() {
     }, 0);
 
     return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    fetch("/config.json")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((config) => {
+        if (!isMounted || !config || typeof config.repoUrl !== "string") {
+          return;
+        }
+
+        setRepoHref(config.repoUrl.replace(/\/$/, ""));
+      })
+      .catch(() => {
+        // Keep the default repository URL when the config file is unavailable.
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
@@ -70,9 +94,7 @@ export const Footer = memo(function Footer() {
             </a>{" "}
             | Encontra Tu Mascota |{" "}
             <a
-              data-repo="eugeniosaintemarie"
-              data-query="ref=encontratumascota"
-              href="#"
+              href={repoHref}
               title="eugeniosaintemarie"
               target="_blank"
               rel="noopener noreferrer"
@@ -82,29 +104,6 @@ export const Footer = memo(function Footer() {
           </p>
         </div>
       </div>
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-            (() => {
-              const siteBaseURL = "https://eugeniosaintemarie.github.io".replace(/\/$/, "");
-              const buildRepoURL = (repoName, query = "") => {
-                const url = new URL(repoName + "/", siteBaseURL + "/");
-                if (query) {
-                  url.search = query.startsWith("?") ? query : "?" + query;
-                }
-                return url.toString();
-              };
-              document.querySelectorAll("[data-repo]").forEach((link) => {
-                const repoName = link.dataset.repo;
-                if (!repoName) {
-                  return;
-                }
-                link.href = buildRepoURL(repoName, link.dataset.query || "");
-              });
-            })();
-          `,
-        }}
-      />
     </footer>
   );
 });
