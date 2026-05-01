@@ -70,7 +70,10 @@ export const Footer = memo(function Footer() {
             </a>{" "}
             | Encontra Tu Mascota |{" "}
             <a
-              href="https://eugeniosaintemarie.github.io?ref=encontratumascota"
+              data-repo="eugeniosaintemarie"
+              data-query="ref=encontratumascota"
+              href="#"
+              title="eugeniosaintemarie"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -79,6 +82,29 @@ export const Footer = memo(function Footer() {
           </p>
         </div>
       </div>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            (() => {
+              const siteBaseURL = "https://eugeniosaintemarie.github.io".replace(/\/$/, "");
+              const buildRepoURL = (repoName, query = "") => {
+                const url = new URL(repoName + "/", siteBaseURL + "/");
+                if (query) {
+                  url.search = query.startsWith("?") ? query : "?" + query;
+                }
+                return url.toString();
+              };
+              document.querySelectorAll("[data-repo]").forEach((link) => {
+                const repoName = link.dataset.repo;
+                if (!repoName) {
+                  return;
+                }
+                link.href = buildRepoURL(repoName, link.dataset.query || "");
+              });
+            })();
+          `,
+        }}
+      />
     </footer>
   );
 });
