@@ -6,9 +6,10 @@ import { useEffect, useState, memo } from "react";
 export const Footer = memo(function Footer() {
   const [reunidas, setReunidas] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [repoHref, setRepoHref] = useState(
-    "https://github.com/eugeniosaintemarie/encontratumascota",
+  const [siteHref, setSiteHref] = useState(
+    "https://eugeniosaintemarie.github.io/?ref=encontratumascota",
   );
+  const configUrl = "https://eugeniosaintemarie.github.io/config.json";
 
   useEffect(() => {
     // Set minimal delay to show loading state briefly, then fetch async
@@ -31,17 +32,20 @@ export const Footer = memo(function Footer() {
   useEffect(() => {
     let isMounted = true;
 
-    fetch("/config.json")
+    fetch(configUrl)
       .then((res) => (res.ok ? res.json() : null))
       .then((config) => {
-        if (!isMounted || !config || typeof config.repoUrl !== "string") {
+        if (!isMounted || !config || typeof config.baseURL !== "string") {
           return;
         }
 
-        setRepoHref(config.repoUrl.replace(/\/$/, ""));
+        const baseURL = config.baseURL.replace(/\/$/, "");
+        const url = new URL("/", baseURL);
+        url.searchParams.set("ref", "encontratumascota");
+        setSiteHref(url.toString());
       })
       .catch(() => {
-        // Keep the default repository URL when the config file is unavailable.
+        // Keep the default site URL when the config file is unavailable.
       });
 
     return () => {
@@ -94,7 +98,7 @@ export const Footer = memo(function Footer() {
             </a>{" "}
             | Encontra Tu Mascota |{" "}
             <a
-              href={repoHref}
+              href={siteHref}
               title="eugeniosaintemarie"
               target="_blank"
               rel="noopener noreferrer"
